@@ -1,3 +1,6 @@
+import {handleDeploy} from './deploy';
+import {logStep} from './logger';
+
 type Command = 'deploy' | 'assign-domain' | 'renew' | 'index' | 'help';
 
 type ParsedArgs = {
@@ -9,7 +12,7 @@ const HELP_TEXT = `
 Press3 CLI (Bun)
 
 Usage:
-  bun run index.ts <command> [options]
+  press3 <command> [options]
 
 Commands:
   deploy         Upload a Walrus site bundle and update the Move contract
@@ -18,9 +21,9 @@ Commands:
   index          Build the off-chain search index and publish it
 
 Global options:
-  --config <file>    Path to a JSON config (default: press3.config.json)
   --dry-run          Print actions without executing transactions
 `;
+
 
 function parseArgs(argv: string[]): ParsedArgs {
   const [, , maybeCommand, ...rest] = argv;
@@ -29,7 +32,7 @@ function parseArgs(argv: string[]): ParsedArgs {
 
   for (let i = 0; i < rest.length; i += 1) {
     const token = rest[i];
-    if (!token.startsWith('--')) continue;
+    if (!token?.startsWith('--')) continue;
 
     const key = token.slice(2);
     const next = rest[i + 1];
@@ -51,7 +54,7 @@ function parseArgs(argv: string[]): ParsedArgs {
   };
 }
 
-async function run() {
+export async function run() {
   const { command, flags } = parseArgs(Bun.argv);
   switch (command) {
     case 'deploy':
@@ -69,13 +72,6 @@ async function run() {
     default:
       console.log(HELP_TEXT.trim());
   }
-}
-
-async function handleDeploy(flags: Record<string, string | boolean>) {
-  const configPath = (flags.config as string) ?? 'press3.config.json';
-  const dryRun = Boolean(flags['dry-run']);
-  logStep('Deploy', `Using config ${configPath} ${dryRun ? '(dry-run)' : ''}`);
-  // TODO: bundle Walrus quilt, upload blobs, submit Move txn
 }
 
 async function handleAssignDomain(flags: Record<string, string | boolean>) {
@@ -96,12 +92,3 @@ async function handleIndex(flags: Record<string, string | boolean>) {
   logStep('Indexer', `Writing Walrus-ready index to ${output}`);
   // TODO: pull Walrus blobs, build compressed index, upload
 }
-
-function logStep(title: string, detail: string) {
-  console.log(`[press3] ${title}: ${detail}`);
-}
-
-run().catch((err) => {
-  console.error('[press3] CLI failed', err);
-  process.exit(1);
-});
