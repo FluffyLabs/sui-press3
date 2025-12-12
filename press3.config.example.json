@@ -1,0 +1,24 @@
+{
+  "network": "testnet",
+  "contract": {
+    "packageId": "0xPRESS3",
+    "registryId": "0xREGISTRY",
+    "capabilityId": "0xADMINCAP"
+  },
+  "walrus": {
+    "apiBase": "https://walrus.devnet.xyz",
+    "publisherKey": "env:WALRUS_PUBLISH_KEY",
+    "quilt": {
+      "entry": "dist/index.html",
+      "assetsDir": "dist"
+    }
+  },
+  "dns": {
+    "domain": "press3.sui",
+    "provider": "cloudflare"
+  },
+  "renewal": {
+    "batchSize": 50,
+    "leadTimeDays": 7
+  }
+}

@@ -1,0 +1,107 @@
+type Command = 'deploy' | 'assign-domain' | 'renew' | 'index' | 'help'
+
+type ParsedArgs = {
+  command: Command
+  flags: Record<string, string | boolean>
+}
+
+const HELP_TEXT = `
+Press3 CLI (Bun)
+
+Usage:
+  bun run index.ts <command> [options]
+
+Commands:
+  deploy         Upload a Walrus site bundle and update the Move contract
+  assign-domain  Attach a DNS/NS record to a Walrus site
+  renew          Proactively renew Walrus blobs for a deployment
+  index          Build the off-chain search index and publish it
+
+Global options:
+  --config <file>    Path to a JSON config (default: press3.config.json)
+  --dry-run          Print actions without executing transactions
+`
+
+function parseArgs(argv: string[]): ParsedArgs {
+  const [, , maybeCommand, ...rest] = argv
+  const command = (maybeCommand ?? 'help') as Command
+  const flags: Record<string, string | boolean> = {}
+
+  for (let i = 0; i < rest.length; i += 1) {
+    const token = rest[i]
+    if (!token.startsWith('--')) continue
+
+    const key = token.slice(2)
+    const next = rest[i + 1]
+
+    if (!next || next.startsWith('--')) {
+      flags[key] = true
+      continue
+    }
+
+    flags[key] = next
+    i += 1
+  }
+
+  return {
+    command: ['deploy', 'assign-domain', 'renew', 'index'].includes(command)
+      ? (command as Command)
+      : 'help',
+    flags,
+  }
+}
+
+async function run() {
+  const { command, flags } = parseArgs(Bun.argv)
+  switch (command) {
+    case 'deploy':
+      await handleDeploy(flags)
+      break
+    case 'assign-domain':
+      await handleAssignDomain(flags)
+      break
+    case 'renew':
+      await handleRenew(flags)
+      break
+    case 'index':
+      await handleIndex(flags)
+      break
+    default:
+      console.log(HELP_TEXT.trim())
+  }
+}
+
+async function handleDeploy(flags: Record<string, string | boolean>) {
+  const configPath = (flags.config as string) ?? 'press3.config.json'
+  const dryRun = Boolean(flags['dry-run'])
+  logStep('Deploy', `Using config ${configPath} ${dryRun ? '(dry-run)' : ''}`)
+  // TODO: bundle Walrus quilt, upload blobs, submit Move txn
+}
+
+async function handleAssignDomain(flags: Record<string, string | boolean>) {
+  const target = (flags.target as string) ?? 'walrus://blob/site'
+  const domain = (flags.domain as string) ?? 'example.press3.sui'
+  logStep('Assign domain', `${domain} -> ${target}`)
+  // TODO: integrate with Walrus NS helpers
+}
+
+async function handleRenew(flags: Record<string, string | boolean>) {
+  const batchSize = Number(flags['batch-size'] ?? 25)
+  logStep('Auto-renew', `Scanning registry in batches of ${batchSize}`)
+  // TODO: fetch registry, renew expiring blobs, batch txns
+}
+
+async function handleIndex(flags: Record<string, string | boolean>) {
+  const output = (flags.output as string) ?? 'dist/search-index.json'
+  logStep('Indexer', `Writing Walrus-ready index to ${output}`)
+  // TODO: pull Walrus blobs, build compressed index, upload
+}
+
+function logStep(title: string, detail: string) {
+  console.log(`[press3] ${title}: ${detail}`)
+}
+
+run().catch((err) => {
+  console.error('[press3] CLI failed', err)
+  process.exit(1)
+})
