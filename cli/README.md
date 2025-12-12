@@ -5,7 +5,7 @@ Utility entry point for automating deployments, renewals, and indexing for the P
 ## Commands
 
 ```bash
-bun run index.ts deploy --config press3.config.json
+bun run index.ts deploy
 bun run index.ts deploy --use-sdk  # Deploy using SDK instead of site-builder
 bun run index.ts assign-domain --domain docs.press3.sui --target walrus://blob/site
 bun run index.ts renew --batch-size 50 --dry-run

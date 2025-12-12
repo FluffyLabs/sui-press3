@@ -35,6 +35,9 @@ jobs:
       - name: Lint with Biome
         run: bun run lint
 
+      - name: Type check
+        run: bun run typecheck
+
       - name: Build CLI bundle
         run: bun run build
 
