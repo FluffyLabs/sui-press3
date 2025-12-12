@@ -1,132 +1,134 @@
-import { useEffect, useMemo, useState } from 'react'
-import './App.css'
-import { HtmlRenderer } from './components/HtmlRenderer'
-import { MarkdownRenderer } from './components/MarkdownRenderer'
-import { JsonRenderer } from './components/JsonRenderer'
+import { useEffect, useMemo, useState } from "react";
+import "./App.css";
+import { HtmlRenderer } from "./components/HtmlRenderer";
+import { JsonRenderer } from "./components/JsonRenderer";
+import { MarkdownRenderer } from "./components/MarkdownRenderer";
 
-type Renderer = 'html' | 'markdown' | 'json'
+type Renderer = "html" | "markdown" | "json";
 
 type PageEvent = {
-  path: string
-  walrusId: string
-  lastEditor: string
-  updatedAt: string
-}
+  path: string;
+  walrusId: string;
+  lastEditor: string;
+  updatedAt: string;
+};
 
 type MenuSchema = {
-  main: Array<{ label: string; href: string }>
-  sidebar: Array<{ label: string; href: string }>
-}
+  main: Array<{ label: string; href: string }>;
+  sidebar: Array<{ label: string; href: string }>;
+};
 
 function getRenderer(path: string): Renderer | null {
-  if (path.endsWith('.html')) return 'html'
-  if (path.endsWith('.md')) return 'markdown'
-  if (path.endsWith('.json') || path === '/menu' || path === '/sidebar') return 'json'
-  return null
+  if (path.endsWith(".html")) return "html";
+  if (path.endsWith(".md")) return "markdown";
+  if (path.endsWith(".json") || path === "/menu" || path === "/sidebar")
+    return "json";
+  return null;
 }
 
 async function mockFetchContent(walrusId: string): Promise<string> {
-  await new Promise(resolve => setTimeout(resolve, 500))
+  await new Promise((resolve) => setTimeout(resolve, 500));
   switch (walrusId) {
-    case 'walrus://blob/main-menu':
-      return '<h1>Welcome to Press3</h1><p>This is the home page.</p>'
-    case 'walrus://blob/wiki-page':
-      return '# Press3 Wiki\n\nThis is a decentralized CMS built on SUI.'
-    case 'walrus://blob/navigation':
-      return '{"main":[{"label":"Home","href":"/"},{"label":"Docs","href":"/docs"}],"sidebar":[{"label":"Latest","href":"/news"}]}'
+    case "walrus://blob/main-menu":
+      return "<h1>Welcome to Press3</h1><p>This is the home page.</p>";
+    case "walrus://blob/wiki-page":
+      return "# Press3 Wiki\n\nThis is a decentralized CMS built on SUI.";
+    case "walrus://blob/navigation":
+      return '{"main":[{"label":"Home","href":"/"},{"label":"Docs","href":"/docs"}],"sidebar":[{"label":"Latest","href":"/news"}]}';
     default:
-      return 'Content not found'
+      return "Content not found";
   }
 }
 
 const PAGE_EVENTS: PageEvent[] = [
   {
-    path: '/index.html',
-    walrusId: 'walrus://blob/main-menu',
-    lastEditor: '0xDeployer',
-    updatedAt: '2024-10-12T10:35:00Z',
+    path: "/index.html",
+    walrusId: "walrus://blob/main-menu",
+    lastEditor: "0xDeployer",
+    updatedAt: "2024-10-12T10:35:00Z",
   },
   {
-    path: '/wiki/press3.md',
-    walrusId: 'walrus://blob/wiki-page',
-    lastEditor: '0xEditor',
-    updatedAt: '2024-10-13T08:12:11Z',
+    path: "/wiki/press3.md",
+    walrusId: "walrus://blob/wiki-page",
+    lastEditor: "0xEditor",
+    updatedAt: "2024-10-13T08:12:11Z",
   },
   {
-    path: '/menu',
-    walrusId: 'walrus://blob/navigation',
-    lastEditor: '0xCMSAdmin',
-    updatedAt: '2024-10-13T09:02:45Z',
+    path: "/menu",
+    walrusId: "walrus://blob/navigation",
+    lastEditor: "0xCMSAdmin",
+    updatedAt: "2024-10-13T09:02:45Z",
   },
-]
+];
 
 const MENU_SCHEMA: MenuSchema = {
   main: [
-    { label: 'Home', href: '/' },
-    { label: 'Docs', href: '/docs' },
-    { label: 'Forum', href: '/forum' },
+    { label: "Home", href: "/" },
+    { label: "Docs", href: "/docs" },
+    { label: "Forum", href: "/forum" },
   ],
   sidebar: [
-    { label: 'Latest', href: '/news' },
-    { label: 'Topics', href: '/topics' },
-    { label: 'Search', href: '/search' },
+    { label: "Latest", href: "/news" },
+    { label: "Topics", href: "/topics" },
+    { label: "Search", href: "/search" },
   ],
-}
+};
 
 const ASSET_BINDINGS = [
-  { logicalPath: '/style.css', walrusId: 'walrus://blob/theme' },
-  { logicalPath: '/logo.png', walrusId: 'walrus://blob/brandmark' },
-  { logicalPath: '/sidebar', walrusId: 'walrus://blob/sidebar' },
-]
+  { logicalPath: "/style.css", walrusId: "walrus://blob/theme" },
+  { logicalPath: "/logo.png", walrusId: "walrus://blob/brandmark" },
+  { logicalPath: "/sidebar", walrusId: "walrus://blob/sidebar" },
+];
 
 function App() {
-  const [selectedPath, setSelectedPath] = useState(PAGE_EVENTS[0]?.path ?? '')
+  const [selectedPath, setSelectedPath] = useState(PAGE_EVENTS[0]?.path ?? "");
 
   const handlePatchChange = (path: string) => {
     setSelectedPath(path);
-  }
+  };
 
-  const [fetchedContent, setFetchedContent] = useState<{ walrusId: string; content: string } | null>(null)
-  const activeEvent = useMemo(
-    () => {
-      const event = PAGE_EVENTS.find((evt) => evt.path === selectedPath)
-      if (event) {
-        return { ...event, renderer: getRenderer(event.path) }
-      }
-      return null
-    },
-    [selectedPath],
-  )
+  const [fetchedContent, setFetchedContent] = useState<{
+    walrusId: string;
+    content: string;
+  } | null>(null);
+  const activeEvent = useMemo(() => {
+    const event = PAGE_EVENTS.find((evt) => evt.path === selectedPath);
+    if (event) {
+      return { ...event, renderer: getRenderer(event.path) };
+    }
+    return null;
+  }, [selectedPath]);
 
   useEffect(() => {
     if (!activeEvent) {
-      return
+      return;
     }
 
-    let cancelled = false
+    let cancelled = false;
 
     const fetchContent = async () => {
-      setFetchedContent(null)
-      const content = await mockFetchContent(activeEvent.walrusId)
+      setFetchedContent(null);
+      const content = await mockFetchContent(activeEvent.walrusId);
       if (!cancelled) {
-        setFetchedContent({ walrusId: activeEvent.walrusId, content })
+        setFetchedContent({ walrusId: activeEvent.walrusId, content });
       }
-    }
+    };
 
-    fetchContent()
+    fetchContent();
 
     return () => {
-      cancelled = true
-    }
-  }, [activeEvent])
+      cancelled = true;
+    };
+  }, [activeEvent]);
 
   return (
     <div className="app">
       <header>
         <h1>Press3 Frontend Sandbox</h1>
         <p>
-          This Vite + React shell visualizes how the public renderer will map CMS
-          events to Walrus blobs, menu metadata, and smart-contract driven assets.
+          This Vite + React shell visualizes how the public renderer will map
+          CMS events to Walrus blobs, menu metadata, and smart-contract driven
+          assets.
         </p>
       </header>
 
@@ -139,12 +141,14 @@ function App() {
           {PAGE_EVENTS.map((event) => (
             <li
               key={event.path}
-              className={selectedPath === event.path ? 'active' : ''}
+              className={selectedPath === event.path ? "active" : ""}
               onClick={() => handlePatchChange(event.path)}
             >
               <div className="event-title">{event.path}</div>
               <div className="event-meta">
-                <span>{(getRenderer(event.path) || 'unknown').toUpperCase()}</span>
+                <span>
+                  {(getRenderer(event.path) || "unknown").toUpperCase()}
+                </span>
                 <span>{event.updatedAt}</span>
               </div>
             </li>
@@ -155,7 +159,9 @@ function App() {
       <section className="panel">
         <div className="panel-heading">
           <h2>Walrus blob preview</h2>
-          <span className="hint">render HTML/Markdown assets based on suffix</span>
+          <span className="hint">
+            render HTML/Markdown assets based on suffix
+          </span>
         </div>
         {activeEvent ? (
           <div className="preview">
@@ -184,9 +190,15 @@ function App() {
               <div>
                 {fetchedContent ? (
                   <div className="rendered-content">
-                    {activeEvent.renderer === 'html' && <HtmlRenderer content={fetchedContent.content} />}
-                    {activeEvent.renderer === 'markdown' && <MarkdownRenderer content={fetchedContent.content} />}
-                    {activeEvent.renderer === 'json' && <JsonRenderer content={fetchedContent.content} />}
+                    {activeEvent.renderer === "html" && (
+                      <HtmlRenderer content={fetchedContent.content} />
+                    )}
+                    {activeEvent.renderer === "markdown" && (
+                      <MarkdownRenderer content={fetchedContent.content} />
+                    )}
+                    {activeEvent.renderer === "json" && (
+                      <JsonRenderer content={fetchedContent.content} />
+                    )}
                   </div>
                 ) : (
                   <p>Content not fetched yet.</p>
@@ -239,12 +251,12 @@ function App() {
 
       <footer>
         <p>
-          Next steps: wire this scaffold to the Move contract events, hydrate Walrus
-          fetchers, and integrate the zkLogin-aware editing UX.
+          Next steps: wire this scaffold to the Move contract events, hydrate
+          Walrus fetchers, and integrate the zkLogin-aware editing UX.
         </p>
       </footer>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

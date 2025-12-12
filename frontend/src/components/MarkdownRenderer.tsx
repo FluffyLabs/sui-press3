@@ -1,8 +1,5 @@
-
 interface Props {
-  content: string
+  content: string;
 }
 
-export const MarkdownRenderer = ({ content }: Props) => (
-  <pre>{content}</pre> 
-)
+export const MarkdownRenderer = ({ content }: Props) => <pre>{content}</pre>;
