@@ -1,12 +1,14 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
+import { HtmlRenderer } from './components/HtmlRenderer'
+import { MarkdownRenderer } from './components/MarkdownRenderer'
+import { JsonRenderer } from './components/JsonRenderer'
 
 type Renderer = 'html' | 'markdown' | 'json'
 
 type PageEvent = {
   path: string
   walrusId: string
-  renderer: Renderer
   lastEditor: string
   updatedAt: string
 }
@@ -16,25 +18,43 @@ type MenuSchema = {
   sidebar: Array<{ label: string; href: string }>
 }
 
+function getRenderer(path: string): Renderer | null {
+  if (path.endsWith('.html')) return 'html'
+  if (path.endsWith('.md')) return 'markdown'
+  if (path.endsWith('.json') || path === '/menu' || path === '/sidebar') return 'json'
+  return null
+}
+
+async function mockFetchContent(walrusId: string): Promise<string> {
+  await new Promise(resolve => setTimeout(resolve, 500))
+  switch (walrusId) {
+    case 'walrus://blob/main-menu':
+      return '<h1>Welcome to Press3</h1><p>This is the home page.</p>'
+    case 'walrus://blob/wiki-page':
+      return '# Press3 Wiki\n\nThis is a decentralized CMS built on SUI.'
+    case 'walrus://blob/navigation':
+      return '{"main":[{"label":"Home","href":"/"},{"label":"Docs","href":"/docs"}],"sidebar":[{"label":"Latest","href":"/news"}]}'
+    default:
+      return 'Content not found'
+  }
+}
+
 const PAGE_EVENTS: PageEvent[] = [
   {
     path: '/index.html',
     walrusId: 'walrus://blob/main-menu',
-    renderer: 'html',
     lastEditor: '0xDeployer',
     updatedAt: '2024-10-12T10:35:00Z',
   },
   {
     path: '/wiki/press3.md',
     walrusId: 'walrus://blob/wiki-page',
-    renderer: 'markdown',
     lastEditor: '0xEditor',
     updatedAt: '2024-10-13T08:12:11Z',
   },
   {
     path: '/menu',
     walrusId: 'walrus://blob/navigation',
-    renderer: 'json',
     lastEditor: '0xCMSAdmin',
     updatedAt: '2024-10-13T09:02:45Z',
   },
@@ -61,10 +81,44 @@ const ASSET_BINDINGS = [
 
 function App() {
   const [selectedPath, setSelectedPath] = useState(PAGE_EVENTS[0]?.path ?? '')
+
+  const handlePatchChange = (path: string) => {
+    setSelectedPath(path);
+  }
+
+  const [fetchedContent, setFetchedContent] = useState<{ walrusId: string; content: string } | null>(null)
   const activeEvent = useMemo(
-    () => PAGE_EVENTS.find((evt) => evt.path === selectedPath),
+    () => {
+      const event = PAGE_EVENTS.find((evt) => evt.path === selectedPath)
+      if (event) {
+        return { ...event, renderer: getRenderer(event.path) }
+      }
+      return null
+    },
     [selectedPath],
   )
+
+  useEffect(() => {
+    if (!activeEvent) {
+      return
+    }
+
+    let cancelled = false
+
+    const fetchContent = async () => {
+      setFetchedContent(null)
+      const content = await mockFetchContent(activeEvent.walrusId)
+      if (!cancelled) {
+        setFetchedContent({ walrusId: activeEvent.walrusId, content })
+      }
+    }
+
+    fetchContent()
+
+    return () => {
+      cancelled = true
+    }
+  }, [activeEvent])
 
   return (
     <div className="app">
@@ -86,11 +140,11 @@ function App() {
             <li
               key={event.path}
               className={selectedPath === event.path ? 'active' : ''}
-              onClick={() => setSelectedPath(event.path)}
+              onClick={() => handlePatchChange(event.path)}
             >
               <div className="event-title">{event.path}</div>
               <div className="event-meta">
-                <span>{event.renderer.toUpperCase()}</span>
+                <span>{(getRenderer(event.path) || 'unknown').toUpperCase()}</span>
                 <span>{event.updatedAt}</span>
               </div>
             </li>
@@ -124,6 +178,20 @@ function App() {
             <div className="preview-row">
               <span>Updated at</span>
               <code>{activeEvent.updatedAt}</code>
+            </div>
+            <div className="preview-row">
+              <span>Content</span>
+              <div>
+                {fetchedContent ? (
+                  <div className="rendered-content">
+                    {activeEvent.renderer === 'html' && <HtmlRenderer content={fetchedContent.content} />}
+                    {activeEvent.renderer === 'markdown' && <MarkdownRenderer content={fetchedContent.content} />}
+                    {activeEvent.renderer === 'json' && <JsonRenderer content={fetchedContent.content} />}
+                  </div>
+                ) : (
+                  <p>Content not fetched yet.</p>
+                )}
+              </div>
             </div>
             <p className="preview-description">
               Replace this card with the actual Walrus fetch logic. The renderer
