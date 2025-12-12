@@ -1,18 +1,15 @@
-import { join, relative, sep } from 'node:path';
 import { promises as fs } from 'node:fs';
+import { join, relative, sep } from 'node:path';
 
 import { getFullnodeUrl } from '@mysten/sui/client';
 import { decodeSuiPrivateKey } from '@mysten/sui/cryptography';
 import { SuiJsonRpcClient } from '@mysten/sui/jsonRpc';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import { fromBase64 } from '@mysten/sui/utils';
-import {
-  WalrusFile,
-  walrus,
-} from '@mysten/walrus';
+import { WalrusFile, walrus } from '@mysten/walrus';
 import { lookup as lookupMime } from 'mime-types';
-import {ensurePathExists, hexToBytes} from '../utils';
-import type {WalrusNetwork} from '../config';
+import type { WalrusNetwork } from '../config';
+import { ensurePathExists, hexToBytes } from '../utils';
 
 export async function prepareWalrusFiles(options: {
   assetsDir: string;
@@ -105,13 +102,10 @@ export async function loadPublisherKeypair(secret: string) {
   }
 }
 
-
 export function createWalrusClient(network: WalrusNetwork) {
   const rpcUrl = getFullnodeUrl(network);
   return new SuiJsonRpcClient({
     url: rpcUrl,
     network,
-  }).$extend(
-    walrus()
-  );
+  }).$extend(walrus());
 }

@@ -5,7 +5,9 @@ export const SUPPORTED_NETWORKS: WalrusNetwork[] = ['testnet', 'mainnet'];
 function getWalrusNetwork(): WalrusNetwork {
   const network = process.env.WALRUS_NETWORK || 'testnet';
   if (!SUPPORTED_NETWORKS.includes(network as WalrusNetwork)) {
-    throw new Error(`Invalid WALRUS_NETWORK: ${network}. Must be one of: ${SUPPORTED_NETWORKS.join(', ')}`);
+    throw new Error(
+      `Invalid WALRUS_NETWORK: ${network}. Must be one of: ${SUPPORTED_NETWORKS.join(', ')}`
+    );
   }
   return network as WalrusNetwork;
 }
@@ -15,7 +17,9 @@ function getWalrusEpochs(): number {
   if (epochs) {
     const parsed = Number.parseInt(epochs, 10);
     if (Number.isNaN(parsed) || parsed < 1) {
-      throw new Error(`Invalid WALRUS_EPOCHS: ${epochs}. Must be a positive integer.`);
+      throw new Error(
+        `Invalid WALRUS_EPOCHS: ${epochs}. Must be a positive integer.`
+      );
     }
     return parsed;
   }
@@ -30,6 +34,6 @@ export const DEFAULT_CONFIG = {
     secret: process.env.WALRUS_PUBLISH_SECRET || '',
     epochs: getWalrusEpochs(),
     network: getWalrusNetwork(),
-    deletable: true
-  }
+    deletable: true,
+  },
 };

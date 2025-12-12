@@ -1,13 +1,17 @@
 import { join } from 'node:path';
 
-import {DEFAULT_CONFIG} from "../config";
-import {logStep} from "../logger";
-import {ensurePathExists} from '../utils';
-import {createWalrusClient, loadPublisherKeypair, prepareWalrusFiles} from './walrus';
+import { DEFAULT_CONFIG } from '../config';
+import { logStep } from '../logger';
+import { ensurePathExists } from '../utils';
+import {
+  createWalrusClient,
+  loadPublisherKeypair,
+  prepareWalrusFiles,
+} from './walrus';
 
 export async function handleDeploy(flags: Record<string, string | boolean>) {
   const dryRun = Boolean(flags['dry-run']);
-  const useSdk = Boolean(flags['use-sdk'])
+  const useSdk = Boolean(flags['use-sdk']);
 
   const config = DEFAULT_CONFIG;
   logStep(
@@ -25,10 +29,7 @@ export async function handleDeploy(flags: Record<string, string | boolean>) {
     assetsDir: quiltAssetsDir,
     entryPath: quiltEntryPoint,
   });
-  logStep(
-    'Deploy',
-    `Bundled ${files.length} files from ${quiltAssetsDir}`
-  );
+  logStep('Deploy', `Bundled ${files.length} files from ${quiltAssetsDir}`);
 
   if (dryRun) {
     logStep('Deploy', 'Dry run enabled, skipping Walrus publish');
@@ -36,7 +37,10 @@ export async function handleDeploy(flags: Record<string, string | boolean>) {
   }
 
   if (!useSdk) {
-    logStep('Deploy', 'Deploying using site-builder. As an alternative --use-sdk');
+    logStep(
+      'Deploy',
+      'Deploying using site-builder. As an alternative --use-sdk'
+    );
     await Bun.$`site-builder --context=${config.walrus.network} deploy ${quiltAssetsDir} --epochs ${config.walrus.epochs} ${config.walrus.deletable ? '' : '--permanent'}`;
     return;
   }
@@ -76,4 +80,3 @@ async function buildFrontend(frontendDir: string) {
   await Bun.$`npm ci`.cwd(frontendDir);
   await Bun.$`npm run build`.cwd(frontendDir);
 }
-

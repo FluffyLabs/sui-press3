@@ -1,5 +1,5 @@
-import {handleDeploy} from './deploy';
-import {logStep} from './logger';
+import { handleDeploy } from './deploy';
+import { logStep } from './logger';
 
 type Command = 'deploy' | 'assign-domain' | 'renew' | 'index' | 'help';
 
@@ -26,7 +26,6 @@ Global options:
 Deploy options:
   --use-sdk          Use the SDK for deployment instead of site-builder
 `;
-
 
 function parseArgs(argv: string[]): ParsedArgs {
   const [, , maybeCommand, ...rest] = argv;

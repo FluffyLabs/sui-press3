@@ -1,4 +1,4 @@
-import {existsSync} from "node:fs";
+import { existsSync } from 'node:fs';
 
 export async function ensurePathExists(path: string, label: string) {
   if (!existsSync(path)) {
