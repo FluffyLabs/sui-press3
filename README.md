@@ -38,3 +38,6 @@ The CLI uses `press3.config.example.json` as a template for Walrus endpoints, pa
 2. Wire the frontend mock data to live Sui events plus Walrus fetchers (HTML/Markdown + asset injection).
 3. Implement the Bun CLI workflows: deploy quilts, assign domains, auto-renew blobs, and publish search indexes.
 4. Share schemas/types across contract, frontend, and CLI to ensure access control and metadata stay consistent.
+
+## CI
+- `.github/workflows/cli.yml` runs on pushes/PRs touching the CLI. It installs Bun, lints with Biome, compiles the binary via `bun build`, and executes `bun test`. Keep the CLI scripts up to date so the workflow mirrors local expectations.

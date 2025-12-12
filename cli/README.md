@@ -17,8 +17,13 @@ Each command currently logs the action so the workflows can be wired up while Mo
 
 ```bash
 bun install
-bun run index.ts help
+bun run index.ts help   # smoke-test commands
+bun run lint            # Biome formatting + lint rules
+bun run test            # Bun test harness (see tests/*)
+bun run build           # Produces dist/press3 binary for deployment
 ```
+
+The lint step is powered by [Biome](https://biomejs.dev/) and matches the settings enforced in CI.
 
 Roadmap:
 1. Load a shared JSON config (Walrus API keys, contract IDs, domains).
