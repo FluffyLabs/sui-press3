@@ -22,6 +22,9 @@ Commands:
 
 Global options:
   --dry-run          Print actions without executing transactions
+
+Deploy options:
+  --use-sdk          Use the SDK for deployment instead of site-builder
 `;
 
 
