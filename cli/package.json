@@ -5,9 +5,13 @@
   "private": true,
   "scripts": {
     "press3": "bun run index.ts",
-    "dev": "bun run index.ts help"
+    "dev": "bun run index.ts help",
+    "lint": "biome check .",
+    "test": "bun test",
+    "build": "bun build index.ts --compile --outfile dist/press3"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.8",
     "@types/bun": "latest"
   },
   "peerDependencies": {
