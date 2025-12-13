@@ -132,12 +132,8 @@ module contract::press3 {
         new_editor: address,
         ctx: &mut sui::tx_context::TxContext,
     ) {
-        let sender = sui::tx_context::sender(ctx);
+        assert_admin(state, ctx);
         let page = vector::borrow_mut(&mut state.pages, page_index);
-
-        // Check if sender is admin or existing editor
-        let is_admin = state.admins.contains(&sender);
-        assert!(is_admin, E_NOT_ADMIN);
 
         // Add editor if not already in the list
         if (!page.editors.contains(&new_editor)) {
@@ -153,12 +149,9 @@ module contract::press3 {
         editor_to_remove: address,
         ctx: &mut sui::tx_context::TxContext,
     ) {
+        assert_admin(state, ctx);
         let sender = sui::tx_context::sender(ctx);
         let page = vector::borrow_mut(&mut state.pages, page_index);
-
-        // Check if sender is admin or existing editor
-        let is_admin = state.admins.contains(&sender);
-        assert!(is_admin, E_NOT_ADMIN);
 
         // Prevent self-removal
         assert!(sender != editor_to_remove, E_CANNOT_REMOVE_SELF);
