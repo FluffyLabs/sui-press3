@@ -1,3 +1,4 @@
+import { handleContract } from './cmd-contract';
 import { handleDeploy } from './cmd-deploy';
 import { handlePublish } from './cmd-publish';
 import { handleRetrieve } from './cmd-retrieve';
@@ -7,6 +8,7 @@ type Command =
   | 'deploy'
   | 'publish'
   | 'retrieve'
+  | 'contract'
   | 'assign-domain'
   | 'renew'
   | 'index'
@@ -27,6 +29,7 @@ Commands:
   deploy         Upload a Walrus site bundle and update the Move contract
   publish        Upload a single file to Walrus and get the blob ID
   retrieve       Download a blob from Walrus by blob ID
+  contract       Build and publish the Move contract to SUI
   assign-domain  Attach a DNS/NS record to a Walrus site
   renew          Proactively renew Walrus blobs for a deployment
   index          Build the off-chain search index and publish it
@@ -43,6 +46,9 @@ Publish options:
 Retrieve options:
   --blob-id          Blob ID to retrieve (required)
   --output           Path to save the retrieved blob (optional, prints to stdout if not specified)
+
+Contract options:
+  --use-sdk          Use WALRUS_PUBLISH_SECRET from .env instead of sui CLI
 `;
 
 function parseArgs(argv: string[]): ParsedArgs {
@@ -67,9 +73,20 @@ function parseArgs(argv: string[]): ParsedArgs {
   }
 
   return {
+<<<<<<< HEAD
     command: ['deploy', 'publish', 'retrieve', 'assign-domain', 'renew', 'index'].includes(
       command
     )
+=======
+    command: [
+      'deploy',
+      'publish',
+      'contract',
+      'assign-domain',
+      'renew',
+      'index',
+    ].includes(command)
+>>>>>>> main
       ? (command as Command)
       : 'help',
     flags,
@@ -85,8 +102,13 @@ export async function run() {
     case 'publish':
       await handlePublish(flags);
       break;
+<<<<<<< HEAD
     case 'retrieve':
       await handleRetrieve(flags);
+=======
+    case 'contract':
+      await handleContract(flags);
+>>>>>>> main
       break;
     case 'assign-domain':
       await handleAssignDomain(flags);
