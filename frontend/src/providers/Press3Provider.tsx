@@ -16,6 +16,7 @@ interface Press3ContextValue {
   pages: Map<string, string>;
   isLoading: boolean;
   error: Error | null;
+  packageId: string;
 }
 
 const Press3Context = createContext<Press3ContextValue | null>(null);
@@ -44,7 +45,7 @@ export function Press3Provider({ packageId, children }: Press3ProviderProps) {
 
         const pagesMap = new Map<string, string>();
         for (const page of state.pages) {
-          pagesMap.set(page.path, page.walrus_id);
+          pagesMap.set(page.path, page.walrusId);
         }
         setPages(pagesMap);
         setIsLoading(false);
@@ -98,7 +99,7 @@ export function Press3Provider({ packageId, children }: Press3ProviderProps) {
   }, [pages]);
 
   return (
-    <Press3Context.Provider value={{ pages, isLoading, error }}>
+    <Press3Context.Provider value={{ pages, isLoading, error, packageId }}>
       {children}
     </Press3Context.Provider>
   );

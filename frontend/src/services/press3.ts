@@ -1,4 +1,5 @@
 import { getFullnodeUrl, SuiClient } from "@mysten/sui/client";
+import type { Press3State } from "../types/press3";
 
 const MODULE_NAME = "press3";
 
@@ -11,17 +12,8 @@ export function getSuiClient(): SuiClient {
   return suiClient;
 }
 
-export interface PageRecord {
-  path: string;
-  walrus_id: string;
-  editors: string[];
-}
-
-export interface Press3State {
-  objectId: string;
-  admins: string[];
-  pages: PageRecord[];
-}
+// Re-export types for backward compatibility
+export type { PageRecord, Press3State } from "../types/press3";
 
 /**
  * Finds the shared Press3 object by querying for objects of the Press3 type.
@@ -97,7 +89,7 @@ export async function getPress3State(
         admins: fields.admins,
         pages: fields.pages.map((p) => ({
           path: p.fields.path,
-          walrus_id: p.fields.walrus_id,
+          walrusId: p.fields.walrus_id,
           editors: p.fields.editors,
         })),
       };
