@@ -10,6 +10,7 @@ import {
   getPress3State,
   subscribeToPress3Events,
 } from "../services/press3";
+import { getFile } from "../services/walrus";
 
 interface Press3ContextValue {
   pages: Map<string, string>;
@@ -77,6 +78,24 @@ export function Press3Provider({ packageId, children }: Press3ProviderProps) {
       subscription.then((unsubscribe) => unsubscribe());
     };
   }, [packageId]);
+
+  // Prefetch all pages in background
+  useEffect(() => {
+    if (pages.size === 0) return;
+
+    const prefetchAll = async () => {
+      for (const walrusId of pages.values()) {
+        await getFile(walrusId);
+      }
+    };
+
+    if ("requestIdleCallback" in window) {
+      const id = requestIdleCallback(() => prefetchAll());
+      return () => cancelIdleCallback(id);
+    }
+    const timeout = setTimeout(prefetchAll, 100);
+    return () => clearTimeout(timeout);
+  }, [pages]);
 
   return (
     <Press3Context.Provider value={{ pages, isLoading, error }}>
