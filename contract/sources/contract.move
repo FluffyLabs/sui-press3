@@ -1,5 +1,4 @@
 module contract::press3 {
-    use std::string;
     use std::string::String;
     use sui::event;
 
@@ -54,7 +53,7 @@ module contract::press3 {
         init(ctx);
     }
 
-    public fun register_page(
+    entry fun register_page(
         state: &mut Press3,
         path: String,
         walrus_id: String,
@@ -80,17 +79,17 @@ module contract::press3 {
     }
 
     /// Returns the configured admins for off-chain tooling.
-    public fun admins(state: &Press3): vector<address> {
+    entry fun admins(state: &Press3): vector<address> {
         state.admins
     }
 
     /// Returns the number of registered pages.
-    public fun pages_count(state: &Press3): u64 {
+    entry fun pages_count(state: &Press3): u64 {
         state.pages.length()
     }
 
     /// Returns the configured editors for off-chain tooling. Sanity checks if we query the right page.
-    public fun editors(state: &Press3, page_index: u64, page_path: String): vector<address> {
+    entry fun editors(state: &Press3, page_index: u64, page_path: String): vector<address> {
         let page = vector::borrow(&state.pages, page_index);
         assert!(page.path == page_path, E_INVALID_PAGE_PATH);
         page.editors
@@ -101,7 +100,7 @@ module contract::press3 {
     }
 
     /// Sets admins. Only existing admins can set admins.
-    public fun set_admin(
+    entry fun set_admin(
         state: &mut Press3,
         new_admins: vector<address>,
         ctx: &mut sui::tx_context::TxContext,
@@ -111,7 +110,7 @@ module contract::press3 {
     }
 
     /// Set editors to a specific page. Only admins can set editors.
-    public fun set_editor(
+    entry fun set_editor(
         state: &mut Press3,
         page_index: u64,
         page_path: String,
@@ -125,7 +124,7 @@ module contract::press3 {
     }
 
     /// Updates the walrus_id for a specific page. Only admins and editors can update.
-    public fun update_page_walrus_id(
+    entry fun update_page_walrus_id(
         state: &mut Press3,
         page_index: u64,
         page_path: String,
