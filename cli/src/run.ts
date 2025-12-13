@@ -39,6 +39,9 @@ Deploy options:
 
 Publish options:
   --file             Path to the file to publish (required)
+
+Contract options:
+  --use-sdk          Use WALRUS_PUBLISH_SECRET from .env instead of sui CLI
 `;
 
 function parseArgs(argv: string[]): ParsedArgs {
