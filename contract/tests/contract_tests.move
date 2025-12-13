@@ -1,6 +1,6 @@
 #[test_only]
-module press3::press3_test {
-    use press3::press3::{Self, Press3, E_CANNOT_REMOVE_SELF, E_ADMIN_NOT_FOUND, E_EDITOR_NOT_FOUND};
+module contract::press3_test {
+    use contract::press3::{Self, Press3, E_CANNOT_REMOVE_SELF, E_ADMIN_NOT_FOUND, E_EDITOR_NOT_FOUND};
     use std::string;
     use sui::test_scenario;
 

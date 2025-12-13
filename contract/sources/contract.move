@@ -1,4 +1,4 @@
-module press3::press3 {
+module contract::press3 {
     use std::string;
     use std::string::String;
     use sui::event;
