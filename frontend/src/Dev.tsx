@@ -5,6 +5,7 @@ import { JsonRenderer } from "./components/JsonRenderer";
 import { MarkdownRenderer } from "./components/MarkdownRenderer";
 import { Menu } from "./components/Menu";
 import { Sidebar } from "./components/Sidebar";
+import { usePress3 } from "./providers/Press3Provider";
 import { getFile } from "./services/walrus";
 import type { TocItem } from "./utils/rehype-collect-headings";
 
@@ -76,7 +77,9 @@ const ASSET_BINDINGS = [
 
 function Dev() {
   const [selectedPath, setSelectedPath] = useState(PAGE_EVENTS[0]?.path ?? "");
+  const pages = usePress3().pages;
 
+  console.log(pages);
   // Test Walrus fetch
   useEffect(() => {
     const testWalrusFetch = async () => {
