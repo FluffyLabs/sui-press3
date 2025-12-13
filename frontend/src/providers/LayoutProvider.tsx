@@ -11,6 +11,7 @@ import { usePress3 } from "./Press3Provider";
 
 interface LayoutContextValue {
   layout: PageLayout | null;
+  rawContent: string | null;
   isLoading: boolean;
   error: Error | null;
 }
@@ -24,6 +25,7 @@ interface Props {
 export function LayoutProvider({ children }: Props) {
   const { pages, isLoading: isLoadingPages } = usePress3();
   const [layout, setLayout] = useState<PageLayout | null>(null);
+  const [rawContent, setRawContent] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -44,6 +46,8 @@ export function LayoutProvider({ children }: Props) {
         const parsed = tryParsePageLayout(content);
         if (parsed) {
           setLayout(parsed);
+        } else {
+          setRawContent(content);
         }
         setIsLoading(false);
       })
@@ -59,7 +63,7 @@ export function LayoutProvider({ children }: Props) {
   }, [pages, isLoadingPages]);
 
   return (
-    <LayoutContext.Provider value={{ layout, isLoading, error }}>
+    <LayoutContext.Provider value={{ layout, rawContent, isLoading, error }}>
       {children}
     </LayoutContext.Provider>
   );
