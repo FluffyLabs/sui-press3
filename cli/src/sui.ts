@@ -4,6 +4,7 @@ import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
 import type { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import { Transaction } from '@mysten/sui/transactions';
 import type { SuiNetwork } from './config';
+import type { PageRecord, Press3Record } from './types';
 
 export interface SuiObjectChange {
   type: string;
@@ -223,7 +224,7 @@ async function waitForPackage(
 }
 
 /**
- * Register the homepage ("/") with a walrus_id using a PTB
+ * Register the page with a walrus_id
  */
 export async function registerPage(options: {
   client: SuiClient;
@@ -245,6 +246,87 @@ export async function registerPage(options: {
     target: `${packageId}::press3::register_page`,
     arguments: [
       tx.object(press3ObjectId),
+      tx.pure.string(pagePath),
+      tx.pure.string(walrusId),
+    ],
+  });
+
+  tx.setGasBudget(10_000_000); // 0.01 SUI
+
+  const result = await client.signAndExecuteTransaction({
+    transaction: tx,
+    signer,
+    options: {
+      showEffects: true,
+      showObjectChanges: true,
+    },
+  });
+
+  return result;
+}
+
+/**
+ * Fetch all pages from a Press3 object
+ */
+export async function getPages(options: {
+  client: SuiClient;
+  press3ObjectId: string;
+}): Promise<PageRecord[]> {
+  const { client, press3ObjectId } = options;
+
+  const object = await client.getObject({
+    id: press3ObjectId,
+    options: {
+      showContent: true,
+    },
+  });
+
+  if (!object.data?.content || object.data.content.dataType !== 'moveObject') {
+    throw new Error('Invalid Press3 object');
+  }
+
+  const fields = object.data.content.fields as unknown as Press3Record;
+  const pages = fields.pages || [];
+
+  return pages.map((page) => ({
+    path: page.fields.path,
+    walrus_id: page.fields.walrus_id,
+    editors: page.fields.editors || [],
+  }));
+}
+
+/**
+ * Update page with a walrus_id
+ */
+export async function updatePage(options: {
+  client: SuiClient;
+  signer: Ed25519Keypair;
+  packageId: string;
+  press3ObjectId: string;
+  pageIndex: number;
+  pagePath: string;
+  walrusId: string;
+}): Promise<SuiPublishResult> {
+  const {
+    client,
+    signer,
+    packageId,
+    press3ObjectId,
+    pageIndex,
+    pagePath,
+    walrusId,
+  } = options;
+
+  // Wait for the package to be indexed before calling Move functions
+  await waitForPackage(client, packageId);
+
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${packageId}::press3::update_page_walrus_id`,
+    arguments: [
+      tx.object(press3ObjectId),
+      tx.pure.u64(pageIndex),
       tx.pure.string(pagePath),
       tx.pure.string(walrusId),
     ],

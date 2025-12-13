@@ -3,6 +3,7 @@ import { handleDeploy } from './cmd-deploy';
 import { handleInit } from './cmd-init';
 import { handlePublish } from './cmd-publish';
 import { handleRetrieve } from './cmd-retrieve';
+import { handleUpdate } from './cmd-update';
 import { logStep } from './logger';
 
 type Command =
@@ -14,6 +15,7 @@ type Command =
   | 'renew'
   | 'index'
   | 'init'
+  | 'update'
   | 'help';
 
 type ParsedArgs = {
@@ -33,6 +35,7 @@ Commands:
   retrieve       Download a blob from Walrus by blob ID
   contract       Build and publish the Move contract to SUI
   init           Build and publish Press3 contract, upload frontend to walrus and initialize home page
+  update         Update an existing page or register new one with a new Walrus blob ID
   assign-domain  Attach a DNS/NS record to a Walrus site
   renew          Proactively renew Walrus blobs for a deployment
   index          Build the off-chain search index and publish it
@@ -57,6 +60,10 @@ Init options:
   --home             Walrus Blob ID to set as homepage (required)
   --demo             Setup initial homepage, index.html and article.md (ignores flag --home)
   --output           Path to save the configuration file (default: press3.init.log)
+
+Update options:
+  --path             Page path to update (required)
+  --blob-id          New Walrus blob ID (required)
 `;
 
 function parseArgs(argv: string[]): ParsedArgs {
@@ -90,6 +97,7 @@ function parseArgs(argv: string[]): ParsedArgs {
       'renew',
       'index',
       'init',
+      'update',
     ].includes(command)
       ? (command as Command)
       : 'help',
@@ -123,6 +131,9 @@ export async function run() {
       break;
     case 'init':
       await handleInit(flags);
+      break;
+    case 'update':
+      await handleUpdate(flags);
       break;
     default:
       console.log(HELP_TEXT.trim());

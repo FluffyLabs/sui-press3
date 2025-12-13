@@ -1,7 +1,14 @@
 export type WalrusNetwork = 'testnet' | 'mainnet';
 export type SuiNetwork = 'testnet' | 'mainnet';
 
+export const PRESS3_CONF_NAME = 'press3.config.yml';
 export const SUPPORTED_NETWORKS: WalrusNetwork[] = ['testnet', 'mainnet'];
+
+export interface Press3Config {
+  package_id: string;
+  press3_object_id: string;
+  network: string;
+}
 
 function getSuiWalrusNetwork(): WalrusNetwork {
   const network = process.env.WALRUS_NETWORK || 'testnet';
@@ -40,3 +47,7 @@ export const DEFAULT_CONFIG = {
     deletable: true,
   },
 };
+
+export async function fileExists(path: string): Promise<boolean> {
+  return Bun.file(path).exists();
+}
