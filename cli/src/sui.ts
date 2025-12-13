@@ -3,20 +3,24 @@ import { join } from 'node:path';
 import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
 import type { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import { Transaction } from '@mysten/sui/transactions';
-import type { WalrusNetwork } from './config';
+import type { SuiNetwork } from './config';
+
+export interface SuiObjectChange {
+  type: string;
+  packageId?: string;
+  objectId?: string;
+  objectType?: string;
+}
 
 export interface SuiPublishResult {
   digest: string;
-  objectChanges?: Array<{
-    type: string;
-    packageId?: string;
-  }> | null;
+  objectChanges?: Array<SuiObjectChange> | null;
 }
 
 /**
  * Create a SUI client for the specified network
  */
-export function createSuiClient(network: WalrusNetwork): SuiClient {
+export function createSuiClient(network: SuiNetwork): SuiClient {
   return new SuiClient({ url: getFullnodeUrl(network) });
 }
 
@@ -36,9 +40,28 @@ export function extractPackageId(result: SuiPublishResult): string {
 }
 
 /**
+ * Extract the Press3 shared object ID from a publish transaction result
+ */
+export function extractPress3ObjectId(result: SuiPublishResult): string {
+  const created = result.objectChanges?.find(
+    (change) =>
+      change.type === 'created' &&
+      change.objectType?.includes('::press3::Press3')
+  );
+
+  if (!created?.objectId) {
+    throw new Error(
+      'Could not find Press3 shared object in transaction result'
+    );
+  }
+
+  return created.objectId;
+}
+
+/**
  * Generate a Suiscan URL for a transaction
  */
-export function getSuiscanUrl(network: WalrusNetwork, digest: string): string {
+export function getSuiscanUrl(network: SuiNetwork, digest: string): string {
   return `https://suiscan.xyz/${network}/tx/${digest}`;
 }
 
@@ -173,4 +196,68 @@ export async function publishMovePackageWithCli(
   }
 
   return JSON.parse(publishResult.stdout.toString()) as SuiPublishResult;
+}
+
+/**
+ * Wait for a package to be indexed on the fullnode
+ */
+async function waitForPackage(
+  client: SuiClient,
+  packageId: string,
+  maxRetries = 10,
+  delayMs = 1000
+): Promise<void> {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      await client.getObject({ id: packageId });
+      return;
+    } catch (_error) {
+      if (i === maxRetries - 1) {
+        throw new Error(
+          `Package ${packageId} not indexed after ${maxRetries} retries`
+        );
+      }
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+}
+
+/**
+ * Register the homepage ("/") with a walrus_id using a PTB
+ */
+export async function registerHomepage(options: {
+  client: SuiClient;
+  signer: Ed25519Keypair;
+  packageId: string;
+  press3ObjectId: string;
+  walrusId: string;
+}): Promise<SuiPublishResult> {
+  const { client, signer, packageId, press3ObjectId, walrusId } = options;
+
+  // Wait for the package to be indexed before calling Move functions
+  await waitForPackage(client, packageId);
+
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${packageId}::press3::register_top_level`,
+    arguments: [
+      tx.object(press3ObjectId),
+      tx.pure.string('/'),
+      tx.pure.string(walrusId),
+    ],
+  });
+
+  tx.setGasBudget(10_000_000); // 0.01 SUI
+
+  const result = await client.signAndExecuteTransaction({
+    transaction: tx,
+    signer,
+    options: {
+      showEffects: true,
+      showObjectChanges: true,
+    },
+  });
+
+  return result;
 }
