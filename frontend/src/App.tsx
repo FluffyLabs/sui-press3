@@ -3,6 +3,7 @@ import "./App.css";
 import { HtmlRenderer } from "./components/HtmlRenderer";
 import { JsonRenderer } from "./components/JsonRenderer";
 import { MarkdownRenderer } from "./components/MarkdownRenderer";
+import { getFile } from "./services/walrus";
 
 type Renderer = "html" | "markdown" | "json";
 
@@ -82,6 +83,21 @@ const ASSET_BINDINGS = [
 
 function App() {
   const [selectedPath, setSelectedPath] = useState(PAGE_EVENTS[0]?.path ?? "");
+
+  // Test Walrus fetch
+  useEffect(() => {
+    const testWalrusFetch = async () => {
+      try {
+        const content = await getFile(
+          "GR6AiGuu5MJIiBPTGw5uEULqjvYZ9YGgtBa6-UwoTZQ",
+        );
+        console.log("Walrus content:", content);
+      } catch (error) {
+        console.error("Walrus fetch error:", error);
+      }
+    };
+    testWalrusFetch();
+  }, []);
 
   const handlePatchChange = (path: string) => {
     setSelectedPath(path);
