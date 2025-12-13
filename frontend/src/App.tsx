@@ -1,4 +1,6 @@
 import { HashRouter, Route, Routes } from "react-router-dom";
+import Admin from "./admin/Admin";
+import { PageEditor } from "./admin/components/PageEditor";
 import Dev from "./Dev";
 import { Page } from "./Page";
 import { Press3Provider } from "./providers/Press3Provider";
@@ -16,6 +18,8 @@ function App() {
       <HashRouter>
         <Routes>
           <Route path="/dev" element={<Dev />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/edit/:pageId" element={<PageEditor />} />
           <Route path="*" element={<Page />} />
         </Routes>
       </HashRouter>
