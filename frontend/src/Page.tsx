@@ -8,7 +8,7 @@ import { usePress3 } from "./providers/Press3Provider";
 type Renderer = "html" | "markdown" | "json";
 
 function getRenderer(path: string): Renderer | null {
-  if (path.endsWith(".html")) return "html";
+  if (path.endsWith(".html") || path === "/" || path === "") return "html";
   if (path.endsWith(".md")) return "markdown";
   if (path.endsWith(".json")) return "json";
   return null;
