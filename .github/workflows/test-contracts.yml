@@ -21,6 +21,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
       - name: Install Sui CLI
         run: |
           cargo install --locked --git https://github.com/MystenLabs/sui.git --branch mainnet sui
