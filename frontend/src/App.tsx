@@ -3,8 +3,8 @@ import "./App.css";
 import { HtmlRenderer } from "./components/HtmlRenderer";
 import { JsonRenderer } from "./components/JsonRenderer";
 import { MarkdownRenderer } from "./components/MarkdownRenderer";
-import { getFile } from "./services/walrus";
 import { Menu } from "./components/Menu";
+import { getFile } from "./services/walrus";
 
 type Renderer = "html" | "markdown" | "json";
 
