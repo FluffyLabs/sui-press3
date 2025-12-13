@@ -1,6 +1,18 @@
 import { useLocation } from "react-router-dom";
+import { HtmlRenderer } from "./components/HtmlRenderer";
+import { JsonRenderer } from "./components/JsonRenderer";
+import { MarkdownRenderer } from "./components/MarkdownRenderer";
 import { useWalrusContent } from "./hooks/useWalrusContent";
 import { usePress3 } from "./providers/Press3Provider";
+
+type Renderer = "html" | "markdown" | "json";
+
+function getRenderer(path: string): Renderer | null {
+  if (path.endsWith(".html")) return "html";
+  if (path.endsWith(".md")) return "markdown";
+  if (path.endsWith(".json")) return "json";
+  return null;
+}
 
 export function Page() {
   const location = useLocation();
@@ -14,7 +26,7 @@ export function Page() {
     error,
   } = useWalrusContent(walrusId);
 
-  console.log("Page:", { path, walrusId, content, isLoadingContent, error });
+  const renderer = getRenderer(path);
 
   if (isLoadingContent || isLoadingPages) {
     return <div>Loading...</div>;
@@ -28,5 +40,18 @@ export function Page() {
     return <div>Error: {error.message}</div>;
   }
 
-  return <div>{content}</div>;
+  if (!content) {
+    return <div>No content</div>;
+  }
+
+  switch (renderer) {
+    case "html":
+      return <HtmlRenderer content={content} />;
+    case "markdown":
+      return <MarkdownRenderer content={content} />;
+    case "json":
+      return <JsonRenderer content={content} />;
+    default:
+      return <div>{content}</div>;
+  }
 }
