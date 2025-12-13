@@ -22,8 +22,8 @@ export function useWalrusContent(
     let cancelled = false;
     // Reset state at the start of fetching - this is intentional
     setContent(null); // eslint-disable-line react-hooks/set-state-in-effect
-    setIsLoading(true);  
-    setError(null);  
+    setIsLoading(true);
+    setError(null);
 
     getFile(walrusId)
       .then((data) => {

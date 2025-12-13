@@ -124,7 +124,7 @@ function Dev() {
   useEffect(() => {
     if (!activeEvent) {
       setTocItems([]); // eslint-disable-line react-hooks/set-state-in-effect
-      setFetchedContent(null);  
+      setFetchedContent(null);
       return;
     }
 
@@ -155,7 +155,7 @@ function Dev() {
     if (tocItems.length === 0) {
       setIsSidebarOpen(false); // eslint-disable-line react-hooks/set-state-in-effect
     } else if (isDesktop) {
-      setIsSidebarOpen(true);  
+      setIsSidebarOpen(true);
     }
   }, [tocItems]);
 
@@ -188,7 +188,6 @@ function Dev() {
       cancelled = true;
     };
   }, [menuEvent]);
-
 
   return (
     <div className="app">
