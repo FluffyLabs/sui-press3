@@ -225,6 +225,7 @@ module contract::press3_test {
             press3::update_page_walrus_id(
                 &mut state,
                 0,
+                string::utf8(b"/test"),
                 string::utf8(b"new_blob456"),
                 test_scenario::ctx(&mut scenario)
             );
@@ -278,6 +279,7 @@ module contract::press3_test {
             press3::update_page_walrus_id(
                 &mut state,
                 0,
+                string::utf8(b"/test"),
                 string::utf8(b"new_blob789"),
                 test_scenario::ctx(&mut scenario)
             );
@@ -317,6 +319,7 @@ module contract::press3_test {
             press3::update_page_walrus_id(
                 &mut state,
                 0,
+                string::utf8(b"/test"),
                 string::utf8(b"should_fail"),
                 test_scenario::ctx(&mut scenario)
             );
