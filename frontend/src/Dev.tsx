@@ -4,11 +4,7 @@ import { HtmlRenderer } from "./components/HtmlRenderer";
 import { JsonRenderer } from "./components/JsonRenderer";
 import { MarkdownRenderer } from "./components/MarkdownRenderer";
 import { Menu } from "./components/Menu";
-import {
-  findPress3Object,
-  getPress3State,
-  queryPageEvents,
-} from "./services/press3";
+import { usePress3Pages } from "./providers/Press3Provider";
 import { getFile } from "./services/walrus";
 
 type Renderer = "html" | "markdown" | "json";
@@ -79,7 +75,9 @@ const ASSET_BINDINGS = [
 
 function Dev() {
   const [selectedPath, setSelectedPath] = useState(PAGE_EVENTS[0]?.path ?? "");
+  const pages = usePress3Pages();
 
+  console.log(pages);
   // Test Walrus fetch
   useEffect(() => {
     const testWalrusFetch = async () => {
@@ -93,34 +91,6 @@ function Dev() {
       }
     };
     testWalrusFetch();
-  }, []);
-
-  // Test Press3 contract interaction
-  useEffect(() => {
-    const testPress3 = async () => {
-      try {
-        console.log("--- Press3 Contract Test ---");
-
-        // Find the Press3 shared object
-        const objectId = await findPress3Object();
-        console.log("Press3 object ID:", objectId);
-
-        if (objectId) {
-          // Get the full state
-          const state = await getPress3State(objectId);
-          console.log("Press3 state:", state);
-        }
-
-        // Query page events
-        const events = await queryPageEvents();
-        console.log("Page events:", events);
-
-        console.log("--- End Press3 Contract Test ---");
-      } catch (error) {
-        console.error("Press3 contract error:", error);
-      }
-    };
-    testPress3();
   }, []);
 
   const handlePatchChange = (path: string) => {

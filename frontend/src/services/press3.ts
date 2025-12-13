@@ -1,9 +1,6 @@
 import { getFullnodeUrl, SuiClient } from "@mysten/sui/client";
 
-const PACKAGE_ID =
-  "0xc394806a04aca8aecae8f8550d1a535f8d880924444da2bca0c8066e11e88ca5";
 const MODULE_NAME = "press3";
-const PRESS3_TYPE = `${PACKAGE_ID}::${MODULE_NAME}::Press3`;
 
 let suiClient: SuiClient | null = null;
 
@@ -29,19 +26,19 @@ export interface Press3State {
 /**
  * Finds the shared Press3 object by querying for objects of the Press3 type.
  */
-export async function findPress3Object(): Promise<string | null> {
+export async function findPress3Object(
+  packageId: string,
+): Promise<string | null> {
   const client = getSuiClient();
 
   // Query for objects owned by the package (shared objects)
   // We need to find the Press3 object that was created during init
   const objects = await client.queryEvents({
     query: {
-      MoveEventType: `${PACKAGE_ID}::${MODULE_NAME}::Press3InitializedEvent`,
+      MoveEventType: `${packageId}::${MODULE_NAME}::Press3InitializedEvent`,
     },
     limit: 1,
   });
-
-  console.log("Press3InitializedEvent query result:", objects);
 
   if (objects.data.length > 0) {
     // Get the transaction that emitted this event to find the created object
@@ -50,8 +47,6 @@ export async function findPress3Object(): Promise<string | null> {
       digest: txDigest,
       options: { showEffects: true },
     });
-
-    console.log("Transaction effects:", tx.effects);
 
     // Find the created shared object
     const created = tx.effects?.created;
@@ -84,8 +79,6 @@ export async function getPress3State(
       id: objectId,
       options: { showContent: true },
     });
-
-    console.log("Press3 object:", object);
 
     if (object.data?.content?.dataType === "moveObject") {
       const fields = object.data.content.fields as {
@@ -120,6 +113,7 @@ export async function getPress3State(
  * Subscribes to Press3 events (PageRegistered, PageUpdated).
  */
 export async function subscribeToPress3Events(
+  packageId: string,
   onPageRegistered: (event: {
     path: string;
     walrus_id: string;
@@ -135,10 +129,9 @@ export async function subscribeToPress3Events(
 
   const unsubscribeRegistered = await client.subscribeEvent({
     filter: {
-      MoveEventType: `${PACKAGE_ID}::${MODULE_NAME}::PageRegisteredEvent`,
+      MoveEventType: `${packageId}::${MODULE_NAME}::PageRegisteredEvent`,
     },
     onMessage: (event) => {
-      console.log("PageRegisteredEvent:", event);
       const parsed = event.parsedJson as {
         path: string;
         walrus_id: string;
@@ -150,10 +143,9 @@ export async function subscribeToPress3Events(
 
   const unsubscribeUpdated = await client.subscribeEvent({
     filter: {
-      MoveEventType: `${PACKAGE_ID}::${MODULE_NAME}::PageUpdatedEvent`,
+      MoveEventType: `${packageId}::${MODULE_NAME}::PageUpdatedEvent`,
     },
     onMessage: (event) => {
-      console.log("PageUpdatedEvent:", event);
       const parsed = event.parsedJson as {
         path: string;
         old_walrus_id: string;
@@ -172,7 +164,7 @@ export async function subscribeToPress3Events(
 /**
  * Queries historical page events from the blockchain.
  */
-export async function queryPageEvents(): Promise<
+export async function queryPageEvents(packageId: string): Promise<
   Array<{
     type: "registered" | "updated";
     path: string;
@@ -197,12 +189,10 @@ export async function queryPageEvents(): Promise<
   // Query PageRegisteredEvents
   const registeredEvents = await client.queryEvents({
     query: {
-      MoveEventType: `${PACKAGE_ID}::${MODULE_NAME}::PageRegisteredEvent`,
+      MoveEventType: `${packageId}::${MODULE_NAME}::PageRegisteredEvent`,
     },
     limit: 50,
   });
-
-  console.log("PageRegisteredEvents:", registeredEvents);
 
   for (const event of registeredEvents.data) {
     const parsed = event.parsedJson as {
@@ -222,12 +212,10 @@ export async function queryPageEvents(): Promise<
   // Query PageUpdatedEvents
   const updatedEvents = await client.queryEvents({
     query: {
-      MoveEventType: `${PACKAGE_ID}::${MODULE_NAME}::PageUpdatedEvent`,
+      MoveEventType: `${packageId}::${MODULE_NAME}::PageUpdatedEvent`,
     },
     limit: 50,
   });
-
-  console.log("PageUpdatedEvents:", updatedEvents);
 
   for (const event of updatedEvents.data) {
     const parsed = event.parsedJson as {
@@ -247,4 +235,4 @@ export async function queryPageEvents(): Promise<
   return events;
 }
 
-export { PACKAGE_ID, MODULE_NAME, PRESS3_TYPE };
+export { MODULE_NAME };
