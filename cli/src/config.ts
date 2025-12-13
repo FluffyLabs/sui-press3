@@ -2,7 +2,6 @@ export type WalrusNetwork = 'testnet' | 'mainnet';
 export type SuiNetwork = 'testnet' | 'mainnet';
 
 export const SUPPORTED_NETWORKS: WalrusNetwork[] = ['testnet', 'mainnet'];
-export const SUPPORTED_SUI_NETWORKS: SuiNetwork[] = ['testnet', 'mainnet'];
 
 function getSuiWalrusNetwork(): WalrusNetwork {
   const network = process.env.WALRUS_NETWORK || 'testnet';
