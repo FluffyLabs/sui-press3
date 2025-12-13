@@ -1,7 +1,7 @@
 import ReactMarkdown from 'react-markdown'
 
 interface Props {
-  content: string
+  content: string;
 }
 
 export const MarkdownRenderer = ({ content }: Props) => (
