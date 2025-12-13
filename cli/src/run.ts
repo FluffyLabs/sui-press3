@@ -55,6 +55,7 @@ Contract options:
 
 Init options:
   --home             Walrus Blob ID to set as homepage (required)
+  --demo             Setup initial homepage, index.html and article.md (ignores flag --home)
   --output           Path to save the configuration file (default: press3.init.log)
 `;
 

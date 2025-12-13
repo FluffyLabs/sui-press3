@@ -31,11 +31,12 @@ interface InitConfig {
 export async function handleInit(flags: Record<string, string | boolean>) {
   const outputPath = (flags.output as string) || 'press3.init.log';
   const homepageBlobId = flags.home as string | undefined;
+  const isDemo = flags.demo as boolean | undefined;
 
   const config = DEFAULT_CONFIG;
   logStep('Init', `Initializing Press3 on ${config.walrus.network}`);
 
-  if (!homepageBlobId) {
+  if (!isDemo && !homepageBlobId) {
     logStep('Init', `Homepage Blob ID is required, and not provided`);
     process.exit(1);
   }
@@ -113,22 +114,73 @@ export async function handleInit(flags: Record<string, string | boolean>) {
       `  Transaction: ${getSuiscanUrl(config.walrus.network, publishResult.digest)}`
   );
 
-  // Step 3: Register homepage with Walrus blob
-  logStep('Init', 'Registering homepage...');
-  const registerResult = await registerPage({
-    client: suiClient,
-    signer,
-    packageId,
-    press3ObjectId,
-    pagePath: '/',
-    walrusId: homepageBlobId,
-  });
+  if (isDemo) {
+    // Step 3: Register demo pages with Walrus blob
+    logStep('Init', 'Registering homepage...');
+    const registerHomeResult = await registerPage({
+      client: suiClient,
+      signer,
+      packageId,
+      press3ObjectId,
+      pagePath: '/',
+      walrusId: 'Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU',
+    });
 
-  logStep(
-    'Init',
-    `Homepage registered successfully!\n` +
-      `  Transaction: ${getSuiscanUrl(config.walrus.network, registerResult.digest)}`
-  );
+    logStep(
+      'Init',
+      `Homepage registered successfully!\n` +
+        `  Transaction: ${getSuiscanUrl(config.walrus.network, registerHomeResult.digest)}`
+    );
+
+    logStep('Init', 'Registering index.html...');
+    const registerIndexResult = await registerPage({
+      client: suiClient,
+      signer,
+      packageId,
+      press3ObjectId,
+      pagePath: '/index.html',
+      walrusId: 'Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU',
+    });
+
+    logStep(
+      'Init',
+      `Index.html registered successfully!\n` +
+        `  Transaction: ${getSuiscanUrl(config.walrus.network, registerIndexResult.digest)}`
+    );
+
+    logStep('Init', 'Registering article.md...');
+    const registerArticleResult = await registerPage({
+      client: suiClient,
+      signer,
+      packageId,
+      press3ObjectId,
+      pagePath: '/article.md',
+      walrusId: '1uJVmO-79L9ZefNxKYJz8239OGFdNFgk9oXQZV5OBkg',
+    });
+
+    logStep(
+      'Init',
+      `Article.md registered successfully!\n` +
+        `  Transaction: ${getSuiscanUrl(config.walrus.network, registerArticleResult.digest)}`
+    );
+  } else {
+    // Step 3: Register homepage with Walrus blob
+    logStep('Init', 'Registering homepage...');
+    const registerResult = await registerPage({
+      client: suiClient,
+      signer,
+      packageId,
+      press3ObjectId,
+      pagePath: '/',
+      walrusId: homepageBlobId,
+    });
+
+    logStep(
+      'Init',
+      `Homepage registered successfully!\n` +
+        `  Transaction: ${getSuiscanUrl(config.walrus.network, registerResult.digest)}`
+    );
+  }
 
   // Step 4: Write config file
   const initConfig: InitConfig = {
