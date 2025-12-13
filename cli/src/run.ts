@@ -73,20 +73,15 @@ function parseArgs(argv: string[]): ParsedArgs {
   }
 
   return {
-<<<<<<< HEAD
-    command: ['deploy', 'publish', 'retrieve', 'assign-domain', 'renew', 'index'].includes(
-      command
-    )
-=======
     command: [
       'deploy',
       'publish',
+      'retrieve',
       'contract',
       'assign-domain',
       'renew',
       'index',
     ].includes(command)
->>>>>>> main
       ? (command as Command)
       : 'help',
     flags,
@@ -102,13 +97,11 @@ export async function run() {
     case 'publish':
       await handlePublish(flags);
       break;
-<<<<<<< HEAD
     case 'retrieve':
       await handleRetrieve(flags);
-=======
+      break;
     case 'contract':
       await handleContract(flags);
->>>>>>> main
       break;
     case 'assign-domain':
       await handleAssignDomain(flags);
