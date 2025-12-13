@@ -134,10 +134,12 @@ module contract::press3 {
     public fun update_page_walrus_id(
         state: &mut Press3,
         page_index: u64,
+        page_path: String,
         new_walrus_id: String,
         ctx: &mut sui::tx_context::TxContext,
     ) {
         let page = vector::borrow_mut(&mut state.pages, page_index);
+        assert!(page.path == page_path, E_INVALID_PAGE_PATH);
 
         let sender = sui::tx_context::sender(ctx);
         let is_admin = state.admins.contains(&sender);
