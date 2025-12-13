@@ -18,7 +18,7 @@ const CONTRACT_PACKAGE_NAME = 'contract';
 
 export async function handleContract(flags: Record<string, string | boolean>) {
   const dryRun = Boolean(flags['dry-run']);
-  const useSdk = Boolean(flags['use-sdk']);
+  const useCli = Boolean(flags['use-cli']);
 
   const config = DEFAULT_CONFIG;
   const network = config.walrus.network;
@@ -39,10 +39,10 @@ export async function handleContract(flags: Record<string, string | boolean>) {
     return;
   }
 
-  if (!useSdk) {
+  if (useCli) {
     logStep(
       'Contract',
-      'Publishing using sui CLI. As an alternative use --use-sdk'
+      'Publishing using sui CLI. As an alternative use SDK (default)'
     );
     const result = await publishMovePackageWithCli(contractDir);
     displayPublishResult(result, network);

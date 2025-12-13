@@ -38,7 +38,7 @@ Global options:
   --dry-run          Print actions without executing transactions
 
 Deploy options:
-  --use-sdk          Use the SDK for deployment instead of site-builder
+  --use-cli          Use site-builder for deployment instead of SDK
 
 Publish options:
   --file             Path to the file to publish (required)
@@ -48,7 +48,7 @@ Retrieve options:
   --output           Path to save the retrieved blob (optional, prints to stdout if not specified)
 
 Contract options:
-  --use-sdk          Use WALRUS_PUBLISH_SECRET from .env instead of sui CLI
+  --use-cli          Use sui CLI instead of SDK with WALRUS_PUBLISH_SECRET
 `;
 
 function parseArgs(argv: string[]): ParsedArgs {
