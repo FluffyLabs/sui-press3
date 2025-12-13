@@ -16,15 +16,14 @@ export function useWalrusContent(
 
   useEffect(() => {
     if (!walrusId) {
-      setContent(null);
-      setIsLoading(false);
-      setError(null);
       return;
     }
 
     let cancelled = false;
-    setIsLoading(true);
-    setError(null);
+    // Reset state at the start of fetching - this is intentional
+    setContent(null); // eslint-disable-line react-hooks/set-state-in-effect
+    setIsLoading(true);  
+    setError(null);  
 
     getFile(walrusId)
       .then((data) => {
