@@ -1,8 +1,11 @@
+import ReactMarkdown from "react-markdown";
 
 interface Props {
-  content: string
+  content: string;
 }
 
 export const MarkdownRenderer = ({ content }: Props) => (
-  <pre>{content}</pre> 
-)
+  <div className="markdown-content">
+    <ReactMarkdown>{content}</ReactMarkdown>
+  </div>
+);
