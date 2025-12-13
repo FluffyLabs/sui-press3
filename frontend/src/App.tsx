@@ -4,6 +4,7 @@ import { PageEditor } from "./admin/components/PageEditor";
 import Dev from "./Dev";
 import { Page } from "./Page";
 import { Press3Provider } from "./providers/Press3Provider";
+import { WalletProvider } from "./providers/WalletProvider";
 import "@fluffylabs/shared-ui/style.css";
 
 const DEFAULT_PACKAGE_ID =
@@ -20,16 +21,18 @@ function getPackageId(): string {
 
 function App() {
   return (
-    <Press3Provider packageId={getPackageId()}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/dev" element={<Dev />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/edit/:pageId" element={<PageEditor />} />
-          <Route path="*" element={<Page />} />
-        </Routes>
-      </BrowserRouter>
-    </Press3Provider>
+    <WalletProvider>
+      <Press3Provider packageId={getPackageId()}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/dev" element={<Dev />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/edit/:pageId" element={<PageEditor />} />
+            <Route path="*" element={<Page />} />
+          </Routes>
+        </BrowserRouter>
+      </Press3Provider>
+    </WalletProvider>
   );
 }
 

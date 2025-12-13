@@ -13,8 +13,10 @@
   },
   "dependencies": {
     "@fluffylabs/shared-ui": "^0.4.6",
+    "@mysten/dapp-kit": "^0.19.11",
     "@mysten/sui": "^1.45.2",
     "@mysten/walrus": "^0.8.6",
+    "@tanstack/react-query": "^5.90.12",
     "hast-util-to-text": "^4.0.2",
     "lucide-react": "^0.561.0",
     "mdast-util-to-string": "^4.0.0",
