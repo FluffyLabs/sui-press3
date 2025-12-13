@@ -43,7 +43,8 @@ module contract::press3 {
             id: sui::object::new(ctx),
             admins,
             pages: vector::empty<PageRecord>(),
-        };
+};
+// NOTE: Just example purposes. To be deleted
         state.register_page("/", "Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU", ctx);
         state.register_page("/index.html", "Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU", ctx);
         state.register_page("/article.md", "1uJVmO-79L9ZefNxKYJz8239OGFdNFgk9oXQZV5OBkg", ctx);
