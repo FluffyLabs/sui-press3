@@ -8,8 +8,8 @@ import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import { fromBase64 } from '@mysten/sui/utils';
 import { WalrusFile, walrus } from '@mysten/walrus';
 import { lookup as lookupMime } from 'mime-types';
-import type { WalrusNetwork } from '../config';
-import { ensurePathExists, hexToBytes } from '../utils';
+import type { WalrusNetwork } from './config';
+import { ensurePathExists, hexToBytes } from './utils';
 
 export async function prepareWalrusFiles(options: {
   assetsDir: string;
