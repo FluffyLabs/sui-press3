@@ -14,7 +14,7 @@ module contract::press3 {
 
     public struct PageRecord has copy, store {
         path: String,
-        quit_id: String,
+        walrus_id: String,
         editors: vector<address>,
     }
 
@@ -24,7 +24,7 @@ module contract::press3 {
 
     public struct PageRegisteredEvent has copy, drop {
         path: String,
-        quit_id: String,
+        walrus_id: String,
         editors: vector<address>,
     }
 
