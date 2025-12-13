@@ -5,7 +5,8 @@ import type { Page } from "../types/page";
  * Fetches all pages from the contract with enriched metadata
  */
 export async function fetchPages(packageId: string): Promise<Page[]> {
-  return fetchEnrichedPages(packageId);
+  const { pages } = await fetchEnrichedPages(packageId);
+  return pages;
 }
 
 /**
@@ -15,7 +16,7 @@ export async function fetchPageById(
   packageId: string,
   id: string,
 ): Promise<Page | null> {
-  const pages = await fetchEnrichedPages(packageId);
+  const { pages } = await fetchEnrichedPages(packageId);
   return pages.find((page) => page.id === id) || null;
 }
 

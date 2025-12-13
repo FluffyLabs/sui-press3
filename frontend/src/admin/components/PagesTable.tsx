@@ -92,14 +92,17 @@ export function PagesTable({ pages, admins }: Props) {
               </td>
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <code
-                    className="text-[11px] text-gray-500 bg-gray-100 px-2 py-1 rounded font-mono flex-none cursor-copy"
+                  <button
+                    type="button"
+                    className="text-[11px] text-gray-500 bg-gray-100 px-2 py-1 rounded font-mono flex-none cursor-copy border-0"
                     onClick={() => copyToClipboard(page.walrusId, page.id)}
                     data-tooltip-id="walrus-tooltip"
-                    data-tooltip-content={copiedId === page.id ? "Copied" : "Copy to clipboard"}
+                    data-tooltip-content={
+                      copiedId === page.id ? "Copied" : "Copy to clipboard"
+                    }
                   >
                     {page.walrusId}
-                  </code>
+                  </button>
                   {page.previousWalrusId &&
                   typeof page.previousWalrusId === "string" ? (
                     <button
@@ -108,7 +111,7 @@ export function PagesTable({ pages, admins }: Props) {
                         copyToClipboard(
                           page.previousWalrusId as string,
                           `${page.id}-prev`,
-                      )
+                        )
                       }
                       className="bg-transparent border border-gray-300 rounded px-2 py-1 cursor-pointer text-gray-500 hover:bg-gray-50"
                     >
@@ -127,7 +130,9 @@ export function PagesTable({ pages, admins }: Props) {
                     <Badge
                       key={editor}
                       data-tooltip-id="editor-tooltip"
-                      data-tooltip-content={isAdmin(editor)? 'admin' : 'editor'}
+                      data-tooltip-content={
+                        isAdmin(editor) ? "admin" : "editor"
+                      }
                       className={
                         isAdmin(editor)
                           ? "bg-purple-100 text-purple-800 border-purple-300"

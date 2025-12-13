@@ -39,14 +39,11 @@ module contract::press3 {
         let admin = sui::tx_context::sender(ctx);
         let mut admins = vector::empty<address>();
         admins.push_back(admin);
-        let mut state = Press3 {
+        let state = Press3 {
             id: sui::object::new(ctx),
             admins,
             pages: vector::empty<PageRecord>(),
         };
-        state.register_page("/", "Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU", ctx);
-        state.register_page("/index.html", "Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU", ctx);
-        state.register_page("/article.md", "1uJVmO-79L9ZefNxKYJz8239OGFdNFgk9oXQZV5OBkg", ctx);
         event::emit(Press3InitializedEvent { admin });
         sui::transfer::share_object(state);
     }
