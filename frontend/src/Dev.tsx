@@ -101,7 +101,7 @@ function Dev() {
     content: string;
   } | null>(null);
   const [menu, setMenu] = useState<MenuSchema | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [tocItems, setTocItems] = useState<TocItem[]>([]);
 
   const activeEvent = useMemo(() => {
@@ -140,6 +140,21 @@ function Dev() {
     };
   }, [activeEvent]);
 
+  // Auto-hide sidebar when there are no TOC items, auto-show when items appear (on desktop)
+  useEffect(() => {
+    if (tocItems.length === 0) {
+      setIsSidebarOpen(false);
+    } else {
+      // On desktop, show sidebar when TOC items appear
+      const isDesktop = window.matchMedia(
+        `(min-width: ${DESKTOP_BREAKPOINT}px)`,
+      ).matches;
+      if (isDesktop) {
+        setIsSidebarOpen(true);
+      }
+    }
+  }, [tocItems]);
+
   useEffect(() => {
     if (!menuEvent) {
       return;
@@ -171,41 +186,32 @@ function Dev() {
   }, [menuEvent]);
 
   useEffect(() => {
-    const checkScreenSize = () => {
-      const isDesktop = window.matchMedia(
-        `(min-width: ${DESKTOP_BREAKPOINT}px)`,
-      ).matches;
-      setIsMenuOpen(isDesktop);
-    };
-
-    checkScreenSize();
-    window.addEventListener("resize", checkScreenSize);
-
-    return () => {
-      window.removeEventListener("resize", checkScreenSize);
-    };
+    const isDesktop = window.matchMedia(
+      `(min-width: ${DESKTOP_BREAKPOINT}px)`,
+    ).matches;
+    setIsSidebarOpen(isDesktop);
   }, []);
 
   return (
     <div className="app">
-      <Sidebar tocItems={tocItems} />
-      <div className="app-main">
+      <Sidebar tocItems={tocItems} isOpen={isSidebarOpen} />
+      <div className={`app-main ${!isSidebarOpen ? "sidebar-hidden" : ""}`}>
         <header>
           <div className="header-top">
-            <h1>Press3 Frontend Sandbox</h1>
-            {menu && menu.length > 0 && (
+            {tocItems.length > 0 && (
               <button
                 type="button"
                 className="hamburger"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                aria-label="Toggle menu"
-                aria-expanded={isMenuOpen}
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                aria-label="Toggle sidebar"
+                aria-expanded={isSidebarOpen}
               >
                 <span></span>
                 <span></span>
                 <span></span>
               </button>
             )}
+            <h1>Press3 Frontend Sandbox</h1>
           </div>
           <p>
             This Vite + React shell visualizes how the public renderer will map
@@ -213,7 +219,7 @@ function Dev() {
             assets.
           </p>
           {menu && menu.length > 0 && (
-            <Menu menu={menu} isOpen={isMenuOpen} currentPath={selectedPath} />
+            <Menu menu={menu} currentPath={selectedPath} />
           )}
         </header>
 

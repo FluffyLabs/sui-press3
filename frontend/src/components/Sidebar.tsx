@@ -4,9 +4,10 @@ import type { TocItem } from "../utils/rehype-collect-headings";
 
 interface Props {
   tocItems: TocItem[];
+  isOpen: boolean;
 }
 
-export const Sidebar = ({ tocItems }: Props) => {
+export const Sidebar = ({ tocItems, isOpen }: Props) => {
   const [activeId, setActiveId] = useState<string>("");
 
   // Track active heading on scroll
@@ -61,7 +62,7 @@ export const Sidebar = ({ tocItems }: Props) => {
   }
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? "sidebar-open" : ""}`}>
       <div className="sidebar-content">
         <h3 className="sidebar-title">Table of Contents</h3>
         <nav className="toc-nav">
