@@ -10,13 +10,13 @@ function normalizePath(path: string): string {
   // Remove hash and query parameters
   const withoutHash = path.split("#")[0];
   const withoutQuery = withoutHash.split("?")[0];
-  
+
   // Normalize: remove trailing slash except for root
   let normalized = withoutQuery;
   if (normalized !== "/" && normalized.endsWith("/")) {
     normalized = normalized.slice(0, -1);
   }
-  
+
   return normalized;
 }
 
@@ -35,7 +35,9 @@ export const Menu = ({ menu, isOpen, currentPath }: Props) => {
               <a
                 href={item.url}
                 target={item.target}
-                rel={item.target === "_blank" ? "noopener noreferrer" : undefined}
+                rel={
+                  item.target === "_blank" ? "noopener noreferrer" : undefined
+                }
                 className={isActive ? "active" : ""}
               >
                 {item.label}

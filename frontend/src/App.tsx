@@ -151,7 +151,9 @@ function App() {
 
   useEffect(() => {
     const checkScreenSize = () => {
-      const isDesktop = window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`).matches;
+      const isDesktop = window.matchMedia(
+        `(min-width: ${DESKTOP_BREAKPOINT}px)`,
+      ).matches;
       setIsMenuOpen(isDesktop);
     };
 
@@ -272,8 +274,8 @@ function App() {
             </div>
             <p className="preview-description">
               Replace this card with the actual Walrus fetch logic. The renderer
-              should hydrate menu JSON automatically and inject resolved
-              assets (CSS, images, etc.) after querying the contract.
+              should hydrate menu JSON automatically and inject resolved assets
+              (CSS, images, etc.) after querying the contract.
             </p>
           </div>
         ) : (
