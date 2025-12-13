@@ -1,21 +1,13 @@
-import "@fluffylabs/shared-ui/theme.css";
-import "@fluffylabs/shared-ui/style.css";
-import { Alert, Badge, Button, Header } from "@fluffylabs/shared-ui";
+import { Alert, Badge, Button } from "@fluffylabs/shared-ui";
 import { useEffect, useState } from "react";
+import { usePress3 } from "../providers/Press3Provider";
+import { fetchEnrichedPages } from "../services/enrichedPages";
+import { AdminLayout } from "./components/AdminLayout";
 import { PagesTable } from "./components/PagesTable";
-import { fetchPages } from "./services/pages";
 import type { Page } from "./types/page";
 
-// Simple SVG logo as data URL
-const LOGO_SVG = `data:image/svg+xml,${encodeURIComponent(`
-  <svg width="120" height="32" xmlns="http://www.w3.org/2000/svg">
-    <text x="0" y="24" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#3b82f6">
-      Press3
-    </text>
-  </svg>
-`)}`;
-
 function Admin() {
+  const { packageId } = usePress3();
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,7 +15,7 @@ function Admin() {
     const loadPages = async () => {
       setLoading(true);
       try {
-        const fetchedPages = await fetchPages();
+        const fetchedPages = await fetchEnrichedPages(packageId);
         setPages(fetchedPages);
       } catch (error) {
         console.error("Failed to load pages:", error);
@@ -33,50 +25,46 @@ function Admin() {
     };
 
     loadPages();
-  }, []);
+  }, [packageId]);
 
   return (
-    <div>
-      <Header
-        toolNameSrc={LOGO_SVG}
-        ghRepoName="FluffyLabs/sui-press3"
-        endSlot={<Button>Create New Page</Button>}
-      />
-      <div style={{ padding: "40px", maxWidth: "1200px", margin: "0 auto" }}>
-        <Alert style={{ marginBottom: "30px" }}>
-          <p>
-            Manage your decentralized content. All pages are stored on Walrus
-            and indexed via SUI smart contracts.
-          </p>
-        </Alert>
+    <AdminLayout
+      headerEndSlot={<Button className="mr-4">Create New Page</Button>}
+    >
+      <Alert className="my-4">
+        <p>
+          All pages are stored on Walrus and path to blob id is stored in SUI
+          smart contracts.
+        </p>
+      </Alert>
 
-        <div style={{ marginBottom: "20px" }}>
-          <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-            <Badge>{pages.length} Total Pages</Badge>
+      <div className="mb-5">
+        <div className="flex gap-2.5 mb-5">
+          <Badge>{pages.length} Total Pages</Badge>
+          <a
+            href={`https://suiscan.xyz/testnet/object/${packageId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="no-underline"
+            title={`View package on Suiscan: ${packageId}`}
+          >
             <Badge>
-              {pages.reduce((sum, p) => sum + p.editors.length, 0)} Total
-              Editors
+              Package: {packageId.slice(0, 6)}...{packageId.slice(-4)}
             </Badge>
-          </div>
+          </a>
         </div>
-
-        {loading ? (
-          <div
-            style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}
-          >
-            Loading pages...
-          </div>
-        ) : pages.length === 0 ? (
-          <div
-            style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}
-          >
-            No pages found. Create your first page to get started.
-          </div>
-        ) : (
-          <PagesTable pages={pages} />
-        )}
       </div>
-    </div>
+
+      {loading ? (
+        <div className="p-10 text-center text-gray-500">Loading pages...</div>
+      ) : pages.length === 0 ? (
+        <div className="p-10 text-center text-gray-500">
+          No pages found. Create your first page to get started.
+        </div>
+      ) : (
+        <PagesTable pages={pages} />
+      )}
+    </AdminLayout>
   );
 }
 
