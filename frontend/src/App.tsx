@@ -9,7 +9,12 @@ const DEFAULT_PACKAGE_ID =
   "0xc394806a04aca8aecae8f8550d1a535f8d880924444da2bca0c8066e11e88ca5";
 
 function getPackageId(): string {
-  return localStorage.getItem("press3_package_id") ?? DEFAULT_PACKAGE_ID;
+  // Priority: localStorage > env variable > hardcoded default
+  return (
+    localStorage.getItem("press3_package_id") ??
+    import.meta.env.VITE_PRESS3_PACKAGE_ID ??
+    DEFAULT_PACKAGE_ID
+  );
 }
 
 function App() {
