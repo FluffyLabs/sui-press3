@@ -132,3 +132,28 @@
     opacity: 1;
   }
 }
+
+.not-found-code {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
+  pointer-events: none;
+}
+
+.not-found-path {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.not-found-path span {
+  color: #0f172a;
+  font-weight: 600;
+}
