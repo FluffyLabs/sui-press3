@@ -1,6 +1,6 @@
 #[test_only]
 module contract::press3_test {
-    use contract::press3::{Self, Press3, E_CANNOT_REMOVE_SELF, E_ADMIN_NOT_FOUND, E_EDITOR_NOT_FOUND};
+    use contract::press3::{Self, Press3, E_NOT_ADMIN, E_CANNOT_REMOVE_SELF, E_ADMIN_NOT_FOUND, E_EDITOR_NOT_FOUND};
     use std::string;
     use sui::test_scenario;
 
@@ -255,7 +255,8 @@ module contract::press3_test {
     }
 
     #[test]
-    fun test_editor_can_add_another_editor() {
+    #[expected_failure(abort_code = E_NOT_ADMIN)]
+    fun test_editor_cannot_add_another_editor() {
         let mut scenario = test_scenario::begin(ADMIN);
 
         // Initialize
@@ -279,7 +280,7 @@ module contract::press3_test {
             test_scenario::return_shared(state);
         };
 
-        // EDITOR adds NEW_EDITOR
+        // EDITOR try adds NEW_EDITOR
         test_scenario::next_tx(&mut scenario, EDITOR);
         {
             let mut state = test_scenario::take_shared<Press3>(&scenario);

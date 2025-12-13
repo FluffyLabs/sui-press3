@@ -137,8 +137,7 @@ module contract::press3 {
 
         // Check if sender is admin or existing editor
         let is_admin = state.admins.contains(&sender);
-        let is_editor = page.editors.contains(&sender);
-        assert!(is_admin || is_editor, E_NOT_EDITOR);
+        assert!(is_admin, E_NOT_ADMIN);
 
         // Add editor if not already in the list
         if (!page.editors.contains(&new_editor)) {
@@ -159,8 +158,7 @@ module contract::press3 {
 
         // Check if sender is admin or existing editor
         let is_admin = state.admins.contains(&sender);
-        let is_editor = page.editors.contains(&sender);
-        assert!(is_admin || is_editor, E_NOT_EDITOR);
+        assert!(is_admin, E_NOT_ADMIN);
 
         // Prevent self-removal
         assert!(sender != editor_to_remove, E_CANNOT_REMOVE_SELF);
