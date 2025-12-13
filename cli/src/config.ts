@@ -1,8 +1,9 @@
 export type WalrusNetwork = 'testnet' | 'mainnet';
+export type SuiNetwork = 'testnet' | 'mainnet';
 
 export const SUPPORTED_NETWORKS: WalrusNetwork[] = ['testnet', 'mainnet'];
 
-function getWalrusNetwork(): WalrusNetwork {
+function getSuiWalrusNetwork(): WalrusNetwork {
   const network = process.env.WALRUS_NETWORK || 'testnet';
   if (!SUPPORTED_NETWORKS.includes(network as WalrusNetwork)) {
     throw new Error(
@@ -32,9 +33,10 @@ export const DEFAULT_CONFIG = {
   quiltEntry: 'dist/index.html',
   quiltAssetsDir: 'dist',
   walrus: {
+    // TODO: rename to client
     secret: process.env.WALRUS_PUBLISH_SECRET || '',
     epochs: getWalrusEpochs(),
-    network: getWalrusNetwork(),
+    network: getSuiWalrusNetwork(),
     deletable: true,
   },
 };

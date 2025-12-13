@@ -1,5 +1,6 @@
 import { handleContract } from './cmd-contract';
 import { handleDeploy } from './cmd-deploy';
+import { handleInit } from './cmd-init';
 import { handlePublish } from './cmd-publish';
 import { handleRetrieve } from './cmd-retrieve';
 import { logStep } from './logger';
@@ -12,6 +13,7 @@ type Command =
   | 'assign-domain'
   | 'renew'
   | 'index'
+  | 'init'
   | 'help';
 
 type ParsedArgs = {
@@ -20,7 +22,7 @@ type ParsedArgs = {
 };
 
 const HELP_TEXT = `
-Press3 CLI (Bun)
+Press3 CLI
 
 Usage:
   press3 <command> [options]
@@ -30,6 +32,7 @@ Commands:
   publish        Upload a single file to Walrus and get the blob ID
   retrieve       Download a blob from Walrus by blob ID
   contract       Build and publish the Move contract to SUI
+  init           Build and publish Press3 contract, upload frontend to walrus and initialize home page
   assign-domain  Attach a DNS/NS record to a Walrus site
   renew          Proactively renew Walrus blobs for a deployment
   index          Build the off-chain search index and publish it
@@ -49,6 +52,11 @@ Retrieve options:
 
 Contract options:
   --use-cli          Use sui CLI instead of SDK with WALRUS_PUBLISH_SECRET
+
+Init options:
+  --home             Walrus Blob ID to set as homepage (required)
+  --demo             Setup initial homepage, index.html and article.md (ignores flag --home)
+  --output           Path to save the configuration file (default: press3.init.log)
 `;
 
 function parseArgs(argv: string[]): ParsedArgs {
@@ -81,6 +89,7 @@ function parseArgs(argv: string[]): ParsedArgs {
       'assign-domain',
       'renew',
       'index',
+      'init',
     ].includes(command)
       ? (command as Command)
       : 'help',
@@ -111,6 +120,9 @@ export async function run() {
       break;
     case 'index':
       await handleIndex(flags);
+      break;
+    case 'init':
+      await handleInit(flags);
       break;
     default:
       console.log(HELP_TEXT.trim());

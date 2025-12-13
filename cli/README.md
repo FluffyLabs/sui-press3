@@ -5,12 +5,20 @@ Utility entry point for automating deployments, renewals, and indexing for the P
 ## Commands
 
 ```bash
+# Initialize Press3 (build contract, deploy frontend, register homepage)
+bun run press3 init
+bun run press3 init --output custom-config.log  # Save config to custom location
+
 # Deploy frontend to Walrus
 bun run press3 deploy
 bun run press3 deploy --use-cli  # Deploy using site-builder instead of SDK
 
 # Publish a single file to Walrus
 bun run press3 publish --file path/to/file.txt
+
+# Retrieve a blob from Walrus
+bun run press3 retrieve --blob-id <blob-id>
+bun run press3 retrieve --blob-id <blob-id> --output path/to/save.txt
 
 # Build and publish the Move contract to SUI
 bun run press3 contract                  # Uses SDK with WALRUS_PUBLISH_SECRET (default)
@@ -27,7 +35,17 @@ bun run press3 renew --batch-size 50 --dry-run
 bun run press3 index --output dist/search-index.json
 ```
 
-Each command logs its actions. The `contract` command is fully implemented and can publish Move packages to SUI networks.
+### Command Details
+
+**init** - Complete initialization workflow that:
+- Builds and deploys the frontend to Walrus
+- Builds and publishes the Move smart contract to SUI
+- Registers the homepage with the Walrus blob
+- Saves configuration (package ID, Press3 object ID, Walrus blob ID) to a log file
+
+**retrieve** - Downloads a blob from Walrus by blob ID. If `--output` is specified, saves to a file; otherwise prints to stdout.
+
+Each command logs its actions. The `contract` and `init` commands are fully implemented and can publish Move packages to SUI networks.
 
 ## Configuration
 
