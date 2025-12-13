@@ -3,6 +3,7 @@ import Admin from "./admin/Admin";
 import { PageEditor } from "./admin/components/PageEditor";
 import Dev from "./Dev";
 import { Page } from "./Page";
+import { LayoutProvider } from "./providers/LayoutProvider";
 import { Press3Provider } from "./providers/Press3Provider";
 
 const DEFAULT_PACKAGE_ID =
@@ -21,12 +22,14 @@ function App() {
   return (
     <Press3Provider packageId={getPackageId()}>
       <HashRouter>
-        <Routes>
-          <Route path="/dev" element={<Dev />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/edit/:pageId" element={<PageEditor />} />
-          <Route path="*" element={<Page />} />
-        </Routes>
+        <LayoutProvider>
+          <Routes>
+            <Route path="/dev" element={<Dev />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/edit/:pageId" element={<PageEditor />} />
+            <Route path="*" element={<Page />} />
+          </Routes>
+        </LayoutProvider>
       </HashRouter>
     </Press3Provider>
   );
