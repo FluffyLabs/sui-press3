@@ -1,5 +1,4 @@
 module contract::press3 {
-    use std::string;
     use std::string::String;
     use sui::event;
 
@@ -54,26 +53,15 @@ module contract::press3 {
         init(ctx);
     }
 
-    /// Registers a top-level page path and associated Walrus blob identifier.
-    /// For now this function simply stores records in a vector; follow-up work
-    /// will replace this with real permission checks and data structures.
-    public fun register_top_level(
+    entry fun register_page(
         state: &mut Press3,
         path: String,
         walrus_id: String,
         ctx: &mut sui::tx_context::TxContext,
     ) {
         assert_admin(state, ctx);
-        assert!(is_top_level(&path), E_NOT_ADMIN);
 
-        let editor = sui::tx_context::sender(ctx);
-        let mut editors = vector::empty<address>();
-        editors.push_back(editor);
-
-        let path_for_event = path;
-        let walrus_for_event = walrus_id;
-        let editors_for_event = editors;
-
+        let editors = vector::empty<address>();
         vector::push_back(
             &mut state.pages,
             PageRecord {
@@ -84,19 +72,24 @@ module contract::press3 {
         );
 
         event::emit(PageRegisteredEvent {
-            path: path_for_event,
-            walrus_id: walrus_for_event,
-            editors: editors_for_event,
+            path,
+            walrus_id,
+            editors,
         });
     }
 
     /// Returns the configured admins for off-chain tooling.
-    public fun admins(state: &Press3): vector<address> {
+    entry fun admins(state: &Press3): vector<address> {
         state.admins
     }
 
+    /// Returns the number of registered pages.
+    entry fun pages_count(state: &Press3): u64 {
+        state.pages.length()
+    }
+
     /// Returns the configured editors for off-chain tooling. Sanity checks if we query the right page.
-    public fun editors(state: &Press3, page_index: u64, page_path: String): vector<address> {
+    entry fun editors(state: &Press3, page_index: u64, page_path: String): vector<address> {
         let page = vector::borrow(&state.pages, page_index);
         assert!(page.path == page_path, E_INVALID_PAGE_PATH);
         page.editors
@@ -107,7 +100,7 @@ module contract::press3 {
     }
 
     /// Sets admins. Only existing admins can set admins.
-    public fun set_admin(
+    entry fun set_admin(
         state: &mut Press3,
         new_admins: vector<address>,
         ctx: &mut sui::tx_context::TxContext,
@@ -117,7 +110,7 @@ module contract::press3 {
     }
 
     /// Set editors to a specific page. Only admins can set editors.
-    public fun set_editor(
+    entry fun set_editor(
         state: &mut Press3,
         page_index: u64,
         page_path: String,
@@ -131,7 +124,7 @@ module contract::press3 {
     }
 
     /// Updates the walrus_id for a specific page. Only admins and editors can update.
-    public fun update_page_walrus_id(
+    entry fun update_page_walrus_id(
         state: &mut Press3,
         page_index: u64,
         page_path: String,
@@ -154,29 +147,5 @@ module contract::press3 {
             old_walrus_id,
             new_walrus_id,
         });
-    }
-
-    /// A naive helper that ensures the provided path represents `/foo` style
-    /// top-level routes. This helps the MVP enforce admin-only registration.
-    fun is_top_level(path: &String): bool {
-        let bytes = string::as_bytes(path);
-        let len = vector::length(bytes);
-        if (len < 2) {
-            return false
-        };
-
-        if (*vector::borrow(bytes, 0) != 47) {
-            return false
-        };
-
-        let mut i = 1;
-        while (i < len) {
-            if (*vector::borrow(bytes, i) == 47) {
-                return false
-            };
-            i = i + 1;
-        };
-
-        true
     }
 }

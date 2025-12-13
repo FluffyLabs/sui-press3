@@ -166,11 +166,11 @@ Create domain-specific utility modules for reusable functionality:
 
 ### SDK vs CLI Pattern
 
-Commands that interact with external services should support both CLI and SDK approaches:
+Commands that interact with external services should support both SDK (default) and CLI approaches:
 
 ```ts
-if (!useSdk) {
-  logStep('Action', 'Using CLI tool. Use --use-sdk for SDK approach');
+if (useCli) {
+  logStep('Action', 'Using CLI tool. As an alternative use SDK (default)');
   await performActionWithCli();
 } else {
   logStep('Action', 'Using SDK...');
@@ -178,13 +178,13 @@ if (!useSdk) {
 }
 ```
 
-- **CLI approach**: Uses external tools (e.g., `sui client publish`)
-  - Pros: Simple, uses user's existing configuration
-  - Cons: Requires external tools to be installed
-
-- **SDK approach**: Uses JavaScript SDKs with `WALRUS_PUBLISH_SECRET`
+- **SDK approach** (default): Uses JavaScript SDKs with `WALRUS_PUBLISH_SECRET`
   - Pros: Self-contained, works in CI/CD without configuration
   - Cons: Requires secret management
+
+- **CLI approach**: Uses external tools (e.g., `sui client publish`) via `--use-cli` flag
+  - Pros: Simple, uses user's existing configuration
+  - Cons: Requires external tools to be installed
 
 ### Type Safety
 

@@ -11,7 +11,7 @@ import {
 
 export async function handleDeploy(flags: Record<string, string | boolean>) {
   const dryRun = Boolean(flags['dry-run']);
-  const useSdk = Boolean(flags['use-sdk']);
+  const useCli = Boolean(flags['use-cli']);
 
   const config = DEFAULT_CONFIG;
   logStep(
@@ -36,10 +36,10 @@ export async function handleDeploy(flags: Record<string, string | boolean>) {
     return;
   }
 
-  if (!useSdk) {
+  if (useCli) {
     logStep(
       'Deploy',
-      'Deploying using site-builder. As an alternative --use-sdk'
+      'Deploying using site-builder. As an alternative use SDK (default)'
     );
     await Bun.$`site-builder --context=${config.walrus.network} deploy ${quiltAssetsDir} --epochs ${config.walrus.epochs} ${config.walrus.deletable ? '' : '--permanent'}`;
     return;
@@ -73,7 +73,10 @@ export async function handleDeploy(flags: Record<string, string | boolean>) {
   // Still need to figure out how to do the rest, but currently the example is
   // useful to show how to deploy to walrus.
   //
-  logStep('Deploy', 'Site registration not implemented yet.');
+  logStep(
+    'Deploy',
+    'Site registration not implemented yet. --use-cli to use site builder instead'
+  );
 }
 
 async function buildFrontend(frontendDir: string) {
