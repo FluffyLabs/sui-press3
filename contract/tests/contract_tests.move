@@ -12,6 +12,214 @@ module contract::press3_test {
     const NON_ADMIN: address = @0xBAD;
 
     #[test]
+    fun test_register_page() {
+        let mut scenario = test_scenario::begin(ADMIN);
+
+        // Initialize
+        {
+            press3::init_for_testing(test_scenario::ctx(&mut scenario));
+        };
+
+        // Register a top-level page
+        test_scenario::next_tx(&mut scenario, ADMIN);
+        {
+            let mut state = test_scenario::take_shared<Press3>(&scenario);
+            press3::register_page(
+                &mut state,
+                string::utf8(b"/about"),
+                string::utf8(b"walrus_blob_123"),
+                test_scenario::ctx(&mut scenario)
+            );
+
+            assert!(press3::pages_count(&state) == 1, 0);
+
+            test_scenario::return_shared(state);
+        };
+
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = E_NOT_ADMIN)]
+    fun test_non_admin_cannot_register_page() {
+        let mut scenario = test_scenario::begin(ADMIN);
+
+        // Initialize
+        {
+            press3::init_for_testing(test_scenario::ctx(&mut scenario));
+        };
+
+        // Non-admin tries to register a page (should fail)
+        test_scenario::next_tx(&mut scenario, NON_ADMIN);
+        {
+            let mut state = test_scenario::take_shared<Press3>(&scenario);
+            press3::register_page(
+                &mut state,
+                string::utf8(b"/test"),
+                string::utf8(b"blob123"),
+                test_scenario::ctx(&mut scenario)
+            );
+            test_scenario::return_shared(state);
+        };
+
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    fun test_register_multiple_pages() {
+        let mut scenario = test_scenario::begin(ADMIN);
+
+        // Initialize
+        {
+            press3::init_for_testing(test_scenario::ctx(&mut scenario));
+        };
+
+        // Register first page
+        test_scenario::next_tx(&mut scenario, ADMIN);
+        {
+            let mut state = test_scenario::take_shared<Press3>(&scenario);
+            press3::register_page(
+                &mut state,
+                string::utf8(b"/home"),
+                string::utf8(b"homepage_blob"),
+                test_scenario::ctx(&mut scenario)
+            );
+
+            // Verify first page was added
+            assert!(press3::pages_count(&state) == 1, 0);
+
+            test_scenario::return_shared(state);
+        };
+
+        // Register second page
+        test_scenario::next_tx(&mut scenario, ADMIN);
+        {
+            let mut state = test_scenario::take_shared<Press3>(&scenario);
+            press3::register_page(
+                &mut state,
+                string::utf8(b"/blog"),
+                string::utf8(b"blog_blob"),
+                test_scenario::ctx(&mut scenario)
+            );
+
+            // Verify second page was added
+            assert!(press3::pages_count(&state) == 2, 1);
+
+            test_scenario::return_shared(state);
+        };
+
+        // Register third page
+        test_scenario::next_tx(&mut scenario, ADMIN);
+        {
+            let mut state = test_scenario::take_shared<Press3>(&scenario);
+            press3::register_page(
+                &mut state,
+                string::utf8(b"/contact"),
+                string::utf8(b"contact_blob"),
+                test_scenario::ctx(&mut scenario)
+            );
+
+            // Verify all three pages were added
+            assert!(press3::pages_count(&state) == 3, 2);
+
+            test_scenario::return_shared(state);
+        };
+
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    fun test_update_page_changes_walrus_id() {
+        let mut scenario = test_scenario::begin(ADMIN);
+
+        // Initialize
+        {
+            press3::init_for_testing(test_scenario::ctx(&mut scenario));
+        };
+
+        // Register a page with initial walrus_id
+        test_scenario::next_tx(&mut scenario, ADMIN);
+        {
+            let mut state = test_scenario::take_shared<Press3>(&scenario);
+            press3::register_page(
+                &mut state,
+                string::utf8(b"/docs"),
+                string::utf8(b"original_blob_id"),
+                test_scenario::ctx(&mut scenario)
+            );
+
+            // Verify page was added
+            assert!(press3::pages_count(&state) == 1, 0);
+
+            test_scenario::return_shared(state);
+        };
+
+        // Update the page with new walrus_id
+        test_scenario::next_tx(&mut scenario, ADMIN);
+        {
+            let mut state = test_scenario::take_shared<Press3>(&scenario);
+            press3::update_page_walrus_id(
+                &mut state,
+                0,
+                string::utf8(b"/docs"),
+                string::utf8(b"updated_blob_id"),
+                test_scenario::ctx(&mut scenario)
+            );
+
+            // Verify length unchanged after update
+            assert!(press3::pages_count(&state) == 1, 1);
+
+            test_scenario::return_shared(state);
+        };
+
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = E_INVALID_PAGE_PATH)]
+    fun test_update_page_wrong_path_fails() {
+        let mut scenario = test_scenario::begin(ADMIN);
+
+        // Initialize
+        {
+            press3::init_for_testing(test_scenario::ctx(&mut scenario));
+        };
+
+        // Register a page
+        test_scenario::next_tx(&mut scenario, ADMIN);
+        {
+            let mut state = test_scenario::take_shared<Press3>(&scenario);
+            press3::register_page(
+                &mut state,
+                string::utf8(b"/about"),
+                string::utf8(b"about_blob"),
+                test_scenario::ctx(&mut scenario)
+            );
+
+            // Verify page was added
+            assert!(press3::pages_count(&state) == 1, 0);
+
+            test_scenario::return_shared(state);
+        };
+
+        // Try to update with wrong path (should fail)
+        test_scenario::next_tx(&mut scenario, ADMIN);
+        {
+            let mut state = test_scenario::take_shared<Press3>(&scenario);
+            press3::update_page_walrus_id(
+                &mut state,
+                0,
+                string::utf8(b"/wrong_path"),
+                string::utf8(b"new_blob"),
+                test_scenario::ctx(&mut scenario)
+            );
+            test_scenario::return_shared(state);
+        };
+
+        test_scenario::end(scenario);
+    }
+
+    #[test]
     fun test_set_admin() {
         let mut scenario = test_scenario::begin(ADMIN);
 
@@ -78,7 +286,7 @@ module contract::press3_test {
         test_scenario::next_tx(&mut scenario, ADMIN);
         {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
-            press3::register_top_level(
+            press3::register_page(
                 &mut state,
                 string::utf8(b"/test"),
                 string::utf8(b"blob123"),
@@ -128,7 +336,7 @@ module contract::press3_test {
         test_scenario::next_tx(&mut scenario, ADMIN);
         {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
-            press3::register_top_level(
+            press3::register_page(
                 &mut state,
                 string::utf8(b"/test"),
                 string::utf8(b"blob123"),
@@ -169,7 +377,7 @@ module contract::press3_test {
         test_scenario::next_tx(&mut scenario, ADMIN);
         {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
-            press3::register_top_level(
+            press3::register_page(
                 &mut state,
                 string::utf8(b"/test"),
                 string::utf8(b"blob123"),
@@ -209,7 +417,7 @@ module contract::press3_test {
         test_scenario::next_tx(&mut scenario, ADMIN);
         {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
-            press3::register_top_level(
+            press3::register_page(
                 &mut state,
                 string::utf8(b"/test"),
                 string::utf8(b"blob123"),
@@ -248,7 +456,7 @@ module contract::press3_test {
         test_scenario::next_tx(&mut scenario, ADMIN);
         {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
-            press3::register_top_level(
+            press3::register_page(
                 &mut state,
                 string::utf8(b"/test"),
                 string::utf8(b"blob123"),
@@ -303,7 +511,7 @@ module contract::press3_test {
         test_scenario::next_tx(&mut scenario, ADMIN);
         {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
-            press3::register_top_level(
+            press3::register_page(
                 &mut state,
                 string::utf8(b"/test"),
                 string::utf8(b"blob123"),

@@ -54,26 +54,15 @@ module contract::press3 {
         init(ctx);
     }
 
-    /// Registers a top-level page path and associated Walrus blob identifier.
-    /// For now this function simply stores records in a vector; follow-up work
-    /// will replace this with real permission checks and data structures.
-    public fun register_top_level(
+    public fun register_page(
         state: &mut Press3,
         path: String,
         walrus_id: String,
         ctx: &mut sui::tx_context::TxContext,
     ) {
         assert_admin(state, ctx);
-        assert!(is_top_level(&path), E_NOT_ADMIN);
 
-        let editor = sui::tx_context::sender(ctx);
-        let mut editors = vector::empty<address>();
-        editors.push_back(editor);
-
-        let path_for_event = path;
-        let walrus_for_event = walrus_id;
-        let editors_for_event = editors;
-
+        let editors = vector::empty<address>();
         vector::push_back(
             &mut state.pages,
             PageRecord {
@@ -84,15 +73,20 @@ module contract::press3 {
         );
 
         event::emit(PageRegisteredEvent {
-            path: path_for_event,
-            walrus_id: walrus_for_event,
-            editors: editors_for_event,
+            path,
+            walrus_id,
+            editors,
         });
     }
 
     /// Returns the configured admins for off-chain tooling.
     public fun admins(state: &Press3): vector<address> {
         state.admins
+    }
+
+    /// Returns the number of registered pages.
+    public fun pages_count(state: &Press3): u64 {
+        state.pages.length()
     }
 
     /// Returns the configured editors for off-chain tooling. Sanity checks if we query the right page.
@@ -154,29 +148,5 @@ module contract::press3 {
             old_walrus_id,
             new_walrus_id,
         });
-    }
-
-    /// A naive helper that ensures the provided path represents `/foo` style
-    /// top-level routes. This helps the MVP enforce admin-only registration.
-    fun is_top_level(path: &String): bool {
-        let bytes = string::as_bytes(path);
-        let len = vector::length(bytes);
-        if (len < 2) {
-            return false
-        };
-
-        if (*vector::borrow(bytes, 0) != 47) {
-            return false
-        };
-
-        let mut i = 1;
-        while (i < len) {
-            if (*vector::borrow(bytes, i) == 47) {
-                return false
-            };
-            i = i + 1;
-        };
-
-        true
     }
 }
