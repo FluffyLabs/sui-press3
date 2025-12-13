@@ -19,8 +19,5 @@ export async function getFile(blobId: string): Promise<string> {
   const client = getWalrusClient();
   const blob = await client.getBlob({ blobId });
   const files = await blob.files();
-  console.log("blob", blob);
-  console.log("files", files.map((x) => x.text()));
-  const [file] = await client.getFiles({ ids: [blobId] });
-  return file.text();
+  return files[0].text();
 }
