@@ -1,11 +1,21 @@
-import { promises as fs } from 'node:fs';
 import { join } from 'node:path';
-import { getFullnodeUrl, SuiClient } from '@mysten/sui/client';
-import { Transaction } from '@mysten/sui/transactions';
 import type { WalrusNetwork } from './config';
 import { DEFAULT_CONFIG } from './config';
 import { logStep } from './logger';
+import {
+  buildMoveContract,
+  createSuiClient,
+  extractPackageId,
+  getSuiscanUrl,
+  publishMovePackage,
+  publishMovePackageWithCli,
+  readCompiledModules,
+  readPackageDependencies,
+  type SuiPublishResult,
+} from './sui';
 import { loadPublisherKeypair } from './walrus';
+
+const CONTRACT_PACKAGE_NAME = 'contract';
 
 export async function handleContract(flags: Record<string, string | boolean>) {
   const dryRun = Boolean(flags['dry-run']);
@@ -21,14 +31,7 @@ export async function handleContract(flags: Record<string, string | boolean>) {
 
   // Build the contract
   logStep('Contract', 'Building Move contract...');
-  const buildResult = await Bun.$`sui move build`.cwd(contractDir).quiet();
-
-  if (buildResult.exitCode !== 0) {
-    throw new Error(
-      `Failed to build contract: ${buildResult.stderr.toString()}`
-    );
-  }
-
+  await buildMoveContract(contractDir);
   logStep('Contract', 'Build successful');
 
   if (dryRun) {
@@ -41,139 +44,44 @@ export async function handleContract(flags: Record<string, string | boolean>) {
       'Contract',
       'Publishing using sui CLI. As an alternative use --use-sdk'
     );
-    await publishWithCli(contractDir, network);
+    const result = await publishMovePackageWithCli(contractDir);
+    displayPublishResult(result, network);
     return;
   }
 
   logStep('Contract', 'Publishing using SDK...');
-  await publishWithSdk(contractDir, network, config.walrus.secret);
-}
-
-async function publishWithCli(contractDir: string, network: WalrusNetwork) {
-  const publishResult =
-    await Bun.$`sui client publish --json --skip-dependency-verification`
-      .cwd(contractDir)
-      .quiet();
-
-  if (publishResult.exitCode !== 0) {
-    throw new Error(
-      `Failed to publish contract: ${publishResult.stderr.toString()}`
-    );
-  }
-
-  // Parse the JSON output
-  const output = JSON.parse(publishResult.stdout.toString()) as PublishOutput;
-  const digest = output.digest;
-  const packageId = extractPackageId(output);
-
-  const suiscanUrl = getSuiscanUrl(network, digest);
-
-  logStep('Contract', 'Contract published successfully');
-  console.log(`Package ID: ${packageId}`);
-  console.log(`Transaction: ${suiscanUrl}`);
-}
-
-async function publishWithSdk(
-  contractDir: string,
-  network: WalrusNetwork,
-  secret: string
-) {
-  const signer = await loadPublisherKeypair(secret);
+  const signer = await loadPublisherKeypair(config.walrus.secret);
   logStep('Contract', `Using signer: ${signer.toSuiAddress()}`);
 
-  const client = new SuiClient({ url: getFullnodeUrl(network) });
-
-  // Read compiled modules from build directory
-  const buildDir = join(contractDir, 'build/contract/bytecode_modules');
-  const moduleFiles = await fs.readdir(buildDir);
-
-  const modules = await Promise.all(
-    moduleFiles
-      .filter((file) => file.endsWith('.mv'))
-      .map(async (file) => {
-        const modulePath = join(buildDir, file);
-        const moduleBytes = await fs.readFile(modulePath);
-        return Array.from(moduleBytes);
-      })
+  const client = createSuiClient(network);
+  const modules = await readCompiledModules(contractDir, CONTRACT_PACKAGE_NAME);
+  const dependencies = await readPackageDependencies(
+    contractDir,
+    CONTRACT_PACKAGE_NAME
   );
 
-  if (modules.length === 0) {
-    throw new Error('No compiled modules found in build directory');
+  logStep('Contract', `Found ${modules.length} module(s) to publish`);
+  if (dependencies.length > 0) {
+    logStep('Contract', `Dependencies: ${dependencies.join(', ')}`);
   }
 
-  logStep('Contract', `Found ${modules.length} module(s) to publish`);
-
-  // Create publish transaction
-  const tx = new Transaction();
-  const upgradeCap = tx.publish({
-    modules,
-    dependencies: [],
-  });
-  tx.transferObjects([upgradeCap], tx.pure.address(signer.toSuiAddress()));
-
-  // Execute transaction
-  const result = await client.signAndExecuteTransaction({
-    transaction: tx,
+  const result = await publishMovePackage({
+    client,
     signer,
-    options: {
-      showEffects: true,
-      showObjectChanges: true,
-    },
+    modules,
+    dependencies,
   });
+  displayPublishResult(result, network);
+}
 
-  const digest = result.digest;
-  const packageId = extractPackageIdFromSdk(result);
-
-  const suiscanUrl = getSuiscanUrl(network, digest);
+function displayPublishResult(
+  result: SuiPublishResult,
+  network: WalrusNetwork
+) {
+  const packageId = extractPackageId(result);
+  const suiscanUrl = getSuiscanUrl(network, result.digest);
 
   logStep('Contract', 'Contract published successfully');
   console.log(`Package ID: ${packageId}`);
   console.log(`Transaction: ${suiscanUrl}`);
-}
-
-interface PublishOutput {
-  digest: string;
-  objectChanges?: Array<{
-    type: string;
-    packageId?: string;
-  }>;
-}
-
-interface SdkPublishResult {
-  digest: string;
-  objectChanges?: Array<{
-    type: string;
-    packageId?: string;
-  }> | null;
-}
-
-function extractPackageId(output: PublishOutput): string {
-  // The package ID is in the objectChanges array with type "published"
-  const published = output.objectChanges?.find(
-    (change) => change.type === 'published'
-  );
-
-  if (!published?.packageId) {
-    throw new Error('Could not find published package in transaction output');
-  }
-
-  return published.packageId;
-}
-
-function extractPackageIdFromSdk(result: SdkPublishResult): string {
-  // The package ID is in the objectChanges array with type "published"
-  const published = result.objectChanges?.find(
-    (change: { type: string; packageId?: string }) =>
-      change.type === 'published'
-  );
-
-  if (!published?.packageId) {
-    throw new Error('Could not find published package in transaction result');
-  }
-
-  return published.packageId;
-}
-
-function getSuiscanUrl(network: WalrusNetwork, digest: string): string {
-  return `https://suiscan.xyz/${network}/tx/${digest}`;
 }
