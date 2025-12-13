@@ -34,7 +34,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
   const config = DEFAULT_CONFIG;
   logStep(
     'Init',
-    `Initializing Press3 on ${config.sui.network}`
+    `Initializing Press3 on ${config.walrus.network}`
   );
 
   // Step 1: Build and deploy frontend to Walrus
@@ -90,7 +90,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
   );
 
   logStep('Init', 'Publishing smart contract...');
-  const suiClient = createSuiClient(config.sui.network);
+  const suiClient = createSuiClient(config.walrus.network);
 
   const publishResult = await publishMovePackage({
     client: suiClient,
@@ -107,7 +107,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
     `Contract published:\n` +
       `  Package ID: ${packageId}\n` +
       `  Press3 Object: ${press3ObjectId}\n` +
-      `  Transaction: ${getSuiscanUrl(config.sui.network, publishResult.digest)}`
+      `  Transaction: ${getSuiscanUrl(config.walrus.network, publishResult.digest)}`
   );
 
   // Step 3: Register homepage with Walrus blob
@@ -124,7 +124,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
   logStep(
     'Init',
     `Homepage registered successfully!\n` +
-      `  Transaction: ${getSuiscanUrl(config.sui.network, registerResult.digest)}`
+      `  Transaction: ${getSuiscanUrl(config.walrus.network, registerResult.digest)}`
   );
 
   // Step 4: Write config file
@@ -132,7 +132,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
     walrus_id: walrusId,
     package_id: packageId,
     press3_object_id: press3ObjectId,
-    network: config.sui.network,
+    network: config.walrus.network,
   };
 
   await writeConfigFile(outputPath, initConfig);
@@ -140,7 +140,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
 
   // Summary
   console.log('\n=== Press3 Initialization Complete ===');
-  console.log(`Network: ${config.sui.network}`);
+  console.log(`Network: ${config.walrus.network}`);
   console.log(`Package ID: ${packageId}`);
   console.log(`Press3 Object: ${press3ObjectId}`);
   console.log(`Walrus Blob: ${walrusId}`);
