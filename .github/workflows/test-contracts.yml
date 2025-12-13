@@ -21,13 +21,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-
-      - name: Install Sui CLI
+      - name: Install Sui CLI via suiup
         run: |
-          cargo install --locked --git https://github.com/MystenLabs/sui.git --branch mainnet sui
+          curl -fsSL https://raw.githubusercontent.com/Mystenlabs/suiup/main/install.sh | bash
+          export PATH="$HOME/.sui/bin:$PATH"
+          suiup install sui
+          echo "$HOME/.sui/bin" >> $GITHUB_PATH
+        shell: bash
 
       - name: Verify Sui installation
         run: sui --version
