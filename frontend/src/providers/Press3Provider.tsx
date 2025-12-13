@@ -19,7 +19,9 @@ interface Press3ContextValue {
   packageId: string;
   admins: string[];
   press3ObjectId: string | null;
-  getPageWithIndex: (path: string) => { walrusId: string; index: number; editors: string[] } | null;
+  getPageWithIndex: (
+    path: string,
+  ) => { walrusId: string; index: number; editors: string[] } | null;
 }
 
 const Press3Context = createContext<Press3ContextValue | null>(null);
@@ -35,7 +37,9 @@ export function Press3Provider({ packageId, children }: Press3ProviderProps) {
   const [error, setError] = useState<Error | null>(null);
   const [admins, setAdmins] = useState<string[]>([]);
   const [press3ObjectId, setPress3ObjectId] = useState<string | null>(null);
-  const [pageRecords, setPageRecords] = useState<Array<{ path: string; walrusId: string; editors: string[] }>>([]);
+  const [pageRecords, setPageRecords] = useState<
+    Array<{ path: string; walrusId: string; editors: string[] }>
+  >([]);
 
   // Fetch initial state
   useEffect(() => {

@@ -1,6 +1,6 @@
-import { uploadContent } from "../../services/walrus";
-import { buildUpdatePageTransaction } from "../../services/contract";
 import type { Transaction } from "@mysten/sui/transactions";
+import { buildUpdatePageTransaction } from "../../services/contract";
+import { uploadContent } from "../../services/walrus";
 
 export type SaveStep = "uploading" | "wallet" | "transaction" | "success";
 
@@ -84,7 +84,11 @@ export async function savePageContent(
     // Determine which step failed based on progress
     let failedStep = SaveStep.UPLOADING_WALRUS;
     if (error instanceof Error) {
-      if (error.message.includes("wallet") || error.message.includes("signature") || error.message.includes("rejected")) {
+      if (
+        error.message.includes("wallet") ||
+        error.message.includes("signature") ||
+        error.message.includes("rejected")
+      ) {
         failedStep = SaveStep.WAITING_WALLET;
       } else if (error.message.includes("transaction")) {
         failedStep = SaveStep.SUBMITTING_TX;

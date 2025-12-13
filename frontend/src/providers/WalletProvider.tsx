@@ -1,9 +1,12 @@
-import { createNetworkConfig } from "@mysten/dapp-kit";
+import {
+  createNetworkConfig,
+  SuiClientProvider,
+  WalletProvider as SuiWalletProvider,
+} from "@mysten/dapp-kit";
 import { getFullnodeUrl } from "@mysten/sui/client";
-import { SuiClientProvider, WalletProvider as SuiWalletProvider } from "@mysten/dapp-kit";
 import "@mysten/dapp-kit/dist/index.css";
-import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 
 // Configure supported networks
 const { networkConfig } = createNetworkConfig({
@@ -26,9 +29,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <SuiClientProvider networks={networkConfig} defaultNetwork="testnet">
-        <SuiWalletProvider autoConnect>
-          {children}
-        </SuiWalletProvider>
+        <SuiWalletProvider autoConnect>{children}</SuiWalletProvider>
       </SuiClientProvider>
     </QueryClientProvider>
   );

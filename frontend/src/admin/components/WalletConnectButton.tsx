@@ -1,5 +1,5 @@
-import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";
 import { Button } from "@fluffylabs/shared-ui";
+import { ConnectButton, useCurrentAccount } from "@mysten/dapp-kit";
 
 /**
  * Wallet connect button that integrates with the admin UI.

@@ -69,5 +69,7 @@ export async function uploadContent(
 ): Promise<string> {
   // TODO: Implement proper Walrus upload with wallet signing
   // For now, we'll throw an error indicating this needs wallet integration
-  throw new Error("Walrus upload in browser requires wallet integration - not yet fully implemented. Please use the CLI for uploads.");
+  throw new Error(
+    "Walrus upload in browser requires wallet integration - not yet fully implemented. Please use the CLI for uploads.",
+  );
 }

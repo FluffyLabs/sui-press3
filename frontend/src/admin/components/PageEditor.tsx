@@ -1,22 +1,26 @@
 import { Alert, Badge, Button, Input, Textarea } from "@fluffylabs/shared-ui";
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+} from "@mysten/dapp-kit";
+import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { usePermissions } from "../../hooks/usePermissions";
 import { usePress3 } from "../../providers/Press3Provider";
 import { getFile } from "../../services/walrus";
 import { fetchPageById } from "../services/pages";
+import { SaveStep, savePageContent } from "../services/save";
 import type { Page } from "../types/page";
 import { AdminLayout } from "./AdminLayout";
-import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
-import { usePermissions } from "../../hooks/usePermissions";
-import { savePageContent, SaveStep } from "../services/save";
-import { ArrowLeft } from "lucide-react";
 
 export function PageEditor() {
   const { pageId } = useParams<{ pageId: string }>();
   const { packageId, press3ObjectId, getPageWithIndex } = usePress3();
   const navigate = useNavigate();
   const currentAccount = useCurrentAccount();
-  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+  const { mutateAsync: signAndExecuteTransaction } =
+    useSignAndExecuteTransaction();
   const { canEditPage } = usePermissions();
 
   const [page, setPage] = useState<Page | null>(null);
@@ -78,7 +82,9 @@ export function PageEditor() {
 
     // Check permissions
     if (!canEditPage(page.path)) {
-      alert("You don't have permission to edit this page. Please connect the right account.");
+      alert(
+        "You don't have permission to edit this page. Please connect the right account.",
+      );
       return;
     }
 
@@ -146,6 +152,7 @@ export function PageEditor() {
     return (
       <AdminLayout>
         <button
+          type="button"
           onClick={() => navigate("/admin")}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-5 cursor-pointer"
         >
@@ -160,6 +167,7 @@ export function PageEditor() {
   return (
     <AdminLayout>
       <button
+        type="button"
         onClick={() => navigate("/admin")}
         className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-5"
       >
@@ -172,7 +180,8 @@ export function PageEditor() {
       {saveStep && !saveSuccess && (
         <Alert className="mb-5">
           {saveStep === SaveStep.UPLOADING_WALRUS && "Uploading to Walrus..."}
-          {saveStep === SaveStep.WAITING_WALLET && "Waiting for wallet approval..."}
+          {saveStep === SaveStep.WAITING_WALLET &&
+            "Waiting for wallet approval..."}
           {saveStep === SaveStep.SUBMITTING_TX && "Submitting transaction..."}
         </Alert>
       )}
@@ -222,7 +231,10 @@ export function PageEditor() {
         </div>
       </div>
       <div className="flex gap-3">
-        <Button onClick={handleSave} disabled={saving || !hasChanges || !currentAccount}>
+        <Button
+          onClick={handleSave}
+          disabled={saving || !hasChanges || !currentAccount}
+        >
           {saving ? "Saving..." : "Save Changes"}
         </Button>
         <Button variant="secondary" onClick={() => navigate("/admin")}>
