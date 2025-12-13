@@ -16,6 +16,8 @@ type PageEvent = {
 
 export type MenuSchema = Array<{ label: string; url: string; target: string }>;
 
+const DESKTOP_BREAKPOINT = 768; // pixels - matches CSS media query
+
 function getRenderer(path: string): Renderer | null {
   if (path.endsWith(".html")) return "html";
   if (path.endsWith(".md")) return "markdown";
@@ -81,6 +83,7 @@ function App() {
     content: string;
   } | null>(null);
   const [menu, setMenu] = useState<MenuSchema | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const activeEvent = useMemo(() => {
     const event = PAGE_EVENTS.find((evt) => evt.path === selectedPath);
@@ -146,16 +149,47 @@ function App() {
     };
   }, [menuEvent]);
 
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const isDesktop = window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`).matches;
+      setIsMenuOpen(isDesktop);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => {
+      window.removeEventListener("resize", checkScreenSize);
+    };
+  }, []);
+
   return (
     <div className="app">
       <header>
-        <h1>Press3 Frontend Sandbox</h1>
+        <div className="header-top">
+          <h1>Press3 Frontend Sandbox</h1>
+          {menu && menu.length > 0 && (
+            <button
+              type="button"
+              className="hamburger"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+              aria-expanded={isMenuOpen}
+            >
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+          )}
+        </div>
         <p>
           This Vite + React shell visualizes how the public renderer will map
           CMS events to Walrus blobs, menu metadata, and smart-contract driven
           assets.
         </p>
-        {menu && menu.length > 0 && <Menu menu={menu} />}
+        {menu && menu.length > 0 && (
+          <Menu menu={menu} isOpen={isMenuOpen} currentPath={selectedPath} />
+        )}
       </header>
 
       <section className="panel">
