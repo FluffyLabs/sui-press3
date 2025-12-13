@@ -1,0 +1,28 @@
+name: Publish Walrus Site
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/walrus-site.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+  actions: read
+  pull-requests: write
+
+jobs:
+  deploy:
+    uses: zktx-io/walrus-sites-ga/.github/workflows/deploy_with_slsa3.yml@v0.4.7
+    with:
+      working-directory: frontend
+      network: testnet
+      epochs: 2
+      DIST: frontend/dist
+      SUI_ADDRESS: ${{ vars.SUI_ADDRESS }}
+    secrets:
+      SUI_KEYSTORE: ${{ secrets.SUI_KEYSTORE }}
