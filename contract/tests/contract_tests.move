@@ -31,7 +31,7 @@ module contract::press3_test {
                 test_scenario::ctx(&mut scenario)
             );
 
-            assert!(press3::pages_count(&state) == 1, 0);
+            assert!(press3::pages_count(&state) == 4, 0);
 
             test_scenario::return_shared(state);
         };
@@ -86,7 +86,7 @@ module contract::press3_test {
             );
 
             // Verify first page was added
-            assert!(press3::pages_count(&state) == 1, 0);
+            assert!(press3::pages_count(&state) == 4, 0);
 
             test_scenario::return_shared(state);
         };
@@ -103,7 +103,7 @@ module contract::press3_test {
             );
 
             // Verify second page was added
-            assert!(press3::pages_count(&state) == 2, 1);
+            assert!(press3::pages_count(&state) == 5, 1);
 
             test_scenario::return_shared(state);
         };
@@ -120,7 +120,7 @@ module contract::press3_test {
             );
 
             // Verify all three pages were added
-            assert!(press3::pages_count(&state) == 3, 2);
+            assert!(press3::pages_count(&state) == 6, 2);
 
             test_scenario::return_shared(state);
         };
@@ -149,7 +149,7 @@ module contract::press3_test {
             );
 
             // Verify page was added
-            assert!(press3::pages_count(&state) == 1, 0);
+            assert!(press3::pages_count(&state) == 4, 0);
 
             test_scenario::return_shared(state);
         };
@@ -160,14 +160,14 @@ module contract::press3_test {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
             press3::update_page_walrus_id(
                 &mut state,
-                0,
+                3,
                 string::utf8(b"/docs"),
                 string::utf8(b"updated_blob_id"),
                 test_scenario::ctx(&mut scenario)
             );
 
             // Verify length unchanged after update
-            assert!(press3::pages_count(&state) == 1, 1);
+            assert!(press3::pages_count(&state) == 4, 1);
 
             test_scenario::return_shared(state);
         };
@@ -197,7 +197,7 @@ module contract::press3_test {
             );
 
             // Verify page was added
-            assert!(press3::pages_count(&state) == 1, 0);
+            assert!(press3::pages_count(&state) == 4, 0);
 
             test_scenario::return_shared(state);
         };
@@ -208,7 +208,7 @@ module contract::press3_test {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
             press3::update_page_walrus_id(
                 &mut state,
-                0,
+                3,
                 string::utf8(b"/wrong_path"),
                 string::utf8(b"new_blob"),
                 test_scenario::ctx(&mut scenario)
@@ -304,14 +304,14 @@ module contract::press3_test {
             let new_editors = vector[editor, new_editor];
             press3::set_editor(
                 &mut state,
-                0,
+                3,
                 string::utf8(b"/test"),
                 new_editors,
                 test_scenario::ctx(&mut scenario)
             );
 
             // Verify editors were set
-            let editors = press3::editors(&state, 0, string::utf8(b"/test"));
+            let editors = press3::editors(&state, 3, string::utf8(b"/test"));
             assert!(editors.length() == 2, 0);
             assert!(editors.contains(&editor), 1);
             assert!(editors.contains(&new_editor), 2);
@@ -352,7 +352,7 @@ module contract::press3_test {
             let new_editors = vector[NON_ADMIN];
             press3::set_editor(
                 &mut state,
-                0,
+                3,
                 string::utf8(b"/test"),
                 new_editors,
                 test_scenario::ctx(&mut scenario)
@@ -393,7 +393,7 @@ module contract::press3_test {
             let new_editors = vector[EDITOR];
             press3::set_editor(
                 &mut state,
-                0,
+                3,
                 string::utf8(b"/wrong"),
                 new_editors,
                 test_scenario::ctx(&mut scenario)
@@ -432,7 +432,7 @@ module contract::press3_test {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
             press3::update_page_walrus_id(
                 &mut state,
-                0,
+                3,
                 string::utf8(b"/test"),
                 string::utf8(b"new_blob456"),
                 test_scenario::ctx(&mut scenario)
@@ -472,7 +472,7 @@ module contract::press3_test {
             let new_editors = vector[ADMIN, EDITOR];
             press3::set_editor(
                 &mut state,
-                0,
+                3,
                 string::utf8(b"/test"),
                 new_editors,
                 test_scenario::ctx(&mut scenario)
@@ -486,7 +486,7 @@ module contract::press3_test {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
             press3::update_page_walrus_id(
                 &mut state,
-                0,
+                3,
                 string::utf8(b"/test"),
                 string::utf8(b"new_blob789"),
                 test_scenario::ctx(&mut scenario)
@@ -526,7 +526,7 @@ module contract::press3_test {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
             press3::update_page_walrus_id(
                 &mut state,
-                0,
+                3,
                 string::utf8(b"/test"),
                 string::utf8(b"should_fail"),
                 test_scenario::ctx(&mut scenario)
