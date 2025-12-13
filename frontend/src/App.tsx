@@ -1,8 +1,8 @@
 import { HashRouter, Route, Routes } from "react-router-dom";
-import Dev from "./Dev";
-import Home from "./Home";
 import Admin from "./admin/Admin";
 import { PageEditor } from "./admin/components/PageEditor";
+import Dev from "./Dev";
+import Home from "./Home";
 
 function App() {
   return (

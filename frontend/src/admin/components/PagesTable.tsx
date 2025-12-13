@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
 import { Badge } from "@fluffylabs/shared-ui";
+import { Link } from "react-router-dom";
 import type { Page } from "../types/page";
 
 interface Props {

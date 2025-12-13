@@ -50,8 +50,7 @@ const MOCK_PAGES: Page[] = [
     registeredAtBlock: 1238000,
     updatedAtBlock: 1250100,
     previousWalrusId: "LX1ElLzz9QNmmFTXKa9yIYPunadD3DIjvFd0-YasXdU",
-    content:
-      "# Getting Started\n\nFollow these steps to begin using Press3...",
+    content: "# Getting Started\n\nFollow these steps to begin using Press3...",
   },
 ];
 

@@ -1,7 +1,7 @@
 import "@fluffylabs/shared-ui/theme.css";
 import "@fluffylabs/shared-ui/style.css";
+import { Alert, Badge, Button, Header } from "@fluffylabs/shared-ui";
 import { useEffect, useState } from "react";
-import { Button, Alert, Badge, Header } from "@fluffylabs/shared-ui";
 import { PagesTable } from "./components/PagesTable";
 import { fetchPages } from "./services/pages";
 import type { Page } from "./types/page";
@@ -43,34 +43,38 @@ function Admin() {
         endSlot={<Button>Create New Page</Button>}
       />
       <div style={{ padding: "40px", maxWidth: "1200px", margin: "0 auto" }}>
+        <Alert style={{ marginBottom: "30px" }}>
+          <p>
+            Manage your decentralized content. All pages are stored on Walrus
+            and indexed via SUI smart contracts.
+          </p>
+        </Alert>
 
-      <Alert style={{ marginBottom: "30px" }}>
-        <p>
-          Manage your decentralized content. All pages are stored on Walrus and
-          indexed via SUI smart contracts.
-        </p>
-      </Alert>
+        <div style={{ marginBottom: "20px" }}>
+          <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+            <Badge>{pages.length} Total Pages</Badge>
+            <Badge>
+              {pages.reduce((sum, p) => sum + p.editors.length, 0)} Total
+              Editors
+            </Badge>
+          </div>
+        </div>
 
-      <div style={{ marginBottom: "20px" }}>
-        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-          <Badge>{pages.length} Total Pages</Badge>
-          <Badge>
-            {pages.reduce((sum, p) => sum + p.editors.length, 0)} Total Editors
-          </Badge>
-        </div>
-      </div>
-
-      {loading ? (
-        <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>
-          Loading pages...
-        </div>
-      ) : pages.length === 0 ? (
-        <div style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}>
-          No pages found. Create your first page to get started.
-        </div>
-      ) : (
-        <PagesTable pages={pages} />
-      )}
+        {loading ? (
+          <div
+            style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}
+          >
+            Loading pages...
+          </div>
+        ) : pages.length === 0 ? (
+          <div
+            style={{ padding: "40px", textAlign: "center", color: "#6b7280" }}
+          >
+            No pages found. Create your first page to get started.
+          </div>
+        ) : (
+          <PagesTable pages={pages} />
+        )}
       </div>
     </div>
   );

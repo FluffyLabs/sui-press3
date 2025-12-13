@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import {
+  Alert,
+  Badge,
   Button,
+  Header,
   Input,
   Textarea,
-  Badge,
-  Alert,
-  Header,
 } from "@fluffylabs/shared-ui";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { fetchPageById, updatePage } from "../services/pages";
 import type { Page } from "../types/page";
 
@@ -104,132 +104,132 @@ export function PageEditor() {
       <div style={{ padding: "40px", maxWidth: "1000px", margin: "0 auto" }}>
         <h1 style={{ marginBottom: "30px" }}>Edit Page</h1>
 
-      {saveSuccess && (
-        <Alert style={{ marginBottom: "20px" }}>
-          Page saved successfully!
-        </Alert>
-      )}
+        {saveSuccess && (
+          <Alert style={{ marginBottom: "20px" }}>
+            Page saved successfully!
+          </Alert>
+        )}
 
-      <div style={{ marginBottom: "20px" }}>
-        <label
-          htmlFor="path"
-          style={{
-            display: "block",
-            marginBottom: "8px",
-            fontWeight: 500,
-          }}
-        >
-          Page Path
-        </label>
-        <Input
-          id="path"
-          value={path}
-          onChange={(e) => setPath(e.target.value)}
-          placeholder="/path/to/page.html"
-        />
-      </div>
-
-      <div style={{ marginBottom: "20px" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "8px",
-          }}
-        >
-          <label htmlFor="content" style={{ fontWeight: 500 }}>
-            Content
+        <div style={{ marginBottom: "20px" }}>
+          <label
+            htmlFor="path"
+            style={{
+              display: "block",
+              marginBottom: "8px",
+              fontWeight: 500,
+            }}
+          >
+            Page Path
           </label>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <span style={{ fontSize: "12px", color: "#6b7280" }}>
-              Walrus ID:
-            </span>
-            <code
-              style={{
-                fontSize: "12px",
-                color: "#6b7280",
-                backgroundColor: "#f3f4f6",
-                padding: "2px 6px",
-                borderRadius: "4px",
-              }}
-            >
-              {page.walrusId}
-            </code>
-          </div>
+          <Input
+            id="path"
+            value={path}
+            onChange={(e) => setPath(e.target.value)}
+            placeholder="/path/to/page.html"
+          />
         </div>
-        <Textarea
-          id="content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          rows={20}
-          placeholder="Enter page content..."
-          style={{ fontFamily: "monospace", fontSize: "13px" }}
-        />
-      </div>
 
-      <div style={{ marginBottom: "20px" }}>
-        <h3 style={{ marginBottom: "12px" }}>Editors</h3>
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          {page.editors.map((editor) => (
-            <Badge key={editor} title={editor}>
-              {editor.slice(0, 6)}...{editor.slice(-4)}
-            </Badge>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ marginBottom: "20px" }}>
-        <h3 style={{ marginBottom: "12px" }}>Metadata</h3>
-        <div
-          style={{
-            fontSize: "14px",
-            color: "#6b7280",
-            display: "grid",
-            gap: "8px",
-          }}
-        >
-          <div>
-            <strong>Registered at Block:</strong> #
-            {page.registeredAtBlock.toLocaleString()}
-          </div>
-          <div>
-            <strong>Updated at Block:</strong> #
-            {page.updatedAtBlock.toLocaleString()}
-            {page.updatedAtBlock !== page.registeredAtBlock && (
-              <span style={{ color: "#16a34a", marginLeft: "8px" }}>
-                (Modified)
+        <div style={{ marginBottom: "20px" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "8px",
+            }}
+          >
+            <label htmlFor="content" style={{ fontWeight: 500 }}>
+              Content
+            </label>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <span style={{ fontSize: "12px", color: "#6b7280" }}>
+                Walrus ID:
               </span>
-            )}
-          </div>
-          {page.previousWalrusId && (
-            <div>
-              <strong>Previous Blob ID:</strong>{" "}
               <code
                 style={{
+                  fontSize: "12px",
+                  color: "#6b7280",
                   backgroundColor: "#f3f4f6",
                   padding: "2px 6px",
                   borderRadius: "4px",
-                  fontSize: "12px",
-                  fontFamily: "monospace",
                 }}
-                title={page.previousWalrusId}
               >
-                {page.previousWalrusId}
+                {page.walrusId}
               </code>
             </div>
-          )}
+          </div>
+          <Textarea
+            id="content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={20}
+            placeholder="Enter page content..."
+            style={{ fontFamily: "monospace", fontSize: "13px" }}
+          />
         </div>
-      </div>
 
-      <div style={{ display: "flex", gap: "12px" }}>
-        <Button onClick={handleSave} disabled={saving}>
-          {saving ? "Saving..." : "Save Changes"}
-        </Button>
-        <Button variant="secondary" onClick={() => navigate("/admin")}>
-          Cancel
-        </Button>
-      </div>
+        <div style={{ marginBottom: "20px" }}>
+          <h3 style={{ marginBottom: "12px" }}>Editors</h3>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            {page.editors.map((editor) => (
+              <Badge key={editor} title={editor}>
+                {editor.slice(0, 6)}...{editor.slice(-4)}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ marginBottom: "20px" }}>
+          <h3 style={{ marginBottom: "12px" }}>Metadata</h3>
+          <div
+            style={{
+              fontSize: "14px",
+              color: "#6b7280",
+              display: "grid",
+              gap: "8px",
+            }}
+          >
+            <div>
+              <strong>Registered at Block:</strong> #
+              {page.registeredAtBlock.toLocaleString()}
+            </div>
+            <div>
+              <strong>Updated at Block:</strong> #
+              {page.updatedAtBlock.toLocaleString()}
+              {page.updatedAtBlock !== page.registeredAtBlock && (
+                <span style={{ color: "#16a34a", marginLeft: "8px" }}>
+                  (Modified)
+                </span>
+              )}
+            </div>
+            {page.previousWalrusId && (
+              <div>
+                <strong>Previous Blob ID:</strong>{" "}
+                <code
+                  style={{
+                    backgroundColor: "#f3f4f6",
+                    padding: "2px 6px",
+                    borderRadius: "4px",
+                    fontSize: "12px",
+                    fontFamily: "monospace",
+                  }}
+                  title={page.previousWalrusId}
+                >
+                  {page.previousWalrusId}
+                </code>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: "12px" }}>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? "Saving..." : "Save Changes"}
+          </Button>
+          <Button variant="secondary" onClick={() => navigate("/admin")}>
+            Cancel
+          </Button>
+        </div>
       </div>
     </div>
   );
