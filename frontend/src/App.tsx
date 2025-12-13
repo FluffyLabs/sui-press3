@@ -139,6 +139,7 @@ function App() {
         </div>
         <ul className="event-list">
           {PAGE_EVENTS.map((event) => (
+            // biome-ignore lint/a11y/useKeyWithClickEvents: prototype UI
             <li
               key={event.path}
               className={selectedPath === event.path ? "active" : ""}
