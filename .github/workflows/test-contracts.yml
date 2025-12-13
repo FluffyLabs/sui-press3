@@ -1,0 +1,48 @@
+name: Test Sui Smart Contracts
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'contract/**'
+      - '.github/workflows/test-contracts.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'contract/**'
+      - '.github/workflows/test-contracts.yml'
+
+jobs:
+  test:
+    name: Run Sui Move Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Sui CLI
+        run: |
+          cargo install --locked --git https://github.com/MystenLabs/sui.git --branch mainnet sui
+
+      - name: Verify Sui installation
+        run: sui --version
+
+      - name: Build contracts
+        working-directory: contract
+        run: sui move build
+
+      - name: Run tests
+        working-directory: contract
+        run: sui move test
+
+      - name: Run tests with coverage
+        working-directory: contract
+        run: sui move test --coverage
+
+      - name: Display coverage summary
+        working-directory: contract
+        run: |
+          if [ -f coverage/summary.txt ]; then
+            cat coverage/summary.txt
+          fi
