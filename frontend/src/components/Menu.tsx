@@ -2,13 +2,12 @@ import type { MenuSchema } from "../Dev";
 
 interface Props {
   menu: MenuSchema;
-  isOpen: boolean;
   currentPath: string;
 }
 
-export const Menu = ({ menu, isOpen, currentPath }: Props) => {
+export const Menu = ({ menu, currentPath }: Props) => {
   return (
-    <nav className={`menu ${isOpen ? "menu-open" : ""}`}>
+    <nav className="menu">
       <ul>
         {menu.map((item) => (
           <li key={item.url}>
