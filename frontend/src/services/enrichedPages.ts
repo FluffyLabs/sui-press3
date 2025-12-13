@@ -6,7 +6,7 @@ import { findPress3Object, getPress3State, queryPageEvents } from "./press3";
  */
 export async function fetchEnrichedPages(
   packageId: string,
-): Promise<EnrichedPage[]> {
+): Promise<{ pages: EnrichedPage[]; admins: string[] }> {
   // Find the Press3 object
   const objectId = await findPress3Object(packageId);
   if (!objectId) {
@@ -50,7 +50,7 @@ export async function fetchEnrichedPages(
   }
 
   // Enrich pages with event data
-  return state.pages.map((page) => {
+  const pages = state.pages.map((page) => {
     const eventData = eventsByPath.get(page.path) || {};
     return {
       id: generatePageId(page.path),
@@ -62,6 +62,11 @@ export async function fetchEnrichedPages(
       previousWalrusId: eventData.previousWalrusId,
     };
   });
+
+  return {
+    pages,
+    admins: state.admins,
+  };
 }
 
 /**

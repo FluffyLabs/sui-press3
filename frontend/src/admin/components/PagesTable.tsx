@@ -1,13 +1,16 @@
-import { Badge, WithTooltip } from "@fluffylabs/shared-ui";
+import { Badge } from "@fluffylabs/shared-ui";
+import { Check, History } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Tooltip } from "react-tooltip";
 import type { Page } from "../types/page";
 
 interface Props {
   pages: Page[];
+  admins: string[];
 }
 
-export function PagesTable({ pages }: Props) {
+export function PagesTable({ pages, admins }: Props) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const formatAddress = (address: string) => {
@@ -24,6 +27,16 @@ export function PagesTable({ pages }: Props) {
     } catch (err) {
       console.error("Failed to copy:", err);
     }
+  };
+
+  const getAllEditors = (pageEditors: string[]) => {
+    // Merge admins with page editors, ensuring admins are always included and unique
+    const allEditors = [...new Set([...admins, ...pageEditors])];
+    return allEditors;
+  };
+
+  const isAdmin = (editor: string) => {
+    return admins.includes(editor);
   };
 
   return (
@@ -50,7 +63,8 @@ export function PagesTable({ pages }: Props) {
               </td>
               <td
                 className="px-4 py-3 text-gray-500"
-                title={
+                data-tooltip-id="block-tooltip"
+                data-tooltip-content={
                   page.registeredAtBlock && page.updatedAtBlock
                     ? `Registered: #${page.registeredAtBlock.toLocaleString()}\nLast Updated: #${page.updatedAtBlock.toLocaleString()}`
                     : undefined
@@ -79,53 +93,47 @@ export function PagesTable({ pages }: Props) {
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
                   <code
-                    className="text-[11px] text-gray-500 bg-gray-100 px-2 py-1 rounded font-mono flex-none"
-                    title={page.walrusId}
+                    className="text-[11px] text-gray-500 bg-gray-100 px-2 py-1 rounded font-mono flex-none cursor-copy"
+                    onClick={() => copyToClipboard(page.walrusId, page.id)}
+                    data-tooltip-id="walrus-tooltip"
+                    data-tooltip-content={copiedId === page.id ? "Copied" : "Copy to clipboard"}
                   >
                     {page.walrusId}
                   </code>
-                  <WithTooltip
-                    help={
-                      copiedId === page.id ? "Copied!" : "Copy current blob ID"
-                    }
-                  >
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard(page.walrusId, page.id)}
-                      className="bg-transparent border border-gray-300 rounded px-2 py-1 cursor-pointer text-[11px] text-gray-500 hover:bg-gray-50"
-                    >
-                      {copiedId === page.id ? "✓" : "📋"}
-                    </button>
-                  </WithTooltip>
                   {page.previousWalrusId &&
                   typeof page.previousWalrusId === "string" ? (
-                    <WithTooltip
-                      help={
-                        copiedId === `${page.id}-prev`
-                          ? "Copied!"
-                          : `Copy previous blob ID: ${page.previousWalrusId}`
+                    <button
+                      type="button"
+                      onClick={() =>
+                        copyToClipboard(
+                          page.previousWalrusId as string,
+                          `${page.id}-prev`,
+                      )
                       }
+                      className="bg-transparent border border-gray-300 rounded px-2 py-1 cursor-pointer text-gray-500 hover:bg-gray-50"
                     >
-                      <button
-                        type="button"
-                        onClick={() =>
-                          copyToClipboard(
-                            page.previousWalrusId as string,
-                            `${page.id}-prev`,
-                          )
-                        }
-                        className="bg-transparent border border-gray-300 rounded px-2 py-1 cursor-pointer text-[11px] text-gray-500 hover:bg-gray-50"
-                      >
-                        {copiedId === `${page.id}-prev` ? "✓" : "⏮"}
-                      </button>
-                    </WithTooltip>
+                      {copiedId === `${page.id}-prev` ? (
+                        <Check size={14} />
+                      ) : (
+                        <History size={14} />
+                      )}
+                    </button>
                   ) : null}
                 </div>
               </td>
               <td className="px-4 py-3">
                 <div className="flex gap-1.5 flex-wrap">
-                  {page.editors.map((editor) => (
-                    <Badge key={editor} title={editor}>
+                  {getAllEditors(page.editors).map((editor) => (
+                    <Badge
+                      key={editor}
+                      data-tooltip-id="editor-tooltip"
+                      data-tooltip-content={isAdmin(editor)? 'admin' : 'editor'}
+                      className={
+                        isAdmin(editor)
+                          ? "bg-purple-100 text-purple-800 border-purple-300"
+                          : ""
+                      }
+                    >
                       {formatAddress(editor)}
                     </Badge>
                   ))}
@@ -135,6 +143,9 @@ export function PagesTable({ pages }: Props) {
           ))}
         </tbody>
       </table>
+      <Tooltip id="block-tooltip" style={{ whiteSpace: "pre-line" }} />
+      <Tooltip id="walrus-tooltip" />
+      <Tooltip id="editor-tooltip" />
     </div>
   );
 }

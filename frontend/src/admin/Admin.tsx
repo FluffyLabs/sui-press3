@@ -9,14 +9,17 @@ import type { Page } from "./types/page";
 function Admin() {
   const { packageId } = usePress3();
   const [pages, setPages] = useState<Page[]>([]);
+  const [admins, setAdmins] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadPages = async () => {
       setLoading(true);
       try {
-        const fetchedPages = await fetchEnrichedPages(packageId);
+        const { pages: fetchedPages, admins: fetchedAdmins } =
+          await fetchEnrichedPages(packageId);
         setPages(fetchedPages);
+        setAdmins(fetchedAdmins);
       } catch (error) {
         console.error("Failed to load pages:", error);
       } finally {
@@ -62,7 +65,7 @@ function Admin() {
           No pages found. Create your first page to get started.
         </div>
       ) : (
-        <PagesTable pages={pages} />
+        <PagesTable pages={pages} admins={admins} />
       )}
     </AdminLayout>
   );
