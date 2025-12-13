@@ -1,4 +1,4 @@
-import type { MenuSchema } from "../App";
+import type { MenuSchema } from "../Dev";
 
 interface Props {
   menu: MenuSchema;
