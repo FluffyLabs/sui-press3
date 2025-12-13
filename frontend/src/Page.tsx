@@ -2,6 +2,7 @@ import { useLocation } from "react-router-dom";
 import { HtmlRenderer } from "./components/HtmlRenderer";
 import { JsonRenderer } from "./components/JsonRenderer";
 import { MarkdownRenderer } from "./components/MarkdownRenderer";
+import { MultiStageLoader } from "./components/MultiStageLoader";
 import { useWalrusContent } from "./hooks/useWalrusContent";
 import { usePress3 } from "./providers/Press3Provider";
 
@@ -28,8 +29,12 @@ export function Page() {
 
   const renderer = getRenderer(path);
 
-  if (isLoadingContent || isLoadingPages) {
-    return <div>Loading...</div>;
+  if (isLoadingPages) {
+    return <MultiStageLoader stage="pages" />;
+  }
+
+  if (isLoadingContent) {
+    return <MultiStageLoader stage="content" />;
   }
 
   if (!walrusId) {

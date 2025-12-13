@@ -104,7 +104,9 @@ function Dev() {
     content: string;
   } | null>(null);
   const [menu, setMenu] = useState<MenuSchema | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    return window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`).matches;
+  });
   const [tocItems, setTocItems] = useState<TocItem[]>([]);
 
   const activeEvent = useMemo(() => {
@@ -120,15 +122,16 @@ function Dev() {
   }, []);
 
   useEffect(() => {
-    setTocItems([]);
-
     if (!activeEvent) {
+      setTocItems([]); // eslint-disable-line react-hooks/set-state-in-effect
+      setFetchedContent(null);
       return;
     }
 
     let cancelled = false;
 
     const fetchContent = async () => {
+      setTocItems([]);
       setFetchedContent(null);
       const content = await mockFetchContent(activeEvent.walrusId);
       if (!cancelled) {
@@ -145,16 +148,14 @@ function Dev() {
 
   // Auto-hide sidebar when there are no TOC items, auto-show when items appear (on desktop)
   useEffect(() => {
+    const isDesktop = window.matchMedia(
+      `(min-width: ${DESKTOP_BREAKPOINT}px)`,
+    ).matches;
+
     if (tocItems.length === 0) {
-      setIsSidebarOpen(false);
-    } else {
-      // On desktop, show sidebar when TOC items appear
-      const isDesktop = window.matchMedia(
-        `(min-width: ${DESKTOP_BREAKPOINT}px)`,
-      ).matches;
-      if (isDesktop) {
-        setIsSidebarOpen(true);
-      }
+      setIsSidebarOpen(false); // eslint-disable-line react-hooks/set-state-in-effect
+    } else if (isDesktop) {
+      setIsSidebarOpen(true);
     }
   }, [tocItems]);
 
@@ -187,13 +188,6 @@ function Dev() {
       cancelled = true;
     };
   }, [menuEvent]);
-
-  useEffect(() => {
-    const isDesktop = window.matchMedia(
-      `(min-width: ${DESKTOP_BREAKPOINT}px)`,
-    ).matches;
-    setIsSidebarOpen(isDesktop);
-  }, []);
 
   return (
     <div className="app">

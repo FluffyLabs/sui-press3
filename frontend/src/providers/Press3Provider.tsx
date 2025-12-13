@@ -104,6 +104,7 @@ export function Press3Provider({ packageId, children }: Press3ProviderProps) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function usePress3() {
   const context = useContext(Press3Context);
   if (!context) {
