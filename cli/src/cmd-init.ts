@@ -32,10 +32,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
   const outputPath = (flags.output as string) || 'press3.init.log';
 
   const config = DEFAULT_CONFIG;
-  logStep(
-    'Init',
-    `Initializing Press3 on ${config.walrus.network}`
-  );
+  logStep('Init', `Initializing Press3 on ${config.walrus.network}`);
 
   // Step 1: Build and deploy frontend to Walrus
   logStep('Init', 'Building frontend...');
@@ -117,7 +114,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
     signer,
     packageId,
     press3ObjectId,
-    pagePath: "/",
+    pagePath: '/',
     walrusId,
   });
 

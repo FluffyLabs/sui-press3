@@ -233,7 +233,8 @@ export async function registerPage(options: {
   pagePath: string;
   walrusId: string;
 }): Promise<SuiPublishResult> {
-  const { client, signer, packageId, press3ObjectId, pagePath, walrusId } = options;
+  const { client, signer, packageId, press3ObjectId, pagePath, walrusId } =
+    options;
 
   // Wait for the package to be indexed before calling Move functions
   await waitForPackage(client, packageId);

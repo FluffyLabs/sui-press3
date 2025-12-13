@@ -33,7 +33,8 @@ export const DEFAULT_CONFIG = {
   contractDir: '../contract',
   quiltEntry: 'dist/index.html',
   quiltAssetsDir: 'dist',
-  walrus: { // TODO: rename to client
+  walrus: {
+    // TODO: rename to client
     secret: process.env.WALRUS_PUBLISH_SECRET || '',
     epochs: getWalrusEpochs(),
     network: getSuiWalrusNetwork(),
