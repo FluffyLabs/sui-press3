@@ -24,8 +24,10 @@ jobs:
       - name: Install Sui CLI via suiup
         run: |
           curl -fsSL https://raw.githubusercontent.com/Mystenlabs/suiup/main/install.sh | bash
+          export PATH="$HOME/.local/bin:$PATH"
           export PATH="$HOME/.sui/bin:$PATH"
-          suiup install sui
+          yes | suiup install sui
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
           echo "$HOME/.sui/bin" >> $GITHUB_PATH
         shell: bash
 
