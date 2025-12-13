@@ -12,7 +12,7 @@ module contract::press3 {
         pages: vector<PageRecord>,
     }
 
-    public struct PageRecord has store {
+    public struct PageRecord has copy, store {
         path: String,
         walrus_id: String,
         editors: vector<address>,
@@ -39,11 +39,15 @@ module contract::press3 {
         let admin = sui::tx_context::sender(ctx);
         let mut admins = vector::empty<address>();
         admins.push_back(admin);
-        let state = Press3 {
+        let mut state = Press3 {
             id: sui::object::new(ctx),
             admins,
             pages: vector::empty<PageRecord>(),
-        };
+};
+// NOTE: Just example purposes. To be deleted
+        state.register_page("/", "Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU", ctx);
+        state.register_page("/index.html", "Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU", ctx);
+        state.register_page("/article.md", "1uJVmO-79L9ZefNxKYJz8239OGFdNFgk9oXQZV5OBkg", ctx);
         event::emit(Press3InitializedEvent { admin });
         sui::transfer::share_object(state);
     }
@@ -57,7 +61,7 @@ module contract::press3 {
         state: &mut Press3,
         path: String,
         walrus_id: String,
-        ctx: &mut sui::tx_context::TxContext,
+        ctx: &sui::tx_context::TxContext,
     ) {
         assert_admin(state, ctx);
 
@@ -88,6 +92,11 @@ module contract::press3 {
         state.pages.length()
     }
 
+    /// Returns all pages registered in the contract.
+    public fun pages(state: &Press3): vector<PageRecord> {
+        state.pages
+    }
+
     /// Returns the configured editors for off-chain tooling. Sanity checks if we query the right page.
     entry fun editors(state: &Press3, page_index: u64, page_path: String): vector<address> {
         let page = vector::borrow(&state.pages, page_index);
@@ -103,7 +112,7 @@ module contract::press3 {
     entry fun set_admin(
         state: &mut Press3,
         new_admins: vector<address>,
-        ctx: &mut sui::tx_context::TxContext,
+        ctx: &sui::tx_context::TxContext,
     ) {
         assert_admin(state, ctx);
         state.admins = new_admins;
@@ -115,7 +124,7 @@ module contract::press3 {
         page_index: u64,
         page_path: String,
         new_editors: vector<address>,
-        ctx: &mut sui::tx_context::TxContext,
+        ctx: &sui::tx_context::TxContext,
     ) {
         assert_admin(state, ctx);
         let page = vector::borrow_mut(&mut state.pages, page_index);
@@ -129,7 +138,7 @@ module contract::press3 {
         page_index: u64,
         page_path: String,
         new_walrus_id: String,
-        ctx: &mut sui::tx_context::TxContext,
+        ctx: &sui::tx_context::TxContext,
     ) {
         let page = vector::borrow_mut(&mut state.pages, page_index);
         assert!(page.path == page_path, E_INVALID_PAGE_PATH);
