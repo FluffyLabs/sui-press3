@@ -64,6 +64,8 @@ The lint step is powered by [Biome](https://biomejs.dev/) and matches the settin
 - **src/sui.ts** - SUI blockchain utilities (contract publishing, client creation)
 - **src/walrus.ts** - Walrus utilities (file uploads, keypair loading)
 - **src/config.ts** - Configuration management and environment variable handling
+  - `frontendDir` - Location of frontend code (default: `../frontend`)
+  - `contractDir` - Location of Move contract (default: `../contract`)
 - **src/logger.ts** - Logging utilities
 - **src/utils.ts** - General utility functions
 

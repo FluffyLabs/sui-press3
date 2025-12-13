@@ -28,6 +28,7 @@ function getWalrusEpochs(): number {
 
 export const DEFAULT_CONFIG = {
   frontendDir: '../frontend',
+  contractDir: '../contract',
   quiltEntry: 'dist/index.html',
   quiltAssetsDir: 'dist',
   walrus: {

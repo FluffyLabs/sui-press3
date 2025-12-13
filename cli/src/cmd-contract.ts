@@ -1,4 +1,3 @@
-import { join } from 'node:path';
 import type { WalrusNetwork } from './config';
 import { DEFAULT_CONFIG } from './config';
 import { logStep } from './logger';
@@ -20,10 +19,11 @@ const CONTRACT_PACKAGE_NAME = 'contract';
 export async function handleContract(flags: Record<string, string | boolean>) {
   const dryRun = Boolean(flags['dry-run']);
   const useSdk = Boolean(flags['use-sdk']);
-  const contractDir = join(import.meta.dir, '../../contract');
 
   const config = DEFAULT_CONFIG;
   const network = config.walrus.network;
+  const contractDir = config.contractDir;
+
   logStep(
     'Contract',
     `Building and publishing contract from ${contractDir} to ${network} ${dryRun ? '(dry-run)' : ''}`
