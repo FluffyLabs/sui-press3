@@ -1,5 +1,8 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+  "files": {
+    "includes": ["**/*", "!**/.bun-cache", "!**/node_modules", "!dist"]
+  },
   "linter": {
     "enabled": true,
     "rules": {
