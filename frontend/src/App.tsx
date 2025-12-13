@@ -1,10 +1,11 @@
-import { HashRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Admin from "./admin/Admin";
 import { PageEditor } from "./admin/components/PageEditor";
 import Dev from "./Dev";
 import { Page } from "./Page";
 import { LayoutProvider } from "./providers/LayoutProvider";
 import { Press3Provider } from "./providers/Press3Provider";
+import "@fluffylabs/shared-ui/style.css";
 
 const DEFAULT_PACKAGE_ID =
   "0xc394806a04aca8aecae8f8550d1a535f8d880924444da2bca0c8066e11e88ca5";
@@ -21,7 +22,7 @@ function getPackageId(): string {
 function App() {
   return (
     <Press3Provider packageId={getPackageId()}>
-      <HashRouter>
+      <BrowserRouter>
         <LayoutProvider>
           <Routes>
             <Route path="/dev" element={<Dev />} />
@@ -30,7 +31,7 @@ function App() {
             <Route path="*" element={<Page />} />
           </Routes>
         </LayoutProvider>
-      </HashRouter>
+      </BrowserRouter>
     </Press3Provider>
   );
 }

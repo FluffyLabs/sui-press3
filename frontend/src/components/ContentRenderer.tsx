@@ -2,6 +2,8 @@ import { useWalrusContent } from "../hooks/useWalrusContent";
 import { usePress3 } from "../providers/Press3Provider";
 import { HtmlRenderer } from "./HtmlRenderer";
 import { MarkdownRenderer } from "./MarkdownRenderer";
+import { MultiStageLoader } from "./MultiStageLoader";
+import { NotFoundPage } from "./NotFoundPage";
 
 type Renderer = "html" | "markdown";
 
@@ -21,11 +23,11 @@ export function ContentRenderer({ path, className }: Props) {
   const { content, isLoading, error } = useWalrusContent(walrusId);
 
   if (!walrusId) {
-    return null;
+    return <NotFoundPage path={path} />;
   }
 
   if (isLoading) {
-    return <div className={className}>Loading...</div>;
+    return <MultiStageLoader stage="content" />;
   }
 
   if (error) {
