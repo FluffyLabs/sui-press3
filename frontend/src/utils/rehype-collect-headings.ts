@@ -1,7 +1,7 @@
-import { visit } from "unist-util-visit";
 import type { Root } from "hast";
 import { toText } from "hast-util-to-text";
 import type { Plugin } from "unified";
+import { visit } from "unist-util-visit";
 import type { VFile } from "vfile";
 
 export interface TocItem {

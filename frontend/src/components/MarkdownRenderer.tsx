@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeSlug from "rehype-slug";
-import { unified } from "unified";
+import rehypeStringify from "rehype-stringify";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
-import rehypeStringify from "rehype-stringify";
-import { rehypeCollectHeadings } from "../utils/rehype-collect-headings";
+import { unified } from "unified";
 import type { TocItem } from "../utils/rehype-collect-headings";
+import { rehypeCollectHeadings } from "../utils/rehype-collect-headings";
 
 interface Props {
   content: string;

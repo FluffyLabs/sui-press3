@@ -9,7 +9,6 @@ interface Props {
 export const Sidebar = ({ tocItems }: Props) => {
   const [activeId, setActiveId] = useState<string>("");
 
-
   // Track active heading on scroll
   useEffect(() => {
     if (tocItems.length === 0) {
@@ -23,7 +22,8 @@ export const Sidebar = ({ tocItems }: Props) => {
       for (let i = tocItems.length - 1; i >= 0; i--) {
         const element = document.getElementById(tocItems[i].id);
         if (element) {
-          const elementTop = element.getBoundingClientRect().top + window.pageYOffset;
+          const elementTop =
+            element.getBoundingClientRect().top + window.pageYOffset;
           if (scrollPosition >= elementTop) {
             setActiveId(tocItems[i].id);
             break;

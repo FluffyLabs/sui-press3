@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { unified } from "unified";
 import rehypeParse from "rehype-parse";
 import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
-import { rehypeCollectHeadings } from "../utils/rehype-collect-headings";
+import { unified } from "unified";
 import type { TocItem } from "../utils/rehype-collect-headings";
+import { rehypeCollectHeadings } from "../utils/rehype-collect-headings";
 
 interface Props {
   content: string;
