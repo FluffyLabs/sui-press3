@@ -3,6 +3,7 @@ import { HtmlRenderer } from "./components/HtmlRenderer";
 import { JsonRenderer } from "./components/JsonRenderer";
 import { MarkdownRenderer } from "./components/MarkdownRenderer";
 import { MultiStageLoader } from "./components/MultiStageLoader";
+import { NotFoundPage } from "./components/NotFoundPage";
 import { useWalrusContent } from "./hooks/useWalrusContent";
 import { usePress3 } from "./providers/Press3Provider";
 
@@ -38,7 +39,7 @@ export function Page() {
   }
 
   if (!walrusId) {
-    return <div>Page not found: {path}</div>;
+    return <NotFoundPage path={path} />;
   }
 
   if (error) {
