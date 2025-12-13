@@ -25,7 +25,7 @@ export async function handlePublish(flags: Record<string, string | boolean>) {
   }
 
   const mime = lookupMime(filePath) || 'application/octet-stream';
-  const contents = new Uint8Array(await file.arrayBuffer());
+  const contents = await file.bytes();
 
   const walrusFile = WalrusFile.from({
     contents,
