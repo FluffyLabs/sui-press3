@@ -12,7 +12,7 @@ module contract::press3 {
         pages: vector<PageRecord>,
     }
 
-    public struct PageRecord has store {
+    public struct PageRecord has copy, store {
         path: String,
         walrus_id: String,
         editors: vector<address>,
@@ -39,11 +39,14 @@ module contract::press3 {
         let admin = sui::tx_context::sender(ctx);
         let mut admins = vector::empty<address>();
         admins.push_back(admin);
-        let state = Press3 {
+        let mut state = Press3 {
             id: sui::object::new(ctx),
             admins,
             pages: vector::empty<PageRecord>(),
         };
+        state.register_top_level("/", "Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU", ctx);
+        state.register_top_level("/index.html", "Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU", ctx);
+        state.register_top_level("/article.md", "1uJVmO-79L9ZefNxKYJz8239OGFdNFgk9oXQZV5OBkg", ctx);
         event::emit(Press3InitializedEvent { admin });
         sui::transfer::share_object(state);
     }
@@ -86,6 +89,11 @@ module contract::press3 {
     /// Returns the number of registered pages.
     entry fun pages_count(state: &Press3): u64 {
         state.pages.length()
+    }
+
+    /// Returns all pages registered in the contract.
+    public fun pages(state: &Press3): vector<PageRecord> {
+        state.pages
     }
 
     /// Returns the configured editors for off-chain tooling. Sanity checks if we query the right page.
