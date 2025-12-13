@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Dev from "./Dev";
-import Home from "./Home";
+import { Page } from "./Page";
 import { Press3Provider } from "./providers/Press3Provider";
 
 const DEFAULT_PACKAGE_ID =
@@ -15,8 +15,8 @@ function App() {
     <Press3Provider packageId={getPackageId()}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
           <Route path="/dev" element={<Dev />} />
+          <Route path="*" element={<Page />} />
         </Routes>
       </BrowserRouter>
     </Press3Provider>

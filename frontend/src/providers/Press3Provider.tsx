@@ -92,7 +92,3 @@ export function usePress3() {
   }
   return context;
 }
-
-export function usePress3Pages(): Map<string, string> {
-  return usePress3().pages;
-}

@@ -4,7 +4,7 @@ import { HtmlRenderer } from "./components/HtmlRenderer";
 import { JsonRenderer } from "./components/JsonRenderer";
 import { MarkdownRenderer } from "./components/MarkdownRenderer";
 import { Menu } from "./components/Menu";
-import { usePress3Pages } from "./providers/Press3Provider";
+import { usePress3 } from "./providers/Press3Provider";
 import { getFile } from "./services/walrus";
 
 type Renderer = "html" | "markdown" | "json";
@@ -75,7 +75,7 @@ const ASSET_BINDINGS = [
 
 function Dev() {
   const [selectedPath, setSelectedPath] = useState(PAGE_EVENTS[0]?.path ?? "");
-  const pages = usePress3Pages();
+  const pages = usePress3().pages;
 
   console.log(pages);
   // Test Walrus fetch
