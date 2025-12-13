@@ -22,7 +22,6 @@ jobs:
       working-directory: frontend
       network: testnet
       epochs: 2
-      DIST: frontend/dist
       SUI_ADDRESS: ${{ vars.SUI_ADDRESS }}
     secrets:
       SUI_KEYSTORE: ${{ secrets.SUI_KEYSTORE }}
