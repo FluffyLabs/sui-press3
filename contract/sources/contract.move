@@ -44,9 +44,9 @@ module contract::press3 {
             admins,
             pages: vector::empty<PageRecord>(),
         };
-        state.register_top_level("/", "Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU", ctx);
-        state.register_top_level("/index.html", "Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU", ctx);
-        state.register_top_level("/article.md", "1uJVmO-79L9ZefNxKYJz8239OGFdNFgk9oXQZV5OBkg", ctx);
+        state.register_page("/", "Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU", ctx);
+        state.register_page("/index.html", "Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU", ctx);
+        state.register_page("/article.md", "1uJVmO-79L9ZefNxKYJz8239OGFdNFgk9oXQZV5OBkg", ctx);
         event::emit(Press3InitializedEvent { admin });
         sui::transfer::share_object(state);
     }
@@ -60,7 +60,7 @@ module contract::press3 {
         state: &mut Press3,
         path: String,
         walrus_id: String,
-        ctx: &mut sui::tx_context::TxContext,
+        ctx: &sui::tx_context::TxContext,
     ) {
         assert_admin(state, ctx);
 
@@ -111,7 +111,7 @@ module contract::press3 {
     entry fun set_admin(
         state: &mut Press3,
         new_admins: vector<address>,
-        ctx: &mut sui::tx_context::TxContext,
+        ctx: &sui::tx_context::TxContext,
     ) {
         assert_admin(state, ctx);
         state.admins = new_admins;
@@ -123,7 +123,7 @@ module contract::press3 {
         page_index: u64,
         page_path: String,
         new_editors: vector<address>,
-        ctx: &mut sui::tx_context::TxContext,
+        ctx: &sui::tx_context::TxContext,
     ) {
         assert_admin(state, ctx);
         let page = vector::borrow_mut(&mut state.pages, page_index);
@@ -137,7 +137,7 @@ module contract::press3 {
         page_index: u64,
         page_path: String,
         new_walrus_id: String,
-        ctx: &mut sui::tx_context::TxContext,
+        ctx: &sui::tx_context::TxContext,
     ) {
         let page = vector::borrow_mut(&mut state.pages, page_index);
         assert!(page.path == page_path, E_INVALID_PAGE_PATH);
