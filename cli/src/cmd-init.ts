@@ -12,7 +12,7 @@ import {
   publishMovePackage,
   readCompiledModules,
   readPackageDependencies,
-  registerHomepage,
+  registerPage,
 } from './sui';
 import { ensurePathExists } from './utils';
 import {
@@ -29,13 +29,12 @@ interface InitConfig {
 }
 
 export async function handleInit(flags: Record<string, string | boolean>) {
-  const dryRun = Boolean(flags['dry-run']);
   const outputPath = (flags.output as string) || 'press3.config.yaml';
 
   const config = DEFAULT_CONFIG;
   logStep(
     'Init',
-    `Initializing Press3 on ${config.sui.network} ${dryRun ? '(dry-run)' : ''}`
+    `Initializing Press3 on ${config.sui.network}`
   );
 
   // Step 1: Build and deploy frontend to Walrus
@@ -51,11 +50,6 @@ export async function handleInit(flags: Record<string, string | boolean>) {
     entryPath: quiltEntryPoint,
   });
   logStep('Init', `Bundled ${files.length} files from ${quiltAssetsDir}`);
-
-  if (dryRun) {
-    logStep('Init', 'Dry run enabled, skipping deployment');
-    return;
-  }
 
   // Deploy to Walrus
   logStep('Init', 'Deploying frontend to Walrus...');
@@ -118,11 +112,12 @@ export async function handleInit(flags: Record<string, string | boolean>) {
 
   // Step 3: Register homepage with Walrus blob
   logStep('Init', 'Registering homepage...');
-  const registerResult = await registerHomepage({
+  const registerResult = await registerPage({
     client: suiClient,
     signer,
     packageId,
     press3ObjectId,
+    pagePath: "/",
     walrusId,
   });
 

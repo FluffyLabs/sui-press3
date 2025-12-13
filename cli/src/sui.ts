@@ -225,14 +225,15 @@ async function waitForPackage(
 /**
  * Register the homepage ("/") with a walrus_id using a PTB
  */
-export async function registerHomepage(options: {
+export async function registerPage(options: {
   client: SuiClient;
   signer: Ed25519Keypair;
   packageId: string;
   press3ObjectId: string;
+  pagePath: string;
   walrusId: string;
 }): Promise<SuiPublishResult> {
-  const { client, signer, packageId, press3ObjectId, walrusId } = options;
+  const { client, signer, packageId, press3ObjectId, pagePath, walrusId } = options;
 
   // Wait for the package to be indexed before calling Move functions
   await waitForPackage(client, packageId);
@@ -240,10 +241,10 @@ export async function registerHomepage(options: {
   const tx = new Transaction();
 
   tx.moveCall({
-    target: `${packageId}::press3::register_top_level`,
+    target: `${packageId}::press3::register_page`,
     arguments: [
       tx.object(press3ObjectId),
-      tx.pure.string('/'),
+      tx.pure.string(pagePath),
       tx.pure.string(walrusId),
     ],
   });
