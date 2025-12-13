@@ -1,8 +1,8 @@
 import { join } from 'node:path';
 
-import { DEFAULT_CONFIG } from '../config';
-import { logStep } from '../logger';
-import { ensurePathExists } from '../utils';
+import { DEFAULT_CONFIG } from './config';
+import { logStep } from './logger';
+import { ensurePathExists } from './utils';
 import {
   createWalrusClient,
   loadPublisherKeypair,

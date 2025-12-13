@@ -1,7 +1,14 @@
-import { handleDeploy } from './deploy';
+import { handleDeploy } from './cmd-deploy';
+import { handlePublish } from './cmd-publish';
 import { logStep } from './logger';
 
-type Command = 'deploy' | 'assign-domain' | 'renew' | 'index' | 'help';
+type Command =
+  | 'deploy'
+  | 'publish'
+  | 'assign-domain'
+  | 'renew'
+  | 'index'
+  | 'help';
 
 type ParsedArgs = {
   command: Command;
@@ -16,6 +23,7 @@ Usage:
 
 Commands:
   deploy         Upload a Walrus site bundle and update the Move contract
+  publish        Upload a single file to Walrus and get the blob ID
   assign-domain  Attach a DNS/NS record to a Walrus site
   renew          Proactively renew Walrus blobs for a deployment
   index          Build the off-chain search index and publish it
@@ -25,6 +33,9 @@ Global options:
 
 Deploy options:
   --use-sdk          Use the SDK for deployment instead of site-builder
+
+Publish options:
+  --file             Path to the file to publish (required)
 `;
 
 function parseArgs(argv: string[]): ParsedArgs {
@@ -49,7 +60,9 @@ function parseArgs(argv: string[]): ParsedArgs {
   }
 
   return {
-    command: ['deploy', 'assign-domain', 'renew', 'index'].includes(command)
+    command: ['deploy', 'publish', 'assign-domain', 'renew', 'index'].includes(
+      command
+    )
       ? (command as Command)
       : 'help',
     flags,
@@ -61,6 +74,9 @@ export async function run() {
   switch (command) {
     case 'deploy':
       await handleDeploy(flags);
+      break;
+    case 'publish':
+      await handlePublish(flags);
       break;
     case 'assign-domain':
       await handleAssignDomain(flags);
