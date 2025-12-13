@@ -4,7 +4,9 @@ import { HtmlRenderer } from "./components/HtmlRenderer";
 import { JsonRenderer } from "./components/JsonRenderer";
 import { MarkdownRenderer } from "./components/MarkdownRenderer";
 import { Menu } from "./components/Menu";
+import { Sidebar } from "./components/Sidebar";
 import { getFile } from "./services/walrus";
+import type { TocItem } from "./utils/rehype-collect-headings";
 
 type Renderer = "html" | "markdown" | "json";
 
@@ -100,6 +102,7 @@ function App() {
   } | null>(null);
   const [menu, setMenu] = useState<MenuSchema | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [tocItems, setTocItems] = useState<TocItem[]>([]);
 
   const activeEvent = useMemo(() => {
     const event = PAGE_EVENTS.find((evt) => evt.path === selectedPath);
@@ -133,6 +136,11 @@ function App() {
     return () => {
       cancelled = true;
     };
+  }, [activeEvent]);
+
+  // Reset TOC when content changes
+  useEffect(() => {
+    setTocItems([]);
   }, [activeEvent]);
 
   useEffect(() => {
@@ -183,7 +191,9 @@ function App() {
 
   return (
     <div className="app">
-      <header>
+      <Sidebar tocItems={tocItems} />
+      <div className="app-main">
+        <header>
         <div className="header-top">
           <h1>Press3 Frontend Sandbox</h1>
           {menu && menu.length > 0 && (
@@ -270,10 +280,16 @@ function App() {
                 {fetchedContent ? (
                   <div className="rendered-content">
                     {activeEvent.renderer === "html" && (
-                      <HtmlRenderer content={fetchedContent.content} />
+                      <HtmlRenderer
+                        content={fetchedContent.content}
+                        onTocExtracted={setTocItems}
+                      />
                     )}
                     {activeEvent.renderer === "markdown" && (
-                      <MarkdownRenderer content={fetchedContent.content} />
+                      <MarkdownRenderer
+                        content={fetchedContent.content}
+                        onTocExtracted={setTocItems}
+                      />
                     )}
                     {activeEvent.renderer === "json" &&
                       activeEvent.path !== "/menu" && (
@@ -338,6 +354,7 @@ function App() {
           Walrus fetchers, and integrate the zkLogin-aware editing UX.
         </p>
       </footer>
+      </div>
     </div>
   );
 }
