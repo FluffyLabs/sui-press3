@@ -7,14 +7,14 @@ Utility entry point for automating deployments, renewals, and indexing for the P
 ```bash
 # Deploy frontend to Walrus
 bun run press3 deploy
-bun run press3 deploy --use-sdk  # Deploy using SDK instead of site-builder
+bun run press3 deploy --use-cli  # Deploy using site-builder instead of SDK
 
 # Publish a single file to Walrus
 bun run press3 publish --file path/to/file.txt
 
 # Build and publish the Move contract to SUI
-bun run press3 contract                  # Uses sui CLI (requires active sui client config)
-bun run press3 contract --use-sdk        # Uses SDK with WALRUS_PUBLISH_SECRET
+bun run press3 contract                  # Uses SDK with WALRUS_PUBLISH_SECRET (default)
+bun run press3 contract --use-cli        # Uses sui CLI (requires active sui client config)
 bun run press3 contract --dry-run        # Build only, skip publishing
 
 # Domain management
@@ -41,7 +41,7 @@ WALRUS_NETWORK=testnet
 
 ### Environment Variables
 
-- **WALRUS_PUBLISH_SECRET** - Your Sui private key for publishing to Walrus and SUI (required for `--use-sdk` mode)
+- **WALRUS_PUBLISH_SECRET** - Your Sui private key for publishing to Walrus and SUI (required for SDK mode, which is the default)
   - Supports multiple formats: `suiprivkey1...`, `ed25519:...`, `0x...` (hex), or base64
 - **WALRUS_EPOCHS** - Number of epochs to store blobs (default: 1, must be a positive integer)
 - **WALRUS_NETWORK** - Target network for both Walrus and SUI operations (default: `testnet`, options: `testnet`, `mainnet`)
