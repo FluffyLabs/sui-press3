@@ -52,6 +52,10 @@ Retrieve options:
 
 Contract options:
   --use-cli          Use sui CLI instead of SDK with WALRUS_PUBLISH_SECRET
+
+Init options:
+  --home             Walrus Blob ID to set as homepage (required)
+  --output           Path to save the configuration file (default: press3.init.log)
 `;
 
 function parseArgs(argv: string[]): ParsedArgs {

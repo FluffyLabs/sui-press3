@@ -30,9 +30,15 @@ interface InitConfig {
 
 export async function handleInit(flags: Record<string, string | boolean>) {
   const outputPath = (flags.output as string) || 'press3.init.log';
+  const homepageBlobId = flags.home as string | undefined;
 
   const config = DEFAULT_CONFIG;
   logStep('Init', `Initializing Press3 on ${config.walrus.network}`);
+
+  if (!homepageBlobId) {
+    logStep('Init', `Homepage Blob ID is required, and not provided`);
+    process.exit(1);
+  }
 
   // Step 1: Build and deploy frontend to Walrus
   logStep('Init', 'Building frontend...');
@@ -115,7 +121,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
     packageId,
     press3ObjectId,
     pagePath: '/',
-    walrusId,
+    walrusId: homepageBlobId,
   });
 
   logStep(
