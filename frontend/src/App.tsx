@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { HashRouter, Route, Routes } from "react-router-dom";
 import Dev from "./Dev";
 import { Page } from "./Page";
 import { Press3Provider } from "./providers/Press3Provider";
@@ -13,12 +13,12 @@ function getPackageId(): string {
 function App() {
   return (
     <Press3Provider packageId={getPackageId()}>
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           <Route path="/dev" element={<Dev />} />
           <Route path="*" element={<Page />} />
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </Press3Provider>
   );
 }
