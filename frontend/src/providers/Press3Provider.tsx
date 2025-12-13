@@ -17,6 +17,11 @@ interface Press3ContextValue {
   isLoading: boolean;
   error: Error | null;
   packageId: string;
+  admins: string[];
+  press3ObjectId: string | null;
+  getPageWithIndex: (
+    path: string,
+  ) => { walrusId: string; index: number; editors: string[] } | null;
 }
 
 const Press3Context = createContext<Press3ContextValue | null>(null);
@@ -30,6 +35,11 @@ export function Press3Provider({ packageId, children }: Press3ProviderProps) {
   const [pages, setPages] = useState<Map<string, string>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [admins, setAdmins] = useState<string[]>([]);
+  const [press3ObjectId, setPress3ObjectId] = useState<string | null>(null);
+  const [pageRecords, setPageRecords] = useState<
+    Array<{ path: string; walrusId: string; editors: string[] }>
+  >([]);
 
   // Fetch initial state
   useEffect(() => {
@@ -48,6 +58,9 @@ export function Press3Provider({ packageId, children }: Press3ProviderProps) {
           pagesMap.set(page.path, page.walrusId);
         }
         setPages(pagesMap);
+        setAdmins(state.admins);
+        setPress3ObjectId(objectId);
+        setPageRecords(state.pages);
         setIsLoading(false);
       } catch (err) {
         if (!cancelled) {
@@ -98,8 +111,28 @@ export function Press3Provider({ packageId, children }: Press3ProviderProps) {
     return () => clearTimeout(timeout);
   }, [pages]);
 
+  const getPageWithIndex = (path: string) => {
+    const index = pageRecords.findIndex((p) => p.path === path);
+    if (index === -1) return null;
+    return {
+      walrusId: pageRecords[index].walrusId,
+      index,
+      editors: pageRecords[index].editors,
+    };
+  };
+
   return (
-    <Press3Context.Provider value={{ pages, isLoading, error, packageId }}>
+    <Press3Context.Provider
+      value={{
+        pages,
+        isLoading,
+        error,
+        packageId,
+        admins,
+        press3ObjectId,
+        getPageWithIndex,
+      }}
+    >
       {children}
     </Press3Context.Provider>
   );
