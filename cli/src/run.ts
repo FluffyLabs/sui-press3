@@ -1,3 +1,4 @@
+import { handleContract } from './cmd-contract';
 import { handleDeploy } from './cmd-deploy';
 import { handlePublish } from './cmd-publish';
 import { logStep } from './logger';
@@ -5,6 +6,7 @@ import { logStep } from './logger';
 type Command =
   | 'deploy'
   | 'publish'
+  | 'contract'
   | 'assign-domain'
   | 'renew'
   | 'index'
@@ -24,6 +26,7 @@ Usage:
 Commands:
   deploy         Upload a Walrus site bundle and update the Move contract
   publish        Upload a single file to Walrus and get the blob ID
+  contract       Build and publish the Move contract to SUI
   assign-domain  Attach a DNS/NS record to a Walrus site
   renew          Proactively renew Walrus blobs for a deployment
   index          Build the off-chain search index and publish it
@@ -36,6 +39,9 @@ Deploy options:
 
 Publish options:
   --file             Path to the file to publish (required)
+
+Contract options:
+  --use-sdk          Use WALRUS_PUBLISH_SECRET from .env instead of sui CLI
 `;
 
 function parseArgs(argv: string[]): ParsedArgs {
@@ -60,9 +66,14 @@ function parseArgs(argv: string[]): ParsedArgs {
   }
 
   return {
-    command: ['deploy', 'publish', 'assign-domain', 'renew', 'index'].includes(
-      command
-    )
+    command: [
+      'deploy',
+      'publish',
+      'contract',
+      'assign-domain',
+      'renew',
+      'index',
+    ].includes(command)
       ? (command as Command)
       : 'help',
     flags,
@@ -77,6 +88,9 @@ export async function run() {
       break;
     case 'publish':
       await handlePublish(flags);
+      break;
+    case 'contract':
+      await handleContract(flags);
       break;
     case 'assign-domain':
       await handleAssignDomain(flags);
