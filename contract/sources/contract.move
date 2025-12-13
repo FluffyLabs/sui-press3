@@ -39,7 +39,7 @@ module contract::press3 {
         let admin = sui::tx_context::sender(ctx);
         let mut admins = vector::empty<address>();
         admins.push_back(admin);
-        let mut state = Press3 {
+        let state = Press3 {
             id: sui::object::new(ctx),
             admins,
             pages: vector::empty<PageRecord>(),

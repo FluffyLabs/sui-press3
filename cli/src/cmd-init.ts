@@ -172,7 +172,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
       packageId,
       press3ObjectId,
       pagePath: '/',
-      walrusId: homepageBlobId,
+      walrusId: homepageBlobId!,
     });
 
     logStep(
