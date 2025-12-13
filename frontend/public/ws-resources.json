@@ -1,0 +1,21 @@
+{
+  "headers": {
+    "/index.html": {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "max-age=3500"
+    }
+  },
+  "routes": {
+    "/*": "/index.html"
+  },
+  "metadata": {
+    "link": "https://press3.fluffylabs.dev",
+    "image_url": "https://press3.fluffylabs.dev/press3-sig-128.png",
+    "description": "Press3 - Decentralized CMS",
+    "project_url": "https://github.com/fluffylabs/sui-press3/",
+    "creator": "Fluffy Labs"
+  },
+  "site_name": "Press3 - Decentralized CMS",
+  "object_id": "0x6ba69659a35f0374246931cd99b39254bac2984dfd89dfc1dc4b79fb045d02ea",
+  "ignore": []
+}

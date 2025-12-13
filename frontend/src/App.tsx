@@ -3,12 +3,13 @@ import Admin from "./admin/Admin";
 import { PageEditor } from "./admin/components/PageEditor";
 import Dev from "./Dev";
 import { Page } from "./Page";
+import { LayoutProvider } from "./providers/LayoutProvider";
 import { Press3Provider } from "./providers/Press3Provider";
 import { WalletProvider } from "./providers/WalletProvider";
 import "@fluffylabs/shared-ui/style.css";
 
 const DEFAULT_PACKAGE_ID =
-  "0xc394806a04aca8aecae8f8550d1a535f8d880924444da2bca0c8066e11e88ca5";
+  "0xb23a6a6687bd1af39d5a2ac6739a7d36e331d6b0b39446101a59748c65ba58a8";
 
 function getPackageId(): string {
   // Priority: localStorage > env variable > hardcoded default
@@ -24,12 +25,14 @@ function App() {
     <WalletProvider>
       <Press3Provider packageId={getPackageId()}>
         <BrowserRouter>
-          <Routes>
-            <Route path="/dev" element={<Dev />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/admin/edit/:pageId" element={<PageEditor />} />
-            <Route path="*" element={<Page />} />
-          </Routes>
+          <LayoutProvider>
+            <Routes>
+              <Route path="/dev" element={<Dev />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/admin/edit/:pageId" element={<PageEditor />} />
+              <Route path="*" element={<Page />} />
+            </Routes>
+          </LayoutProvider>
         </BrowserRouter>
       </Press3Provider>
     </WalletProvider>
