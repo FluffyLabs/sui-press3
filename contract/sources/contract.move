@@ -5,9 +5,7 @@ module contract::press3 {
 
     const E_NOT_ADMIN: u64 = 0;
     const E_NOT_EDITOR: u64 = 1;
-    const E_CANNOT_REMOVE_SELF: u64 = 2;
-    const E_ADMIN_NOT_FOUND: u64 = 3;
-    const E_EDITOR_NOT_FOUND: u64 = 4;
+    const E_INVALID_PAGE_PATH: u64 = 2;
 
     public struct Press3 has key {
         id: sui::object::UID,
@@ -97,69 +95,39 @@ module contract::press3 {
         state.admins
     }
 
+    /// Returns the configured editors for off-chain tooling. Sanity checks if we query the right page.
+    public fun editors(state: &Press3, page_index: u64, page_path: String): vector<address> {
+        let page = vector::borrow(&state.pages, page_index);
+        assert!(page.path == page_path, E_INVALID_PAGE_PATH);
+        page.editors
+    }
+
     fun assert_admin(state: &Press3, ctx: &sui::tx_context::TxContext) {
         assert!(state.admins.contains(&sui::tx_context::sender(ctx)), E_NOT_ADMIN);
     }
 
-    /// Adds a new admin. Only existing admins can add new admins.
-    public fun add_admin(
+    /// Sets admins. Only existing admins can set admins.
+    public fun set_admin(
         state: &mut Press3,
-        new_admin: address,
+        new_admins: vector<address>,
         ctx: &mut sui::tx_context::TxContext,
     ) {
         assert_admin(state, ctx);
-        if (!state.admins.contains(&new_admin)) {
-            state.admins.push_back(new_admin);
-        };
+        state.admins = new_admins;
     }
 
-    /// Removes an admin. Only existing admins can remove admins.
-    /// Admins cannot remove themselves.
-    public fun remove_admin(
-        state: &mut Press3,
-        admin_to_remove: address,
-        ctx: &mut sui::tx_context::TxContext,
-    ) {
-        assert_admin(state, ctx);
-        let sender = sui::tx_context::sender(ctx);
-
-        // Prevent self-removal
-        assert!(sender != admin_to_remove, E_CANNOT_REMOVE_SELF);
-
-        let (found, index) = state.admins.index_of(&admin_to_remove);
-        assert!(found, E_ADMIN_NOT_FOUND);
-        state.admins.remove(index);
-    }
-
-    /// Adds an editor to a specific page. Only admins can add editors.
-    public fun add_editor(
+    /// Set editors to a specific page. Only admins can set editors.
+    public fun set_editor(
         state: &mut Press3,
         page_index: u64,
-        new_editor: address,
+        page_path: String,
+        new_editors: vector<address>,
         ctx: &mut sui::tx_context::TxContext,
     ) {
         assert_admin(state, ctx);
         let page = vector::borrow_mut(&mut state.pages, page_index);
-
-        // Add editor if not already in the list
-        if (!page.editors.contains(&new_editor)) {
-            page.editors.push_back(new_editor);
-        };
-    }
-
-    /// Removes an editor from a specific page. Only admins can remove editors.
-    public fun remove_editor(
-        state: &mut Press3,
-        page_index: u64,
-        editor_to_remove: address,
-        ctx: &mut sui::tx_context::TxContext,
-    ) {
-        assert_admin(state, ctx);
-        let page = vector::borrow_mut(&mut state.pages, page_index);
-
-        let (found, index) = page.editors.index_of(&editor_to_remove);
-        assert!(found, E_EDITOR_NOT_FOUND);
-        page.editors.remove(index);
+        assert!(page.path == page_path, E_INVALID_PAGE_PATH);
+        page.editors = new_editors;
     }
 
     /// Updates the walrus_id for a specific page. Only admins and editors can update.
