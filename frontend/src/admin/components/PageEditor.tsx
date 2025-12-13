@@ -124,7 +124,7 @@ export function PageEditor() {
           <Input
             id="path"
             value={path}
-            onChange={(e) => setPath(e.target.value)}
+            disabled
             placeholder="/path/to/page.html"
           />
         </div>
