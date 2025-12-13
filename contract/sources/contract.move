@@ -31,6 +31,12 @@ module contract::press3 {
         editors: vector<address>,
     }
 
+    public struct PageUpdatedEvent has copy, drop {
+        path: String,
+        old_walrus_id: String,
+        new_walrus_id: String,
+    }
+
     /// Initializes a shared Press3 object with the transaction sender as admin.
     fun init(ctx: &mut sui::tx_context::TxContext) {
         let admin = sui::tx_context::sender(ctx);
@@ -125,7 +131,7 @@ module contract::press3 {
         state.admins.remove(index);
     }
 
-    /// Adds an editor to a specific page. Only admins or existing editors can add editors.
+    /// Adds an editor to a specific page. Only admins can add editors.
     public fun add_editor(
         state: &mut Press3,
         page_index: u64,
@@ -141,8 +147,7 @@ module contract::press3 {
         };
     }
 
-    /// Removes an editor from a specific page. Only admins or existing editors can remove editors.
-    /// Editors cannot remove themselves.
+    /// Removes an editor from a specific page. Only admins can remove editors.
     public fun remove_editor(
         state: &mut Press3,
         page_index: u64,
@@ -155,6 +160,30 @@ module contract::press3 {
         let (found, index) = page.editors.index_of(&editor_to_remove);
         assert!(found, E_EDITOR_NOT_FOUND);
         page.editors.remove(index);
+    }
+
+    /// Updates the walrus_id for a specific page. Only admins and editors can update.
+    public fun update_page_walrus_id(
+        state: &mut Press3,
+        page_index: u64,
+        new_walrus_id: String,
+        ctx: &mut sui::tx_context::TxContext,
+    ) {
+        let page = vector::borrow_mut(&mut state.pages, page_index);
+
+        let sender = sui::tx_context::sender(ctx);
+        let is_admin = state.admins.contains(&sender);
+        let is_editor = page.editors.contains(&sender);
+        assert!(is_admin || is_editor, E_NOT_EDITOR);
+
+        let old_walrus_id = page.walrus_id;
+        page.walrus_id = new_walrus_id;
+
+        event::emit(PageUpdatedEvent {
+            path: page.path,
+            old_walrus_id,
+            new_walrus_id,
+        });
     }
 
     /// A naive helper that ensures the provided path represents `/foo` style
