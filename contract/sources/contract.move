@@ -150,11 +150,7 @@ module contract::press3 {
         ctx: &mut sui::tx_context::TxContext,
     ) {
         assert_admin(state, ctx);
-        let sender = sui::tx_context::sender(ctx);
         let page = vector::borrow_mut(&mut state.pages, page_index);
-
-        // Prevent self-removal
-        assert!(sender != editor_to_remove, E_CANNOT_REMOVE_SELF);
 
         let (found, index) = page.editors.index_of(&editor_to_remove);
         assert!(found, E_EDITOR_NOT_FOUND);
