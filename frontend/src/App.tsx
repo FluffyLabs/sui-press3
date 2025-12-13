@@ -3,6 +3,7 @@ import "./App.css";
 import { HtmlRenderer } from "./components/HtmlRenderer";
 import { JsonRenderer } from "./components/JsonRenderer";
 import { MarkdownRenderer } from "./components/MarkdownRenderer";
+import { Menu } from "./components/Menu";
 
 type Renderer = "html" | "markdown" | "json";
 
@@ -13,16 +14,12 @@ type PageEvent = {
   updatedAt: string;
 };
 
-type MenuSchema = {
-  main: Array<{ label: string; href: string }>;
-  sidebar: Array<{ label: string; href: string }>;
-};
+export type MenuSchema = Array<{ label: string; url: string; target: string }>;
 
 function getRenderer(path: string): Renderer | null {
   if (path.endsWith(".html")) return "html";
   if (path.endsWith(".md")) return "markdown";
-  if (path.endsWith(".json") || path === "/menu" || path === "/sidebar")
-    return "json";
+  if (path.endsWith(".json")) return "json";
   return null;
 }
 
@@ -34,7 +31,7 @@ async function mockFetchContent(walrusId: string): Promise<string> {
     case "walrus://blob/wiki-page":
       return "# Press3 Wiki\n\nThis is a decentralized CMS built on SUI.";
     case "walrus://blob/navigation":
-      return '{"main":[{"label":"Home","href":"/"},{"label":"Docs","href":"/docs"}],"sidebar":[{"label":"Latest","href":"/news"}]}';
+      return '[{"label":"Home","url":"/","target":"_self"},{"label":"Docs","url":"/docs","target":"_self"}]';
     default:
       return "Content not found";
   }
@@ -61,23 +58,15 @@ const PAGE_EVENTS: PageEvent[] = [
   },
 ];
 
-const MENU_SCHEMA: MenuSchema = {
-  main: [
-    { label: "Home", href: "/" },
-    { label: "Docs", href: "/docs" },
-    { label: "Forum", href: "/forum" },
-  ],
-  sidebar: [
-    { label: "Latest", href: "/news" },
-    { label: "Topics", href: "/topics" },
-    { label: "Search", href: "/search" },
-  ],
-};
+const MENU_SCHEMA: MenuSchema = [
+  { label: "Home", url: "/", target: "_self" },
+  { label: "Docs", url: "/docs", target: "_self" },
+  { label: "Forum", url: "/forum", target: "_self" },
+];
 
 const ASSET_BINDINGS = [
   { logicalPath: "/style.css", walrusId: "walrus://blob/theme" },
   { logicalPath: "/logo.png", walrusId: "walrus://blob/brandmark" },
-  { logicalPath: "/sidebar", walrusId: "walrus://blob/sidebar" },
 ];
 
 function App() {
@@ -91,6 +80,8 @@ function App() {
     walrusId: string;
     content: string;
   } | null>(null);
+  const [menu, setMenu] = useState<MenuSchema | null>(null);
+
   const activeEvent = useMemo(() => {
     const event = PAGE_EVENTS.find((evt) => evt.path === selectedPath);
     if (event) {
@@ -98,6 +89,10 @@ function App() {
     }
     return null;
   }, [selectedPath]);
+
+  const menuEvent = useMemo(() => {
+    return PAGE_EVENTS.find((evt) => evt.path === "/menu");
+  }, []);
 
   useEffect(() => {
     if (!activeEvent) {
@@ -121,6 +116,36 @@ function App() {
     };
   }, [activeEvent]);
 
+  useEffect(() => {
+    if (!menuEvent) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchMenu = async () => {
+      const content = await mockFetchContent(menuEvent.walrusId);
+      if (!cancelled) {
+        try {
+          const parsedMenu: MenuSchema = JSON.parse(content);
+          if (Array.isArray(parsedMenu) && parsedMenu.length > 0) {
+            setMenu(parsedMenu);
+          } else {
+            setMenu(null);
+          }
+        } catch {
+          setMenu(null);
+        }
+      }
+    };
+
+    fetchMenu();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [menuEvent]);
+
   return (
     <div className="app">
       <header>
@@ -130,6 +155,7 @@ function App() {
           CMS events to Walrus blobs, menu metadata, and smart-contract driven
           assets.
         </p>
+        {menu && menu.length > 0 && <Menu menu={menu} />}
       </header>
 
       <section className="panel">
@@ -197,8 +223,12 @@ function App() {
                     {activeEvent.renderer === "markdown" && (
                       <MarkdownRenderer content={fetchedContent.content} />
                     )}
-                    {activeEvent.renderer === "json" && (
-                      <JsonRenderer content={fetchedContent.content} />
+                    {activeEvent.renderer === "json" &&
+                      activeEvent.path !== "/menu" && (
+                        <JsonRenderer content={fetchedContent.content} />
+                      )}
+                    {activeEvent.path === "/menu" && (
+                      <p>Menu is rendered as a navigation component above.</p>
                     )}
                   </div>
                 ) : (
@@ -208,7 +238,7 @@ function App() {
             </div>
             <p className="preview-description">
               Replace this card with the actual Walrus fetch logic. The renderer
-              should hydrate menu/sidebar JSON automatically and inject resolved
+              should hydrate menu JSON automatically and inject resolved
               assets (CSS, images, etc.) after querying the contract.
             </p>
           </div>
@@ -219,8 +249,8 @@ function App() {
 
       <section className="panel">
         <div className="panel-heading">
-          <h2>Menu & sidebar schema</h2>
-          <span className="hint">served from /menu and /sidebar blobs</span>
+          <h2>Menu schema</h2>
+          <span className="hint">served from /menu blob</span>
         </div>
         <pre className="code-block">{JSON.stringify(MENU_SCHEMA, null, 2)}</pre>
       </section>
