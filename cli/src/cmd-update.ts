@@ -1,9 +1,4 @@
-import {
-  DEFAULT_CONFIG,
-  fileExists,
-  PRESS3_CONF_NAME,
-  type Press3Config,
-} from './config';
+import { DEFAULT_CONFIG, PRESS3_CONF_NAME, type Press3Config } from './config';
 import { logStep } from './logger';
 import {
   createSuiClient,
@@ -12,12 +7,11 @@ import {
   registerPage,
   updatePage,
 } from './sui';
+import { ensurePathExists } from './utils';
 import { loadPublisherKeypair } from './walrus';
 
 export async function handleUpdate(flags: Record<string, string | boolean>) {
-  if (!(await fileExists(PRESS3_CONF_NAME))) {
-    throw new Error('Missing press3.config.yml');
-  }
+  await ensurePathExists(PRESS3_CONF_NAME, 'Press3 config file');
   const { package_id: packageId, press3_object_id: press3ObjectId } =
     Bun.YAML.parse(await Bun.file(PRESS3_CONF_NAME).text()) as Press3Config;
   const pagePath = flags.path as string;

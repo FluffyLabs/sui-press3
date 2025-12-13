@@ -47,7 +47,3 @@ export const DEFAULT_CONFIG = {
     deletable: true,
   },
 };
-
-export async function fileExists(path: string): Promise<boolean> {
-  return Bun.file(path).exists();
-}

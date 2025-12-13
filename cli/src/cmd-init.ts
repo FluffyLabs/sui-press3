@@ -1,12 +1,7 @@
 import { promises as fs } from 'node:fs';
 import { join } from 'node:path';
 
-import {
-  DEFAULT_CONFIG,
-  fileExists,
-  PRESS3_CONF_NAME,
-  type Press3Config,
-} from './config';
+import { DEFAULT_CONFIG, PRESS3_CONF_NAME, type Press3Config } from './config';
 import { logStep } from './logger';
 import {
   buildMoveContract,
@@ -19,7 +14,7 @@ import {
   readPackageDependencies,
   registerPage,
 } from './sui';
-import { ensurePathExists } from './utils';
+import { ensurePathExists, fileExists } from './utils';
 import {
   createWalrusClient,
   loadPublisherKeypair,

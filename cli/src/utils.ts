@@ -6,6 +6,10 @@ export async function ensurePathExists(path: string, label: string) {
   }
 }
 
+export async function fileExists(path: string): Promise<boolean> {
+  return Bun.file(path).exists();
+}
+
 export function hexToBytes(value: string) {
   if (value.length % 2 !== 0) {
     throw new Error('Hex-encoded secrets must have an even length.');
