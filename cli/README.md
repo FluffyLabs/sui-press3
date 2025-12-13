@@ -5,14 +5,29 @@ Utility entry point for automating deployments, renewals, and indexing for the P
 ## Commands
 
 ```bash
-bun run index.ts deploy
-bun run index.ts deploy --use-sdk  # Deploy using SDK instead of site-builder
-bun run index.ts assign-domain --domain docs.press3.sui --target walrus://blob/site
-bun run index.ts renew --batch-size 50 --dry-run
-bun run index.ts index --output dist/search-index.json
+# Deploy frontend to Walrus
+bun run press3 deploy
+bun run press3 deploy --use-sdk  # Deploy using SDK instead of site-builder
+
+# Publish a single file to Walrus
+bun run press3 publish --file path/to/file.txt
+
+# Build and publish the Move contract to SUI
+bun run press3 contract                  # Uses sui CLI (requires active sui client config)
+bun run press3 contract --use-sdk        # Uses SDK with WALRUS_PUBLISH_SECRET
+bun run press3 contract --dry-run        # Build only, skip publishing
+
+# Domain management
+bun run press3 assign-domain --domain docs.press3.sui --target walrus://blob/site
+
+# Blob management
+bun run press3 renew --batch-size 50 --dry-run
+
+# Search indexing
+bun run press3 index --output dist/search-index.json
 ```
 
-Each command currently logs the action so the workflows can be wired up while Move + Walrus plumbing is implemented.
+Each command logs its actions. The `contract` command is fully implemented and can publish Move packages to SUI networks.
 
 ## Configuration
 
@@ -26,9 +41,10 @@ WALRUS_NETWORK=testnet
 
 ### Environment Variables
 
-- **WALRUS_PUBLISH_SECRET** - Your Sui private key for publishing to Walrus (required for deployment)
+- **WALRUS_PUBLISH_SECRET** - Your Sui private key for publishing to Walrus and SUI (required for `--use-sdk` mode)
+  - Supports multiple formats: `suiprivkey1...`, `ed25519:...`, `0x...` (hex), or base64
 - **WALRUS_EPOCHS** - Number of epochs to store blobs (default: 1, must be a positive integer)
-- **WALRUS_NETWORK** - Target Walrus network (default: `testnet`, options: `testnet`, `mainnet`)
+- **WALRUS_NETWORK** - Target network for both Walrus and SUI operations (default: `testnet`, options: `testnet`, `mainnet`)
 
 ## Development
 
@@ -41,6 +57,17 @@ bun run build           # Produces dist/press3 binary for deployment
 ```
 
 The lint step is powered by [Biome](https://biomejs.dev/) and matches the settings enforced in CI.
+
+## Project Structure
+
+- **src/cmd-*.ts** - Command handlers for each CLI command
+- **src/sui.ts** - SUI blockchain utilities (contract publishing, client creation)
+- **src/walrus.ts** - Walrus utilities (file uploads, keypair loading)
+- **src/config.ts** - Configuration management and environment variable handling
+  - `frontendDir` - Location of frontend code (default: `../frontend`)
+  - `contractDir` - Location of Move contract (default: `../contract`)
+- **src/logger.ts** - Logging utilities
+- **src/utils.ts** - General utility functions
 
 Roadmap:
 1. Load a shared JSON config (Walrus API keys, contract IDs, domains).
