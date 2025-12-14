@@ -93,14 +93,8 @@ export function RichEditor({
     content,
     onUpdate: ({ editor }) => {
       if (format === "markdown") {
-        // tiptap-markdown adds getMarkdown() directly to editor
-        onChange(
-          (
-            editor as ReturnType<typeof useEditor> & {
-              getMarkdown: () => string;
-            }
-          ).getMarkdown(),
-        );
+        const storage = editor.storage as unknown as { markdown: { getMarkdown: () => string } };
+        onChange(storage.markdown.getMarkdown());
       } else {
         onChange(editor.getHTML());
       }
@@ -110,12 +104,10 @@ export function RichEditor({
   // Sync content from parent
   useEffect(() => {
     if (!editor) return;
-    const editorWithMarkdown = editor as ReturnType<typeof useEditor> & {
-      getMarkdown: () => string;
-    };
+    const storage = editor.storage as unknown as { markdown: { getMarkdown: () => string } };
     const currentContent =
       format === "markdown"
-        ? editorWithMarkdown.getMarkdown()
+        ? storage.markdown.getMarkdown()
         : editor.getHTML();
     if (content !== currentContent) {
       editor.commands.setContent(content);
