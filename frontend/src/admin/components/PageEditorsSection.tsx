@@ -7,7 +7,11 @@ interface PageEditorsSectionProps {
   canEdit?: boolean;
 }
 
-export function PageEditorsSection({ editors, onEditClick, canEdit = false }: PageEditorsSectionProps) {
+export function PageEditorsSection({
+  editors,
+  onEditClick,
+  canEdit = false,
+}: PageEditorsSectionProps) {
   return (
     <div className="mb-5 border border-gray-200 rounded-lg p-4 bg-white">
       <div className="flex items-center justify-between mb-3">
@@ -37,7 +41,8 @@ export function PageEditorsSection({ editors, onEditClick, canEdit = false }: Pa
         </div>
       ) : (
         <div className="text-sm text-gray-500 py-2">
-          No editors assigned yet. {canEdit && onEditClick && "Click 'Edit Editors' to add some."}
+          No editors assigned yet.{" "}
+          {canEdit && onEditClick && "Click 'Edit Editors' to add some."}
         </div>
       )}
     </div>

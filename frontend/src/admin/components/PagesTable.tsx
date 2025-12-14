@@ -80,7 +80,9 @@ export function PagesTable({
       handleDialogOpenChange(false);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : String(error ?? "Unknown error");
+        error instanceof Error
+          ? error.message
+          : String(error ?? "Unknown error");
       setDialogError(message);
     } finally {
       setIsSavingEditors(false);
@@ -220,7 +222,9 @@ export function PagesTable({
                       data-tooltip-content="Edit editors"
                     >
                       <Pencil className="w-4 h-4" />
-                      <span className="sr-only">Edit editors for {page.path}</span>
+                      <span className="sr-only">
+                        Edit editors for {page.path}
+                      </span>
                     </button>
                   )}
                 </div>

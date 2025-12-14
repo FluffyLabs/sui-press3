@@ -28,10 +28,14 @@ export function PageSaveActions({
         </Button>
       </div>
       {!walletConnected && (
-        <p className="text-sm text-gray-500 mt-2">Connect your wallet to save changes</p>
+        <p className="text-sm text-gray-500 mt-2">
+          Connect your wallet to save changes
+        </p>
       )}
       {walletConnected && !canEdit && (
-        <p className="text-sm text-gray-500 mt-2">You don't have permission to edit this page</p>
+        <p className="text-sm text-gray-500 mt-2">
+          You don't have permission to edit this page
+        </p>
       )}
     </>
   );

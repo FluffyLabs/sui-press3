@@ -47,7 +47,9 @@ export function PageEditor() {
   } | null>(null);
   const [editorsDialogOpen, setEditorsDialogOpen] = useState(false);
   const [isSavingEditors, setIsSavingEditors] = useState(false);
-  const [editorsDialogError, setEditorsDialogError] = useState<string | null>(null);
+  const [editorsDialogError, setEditorsDialogError] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!pageId) return;
@@ -219,7 +221,8 @@ export function PageEditor() {
       setPage({ ...page, editors });
       setEditorsDialogOpen(false);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to update editors";
+      const message =
+        error instanceof Error ? error.message : "Failed to update editors";
       setEditorsDialogError(message);
     } finally {
       setIsSavingEditors(false);

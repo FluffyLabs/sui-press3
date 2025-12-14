@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
 import { Button, DialogModal, Input } from "@fluffylabs/shared-ui";
-import { Plus, Trash2, AlertCircle } from "lucide-react";
+import { AlertCircle, Plus, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 interface EditorsDialogProps {
   open: boolean;
@@ -32,8 +32,10 @@ export function EditorsDialog({
 }: EditorsDialogProps) {
   const [slots, setSlots] = useState<string[]>([]);
 
+  // Reset dialog state when opening/closing - intentional setState in effect
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSlots(editors.length ? editors : [""]);
     } else {
       setSlots([]);
@@ -44,7 +46,8 @@ export function EditorsDialog({
   const validationErrors = useMemo(() => {
     return trimmedSlots.map((slot) => {
       if (slot === "") return "Address is required";
-      if (!isValidAddress(slot)) return "Invalid address format (must start with 0x)";
+      if (!isValidAddress(slot))
+        return "Invalid address format (must start with 0x)";
       return null;
     });
   }, [trimmedSlots]);
@@ -81,7 +84,9 @@ export function EditorsDialog({
         <DialogModal.Body className="min-h-[40vh]">
           {pagePath && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 mb-4">
-              <div className="text-xs text-gray-500 font-medium mb-1">PAGE PATH</div>
+              <div className="text-xs text-gray-500 font-medium mb-1">
+                PAGE PATH
+              </div>
               <div className="text-sm font-mono text-gray-900">{pagePath}</div>
             </div>
           )}
@@ -105,7 +110,9 @@ export function EditorsDialog({
             {slots.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 <p className="text-sm mb-2">No editors assigned yet</p>
-                <p className="text-xs text-gray-400">Click "Add Editor" to get started</p>
+                <p className="text-xs text-gray-400">
+                  Click "Add Editor" to get started
+                </p>
               </div>
             )}
 
@@ -115,7 +122,9 @@ export function EditorsDialog({
                   <div className="flex-1">
                     <Input
                       value={slot}
-                      onChange={(event) => handleSlotChange(index, event.target.value)}
+                      onChange={(event) =>
+                        handleSlotChange(index, event.target.value)
+                      }
                       placeholder="0x1234567890abcdef..."
                       className={`font-mono text-sm ${validationErrors[index] && slot ? "border-red-300 focus:border-red-500 focus:ring-red-500" : ""}`}
                     />

@@ -1,5 +1,5 @@
 import { Transaction } from "@mysten/sui/transactions";
-import {getSetEditors} from "../App";
+import { getSetEditors } from "../App";
 
 /**
  * Builds a transaction to update a page's Walrus ID in the smart contract.

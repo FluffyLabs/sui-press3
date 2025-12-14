@@ -1,5 +1,8 @@
 import { Alert, Badge, Button } from "@fluffylabs/shared-ui";
-import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
+import {
+  useCurrentAccount,
+  useSignAndExecuteTransaction,
+} from "@mysten/dapp-kit";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePermissions } from "../hooks/usePermissions";
@@ -66,7 +69,9 @@ function Admin() {
 
     setPages((prev) =>
       prev.map((candidate) =>
-        candidate.id === page.id ? { ...candidate, editors: updatedEditors } : candidate,
+        candidate.id === page.id
+          ? { ...candidate, editors: updatedEditors }
+          : candidate,
       ),
     );
   };
