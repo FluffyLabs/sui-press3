@@ -2,12 +2,12 @@ import type { Transaction } from "@mysten/sui/transactions";
 import { buildUpdatePageTransaction } from "../../services/contract";
 import { uploadContent } from "../../services/walrus";
 
-export type SaveStep = "uploading" | "wallet" | "transaction" | "success";
+export type SaveStep = "registering" | "certifying" | "updating" | "success";
 
 export const SaveStep = {
-  UPLOADING_WALRUS: "uploading" as SaveStep,
-  WAITING_WALLET: "wallet" as SaveStep,
-  SUBMITTING_TX: "transaction" as SaveStep,
+  REGISTERING: "registering" as SaveStep,
+  CERTIFYING: "certifying" as SaveStep,
+  UPDATING: "updating" as SaveStep,
   SUCCESS: "success" as SaveStep,
 };
 
@@ -15,6 +15,8 @@ export interface SaveResult {
   success: boolean;
   transactionDigest?: string;
   newWalrusId?: string;
+  walrusRegisterDigest?: string;
+  walrusCertifyDigest?: string;
   error?: Error;
   failedStep?: SaveStep;
 }
@@ -25,9 +27,10 @@ export interface SavePageContentOptions {
   pageIndex: number;
   pagePath: string;
   content: string;
+  owner: string;
   onProgress: (step: SaveStep) => void;
   signAndExecute: (tx: Transaction) => Promise<{ digest: string }>;
-  epochs?: number;
+  epochs: number;
 }
 
 /**
@@ -47,18 +50,32 @@ export async function savePageContent(
     pageIndex,
     pagePath,
     content,
+    owner,
     onProgress,
     signAndExecute,
-    epochs = 100,
+    epochs,
   } = options;
 
   try {
-    // Step 1: Upload to Walrus
-    onProgress(SaveStep.UPLOADING_WALRUS);
-    const newWalrusId = await uploadContent(content, pagePath, epochs);
+    // Step 1: Register to Walrus
+    onProgress(SaveStep.REGISTERING);
 
-    // Step 2: Build and sign transaction
-    onProgress(SaveStep.WAITING_WALLET);
+    // Step 2: Certify to Walrus (callback will be called from uploadContent)
+    const {
+      blobId: newWalrusId,
+      registerDigest,
+      certifyDigest,
+    } = await uploadContent(
+      content,
+      pagePath,
+      owner,
+      epochs,
+      signAndExecute,
+      () => onProgress(SaveStep.CERTIFYING),
+    );
+
+    // Step 3: Update CMS contract
+    onProgress(SaveStep.UPDATING);
     const tx = buildUpdatePageTransaction(
       packageId,
       press3ObjectId,
@@ -69,9 +86,6 @@ export async function savePageContent(
 
     const result = await signAndExecute(tx);
 
-    // Step 3: Transaction is being processed
-    onProgress(SaveStep.SUBMITTING_TX);
-
     // Step 4: Success
     onProgress(SaveStep.SUCCESS);
 
@@ -79,25 +93,38 @@ export async function savePageContent(
       success: true,
       transactionDigest: result.digest,
       newWalrusId,
+      walrusRegisterDigest: registerDigest,
+      walrusCertifyDigest: certifyDigest,
     };
   } catch (error) {
     // Determine which step failed based on progress
-    let failedStep = SaveStep.UPLOADING_WALRUS;
-    if (error instanceof Error) {
-      if (
-        error.message.includes("wallet") ||
-        error.message.includes("signature") ||
-        error.message.includes("rejected")
-      ) {
-        failedStep = SaveStep.WAITING_WALLET;
-      } else if (error.message.includes("transaction")) {
-        failedStep = SaveStep.SUBMITTING_TX;
-      }
+    let failedStep = SaveStep.REGISTERING;
+    let errorMessage = error instanceof Error ? error.message : String(error);
+
+    // Check for specific Walrus errors
+    if (
+      errorMessage.includes("reserve_space") &&
+      errorMessage.includes("0x2")
+    ) {
+      errorMessage =
+        "Insufficient SUI balance to pay for Walrus storage. Please ensure you have enough SUI in your wallet to cover storage costs for the specified epochs.";
+      failedStep = SaveStep.REGISTERING;
+    } else if (errorMessage.includes("certify")) {
+      failedStep = SaveStep.CERTIFYING;
+    } else if (
+      errorMessage.includes("wallet") ||
+      errorMessage.includes("signature") ||
+      errorMessage.includes("rejected")
+    ) {
+      // Could be any step requiring wallet signature
+      failedStep = SaveStep.UPDATING;
+    } else if (errorMessage.includes("transaction")) {
+      failedStep = SaveStep.UPDATING;
     }
 
     return {
       success: false,
-      error: error instanceof Error ? error : new Error(String(error)),
+      error: new Error(errorMessage),
       failedStep,
     };
   }

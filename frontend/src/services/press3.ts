@@ -16,49 +16,6 @@ export function getSuiClient(): SuiClient {
 export type { PageRecord, Press3State } from "../types/press3";
 
 /**
- * Finds the shared Press3 object by querying for objects of the Press3 type.
- */
-export async function findPress3Object(
-  packageId: string,
-): Promise<string | null> {
-  const client = getSuiClient();
-
-  // Query for objects owned by the package (shared objects)
-  // We need to find the Press3 object that was created during init
-  const objects = await client.queryEvents({
-    query: {
-      MoveEventType: `${packageId}::${MODULE_NAME}::Press3InitializedEvent`,
-    },
-    limit: 1,
-  });
-
-  if (objects.data.length > 0) {
-    // Get the transaction that emitted this event to find the created object
-    const txDigest = objects.data[0].id.txDigest;
-    const tx = await client.getTransactionBlock({
-      digest: txDigest,
-      options: { showEffects: true },
-    });
-
-    // Find the created shared object
-    const created = tx.effects?.created;
-    if (created) {
-      for (const obj of created) {
-        if (
-          obj.owner &&
-          typeof obj.owner === "object" &&
-          "Shared" in obj.owner
-        ) {
-          return obj.reference.objectId;
-        }
-      }
-    }
-  }
-
-  return null;
-}
-
-/**
  * Fetches the Press3 state from the blockchain.
  */
 export async function getPress3State(
