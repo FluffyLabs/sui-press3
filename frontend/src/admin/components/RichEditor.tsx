@@ -27,14 +27,15 @@ import {
   Type,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Markdown } from "tiptap-markdown";
 import "./RichEditor.css";
 
 const lowlight = createLowlight(common);
 
 interface RichEditorProps {
   content: string;
-  onChange: (html: string) => void;
-  placeholder?: string;
+  onChange: (content: string) => void;
+  format?: "html" | "markdown";
 }
 
 interface SlashMenuItem {
@@ -44,7 +45,11 @@ interface SlashMenuItem {
   command: () => void;
 }
 
-export function RichEditor({ content, onChange }: RichEditorProps) {
+export function RichEditor({
+  content,
+  onChange,
+  format = "html",
+}: RichEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [slashMenuOpen, setSlashMenuOpen] = useState(false);
   const [slashMenuFilter, setSlashMenuFilter] = useState("");
@@ -75,27 +80,37 @@ export function RichEditor({ content, onChange }: RichEditorProps) {
       TableRow,
       TableHeader,
       TableCell,
-      // Placeholder.configure({
-      //   placeholder: ({ node }) => {
-      //     if (node.type.name === "heading") {
-      //       return `Heading ${node.attrs.level}`;
-      //     }
-      //     return placeholder || "Type '/' for commands...";
-      //   },
-      // }),
+      Markdown.configure({
+        html: true,
+        tightLists: true,
+        bulletListMarker: "-",
+        linkify: true,
+        breaks: false,
+        transformPastedText: true,
+        transformCopiedText: true,
+      }),
     ],
     content,
     onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+      if (format === "markdown") {
+        onChange(editor.storage.markdown.getMarkdown());
+      } else {
+        onChange(editor.getHTML());
+      }
     },
   });
 
   // Sync content from parent
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
+    if (!editor) return;
+    const currentContent =
+      format === "markdown"
+        ? editor.storage.markdown.getMarkdown()
+        : editor.getHTML();
+    if (content !== currentContent) {
       editor.commands.setContent(content);
     }
-  }, [content, editor]);
+  }, [content, editor, format]);
 
   const closeSlashMenu = useCallback(() => {
     setSlashMenuOpen(false);

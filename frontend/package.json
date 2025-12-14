@@ -45,6 +45,7 @@
     "remark-rehype": "^11.1.2",
     "remark-slug": "^7.0.1",
     "tailwind-merge": "^3.4.0",
+    "tiptap-markdown": "^0.9.0",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
     "vfile": "^6.0.3"

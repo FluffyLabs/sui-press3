@@ -232,7 +232,11 @@ export function PageEditor() {
             </code>
           </div>
         </div>
-        <RichEditor content={content} onChange={setContent} />
+        <RichEditor
+          content={content}
+          onChange={setContent}
+          format={page.path.endsWith(".md") ? "markdown" : "html"}
+        />
       </div>
 
       <div className="mb-5">
