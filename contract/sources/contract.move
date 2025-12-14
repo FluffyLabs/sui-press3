@@ -9,6 +9,7 @@ module contract::press3 {
     const E_PATH_ALREADY_EXISTS: u64 = 4;
     const E_INVALID_PATH_FORMAT: u64 = 5;
 
+    // TODO: Page deletion not yet implemented. Pages cannot be removed once registered.
     public struct Press3 has key {
         id: sui::object::UID,
         admins: vector<address>,
