@@ -269,8 +269,10 @@ export function RichEditor({
     [editor, deleteSlashCommand, handleImageUpload],
   );
 
+  // slashMenuItems contains event handlers that safely access refs
   const filteredItems = useMemo(
     () =>
+      // eslint-disable-next-line react-hooks/refs
       slashMenuItems.filter(
         (item) =>
           item.title.toLowerCase().includes(slashMenuFilter.toLowerCase()) ||
@@ -299,26 +301,23 @@ export function RichEditor({
     [editor, deleteSlashCommand, closeSlashMenu],
   );
 
-  // Ref for filtered items to use in effect
-  const filteredItemsRef = useRef(filteredItems);
-  filteredItemsRef.current = filteredItems;
-
   // Slash command keyboard handler
   useEffect(() => {
     if (!editor) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (slashMenuOpen) {
-        const items = filteredItemsRef.current;
         if (event.key === "ArrowDown") {
           event.preventDefault();
-          setSelectedIndex((i) => (i + 1) % items.length);
+          setSelectedIndex((i) => (i + 1) % filteredItems.length);
         } else if (event.key === "ArrowUp") {
           event.preventDefault();
-          setSelectedIndex((i) => (i - 1 + items.length) % items.length);
+          setSelectedIndex(
+            (i) => (i - 1 + filteredItems.length) % filteredItems.length,
+          );
         } else if (event.key === "Enter") {
           event.preventDefault();
-          items[selectedIndex]?.command();
+          filteredItems[selectedIndex]?.command();
           closeSlashMenu();
         } else if (event.key === "Escape") {
           closeSlashMenu();
@@ -332,7 +331,14 @@ export function RichEditor({
     return () => {
       editor.view.dom.removeEventListener("keydown", handleKeyDown);
     };
-  }, [editor, slashMenuOpen, slashMenuFilter, selectedIndex, closeSlashMenu]);
+  }, [
+    editor,
+    slashMenuOpen,
+    slashMenuFilter,
+    selectedIndex,
+    closeSlashMenu,
+    filteredItems,
+  ]);
 
   // Slash command input detection
   useEffect(() => {

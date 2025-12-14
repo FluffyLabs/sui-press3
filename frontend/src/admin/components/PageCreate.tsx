@@ -164,7 +164,7 @@ export function PageCreate() {
         <button
           type="button"
           onClick={() => navigate("/admin")}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-5"
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-5 cursor-pointer"
         >
           <ArrowLeft size={20} />
           <span>Back</span>
@@ -182,7 +182,7 @@ export function PageCreate() {
       <button
         type="button"
         onClick={() => navigate("/admin")}
-        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-5"
+        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-5 cursor-pointer"
       >
         <ArrowLeft size={20} />
         <span>Back</span>

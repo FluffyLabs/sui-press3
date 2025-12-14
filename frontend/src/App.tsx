@@ -14,6 +14,18 @@ const DEFAULT_PACKAGE_ID =
 const DEFAULT_OBJECT_ID =
   "0x10c798b604846b4eace4f2966c1a93f07d49dce129dad99052fffc165fff36d3";
 
+// eslint-disable-next-line react-refresh/only-export-components
+export function getSetEditors(): string {
+  /// old version
+  if (
+    getPackageId() ===
+    "0xb23a6a6687bd1af39d5a2ac6739a7d36e331d6b0b39446101a59748c65ba58a8"
+  ) {
+    return "set_editor";
+  }
+  return "set_editors";
+}
+
 console.log("Default contract", {
   packageId: DEFAULT_PACKAGE_ID,
   objectId: DEFAULT_OBJECT_ID,

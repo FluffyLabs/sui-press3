@@ -1,19 +1,24 @@
-import { Alert, Badge, Button, Input } from "@fluffylabs/shared-ui";
+import { Alert } from "@fluffylabs/shared-ui";
 import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
 } from "@mysten/dapp-kit";
-import { ArrowLeft, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePermissions } from "../../hooks/usePermissions";
 import { usePress3 } from "../../providers/Press3Provider";
 import { getFile } from "../../services/walrus";
+import { setPageEditors } from "../services/editors";
 import { fetchPageById } from "../services/pages";
 import { type SaveStep, savePageContent } from "../services/save";
 import type { Page } from "../types/page";
 import { AdminLayout } from "./AdminLayout";
-import { RichEditor } from "./RichEditor";
+import { EditorsDialog } from "./EditorsDialog";
+import { PageContentField } from "./PageContentField";
+import { PageEditorHeader } from "./PageEditorHeader";
+import { PageEditorsSection } from "./PageEditorsSection";
+import { PagePathField } from "./PagePathField";
+import { PageSaveActions } from "./PageSaveActions";
 import { SaveProgressModal } from "./SaveProgressModal";
 
 export function PageEditor() {
@@ -40,6 +45,11 @@ export function PageEditor() {
     certify?: string;
     update?: string;
   } | null>(null);
+  const [editorsDialogOpen, setEditorsDialogOpen] = useState(false);
+  const [isSavingEditors, setIsSavingEditors] = useState(false);
+  const [editorsDialogError, setEditorsDialogError] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!pageId) return;
@@ -165,6 +175,60 @@ export function PageEditor() {
     }
   };
 
+  const handleBack = () => {
+    navigate("/admin");
+  };
+
+  const handleOpenEditorsDialog = () => {
+    setEditorsDialogOpen(true);
+    setEditorsDialogError(null);
+  };
+
+  const handleEditorsDialogClose = (open: boolean) => {
+    setEditorsDialogOpen(open);
+    if (!open) {
+      setEditorsDialogError(null);
+      setIsSavingEditors(false);
+    }
+  };
+
+  const handleSaveEditors = async (editors: string[]) => {
+    if (!page || !currentAccount) return;
+
+    const pageData = getPageWithIndex(page.path);
+    if (!pageData) {
+      setEditorsDialogError("Page not found in contract state");
+      return;
+    }
+
+    setIsSavingEditors(true);
+    setEditorsDialogError(null);
+
+    try {
+      await setPageEditors({
+        packageId,
+        press3ObjectId,
+        pageIndex: pageData.index,
+        pagePath: page.path,
+        editors,
+        signAndExecute: async (tx) => {
+          const result = await signAndExecuteTransaction({ transaction: tx });
+          return { digest: result.digest };
+        },
+      });
+
+      // Update local page state
+      setPage({ ...page, editors });
+      setEditorsDialogOpen(false);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to update editors";
+      setEditorsDialogError(message);
+    } finally {
+      setIsSavingEditors(false);
+    }
+  };
+
   if (loading) {
     return (
       <AdminLayout>
@@ -176,14 +240,7 @@ export function PageEditor() {
   if (!page) {
     return (
       <AdminLayout>
-        <button
-          type="button"
-          onClick={() => navigate("/admin")}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-5 cursor-pointer"
-        >
-          <ArrowLeft size={20} />
-          <span>Back</span>
-        </button>
+        <PageEditorHeader onBack={handleBack} />
         <Alert>Page not found</Alert>
       </AdminLayout>
     );
@@ -191,14 +248,7 @@ export function PageEditor() {
 
   return (
     <AdminLayout>
-      <button
-        type="button"
-        onClick={() => navigate("/admin")}
-        className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-5"
-      >
-        <ArrowLeft size={20} />
-        <span>Back</span>
-      </button>
+      <PageEditorHeader onBack={handleBack} />
 
       <SaveProgressModal
         open={saveModalOpen}
@@ -209,79 +259,39 @@ export function PageEditor() {
         onClose={handleCloseModal}
       />
 
-      <div className="mb-5">
-        <div className="flex justify-between items-center mb-2">
-          <label htmlFor="path" className="font-medium">
-            Page Path
-          </label>
-          <a
-            href={page.path}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-600 no-underline"
-          >
-            <ExternalLink size={14} />
-            Preview Page
-          </a>
-        </div>
-        <Input
-          id="path"
-          value={path}
-          disabled
-          placeholder="/path/to/page.html"
-        />
-      </div>
+      <PagePathField path={path} />
 
-      <div className="mb-5">
-        <div className="flex justify-between items-center mb-2">
-          <label htmlFor="content" className="font-medium">
-            Content
-          </label>
-          <div className="flex gap-2">
-            <span className="text-xs text-gray-500">Walrus ID:</span>
-            <code className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
-              {page.walrusId}
-            </code>
-          </div>
-        </div>
-        <RichEditor
-          content={content}
-          onChange={setContent}
-          format={page.path.endsWith(".md") ? "markdown" : "html"}
-        />
-      </div>
+      <PageContentField
+        walrusId={page.walrusId}
+        path={page.path}
+        content={content}
+        onChange={setContent}
+      />
 
-      <div className="mb-5">
-        <h3 className="mb-3">Editors</h3>
-        <div className="flex gap-2 flex-wrap">
-          {page.editors.map((editor) => (
-            <Badge key={editor} title={editor}>
-              {editor.slice(0, 6)}...{editor.slice(-4)}
-            </Badge>
-          ))}
-        </div>
-      </div>
-      <div className="flex gap-3">
-        <Button
-          onClick={handleSave}
-          disabled={saveModalOpen || !hasChanges || !currentAccount}
-        >
-          Save Changes
-        </Button>
-        <Button variant="secondary" onClick={() => navigate("/admin")}>
-          Cancel
-        </Button>
-      </div>
-      {!currentAccount && (
-        <p className="text-sm text-gray-500 mt-2">
-          Connect your wallet to save changes
-        </p>
-      )}
-      {currentAccount && !canEditPage(page.path) && (
-        <p className="text-sm text-gray-500 mt-2">
-          You don't have permission to edit this page
-        </p>
-      )}
+      <PageEditorsSection
+        editors={page.editors}
+        onEditClick={handleOpenEditorsDialog}
+        canEdit={currentAccount ? canEditPage(page.path) : false}
+      />
+
+      <PageSaveActions
+        onSave={handleSave}
+        onCancel={handleBack}
+        saveDisabled={saveModalOpen || !hasChanges || !currentAccount}
+        walletConnected={Boolean(currentAccount)}
+        canEdit={currentAccount ? canEditPage(page.path) : false}
+        showSavingState={saveModalOpen}
+      />
+
+      <EditorsDialog
+        open={editorsDialogOpen}
+        pagePath={page.path}
+        editors={page.editors}
+        onOpenChange={handleEditorsDialogClose}
+        onSave={handleSaveEditors}
+        isSaving={isSavingEditors}
+        errorMessage={editorsDialogError}
+      />
     </AdminLayout>
   );
 }
