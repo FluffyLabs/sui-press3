@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getFile } from "../services/walrus";
+import { getCachedBlob, getFile } from "../services/walrus";
 
 interface UseWalrusContentResult {
   content: Uint8Array | null;
@@ -15,17 +15,35 @@ export function useWalrusContent(
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     if (!walrusId) {
-      return;
+      // Queue state updates asynchronously to avoid cascading renders
+      queueMicrotask(() => {
+        if (!cancelled) {
+          setContent(null);
+          setIsLoading(false);
+          setError(null);
+        }
+      });
+      return () => {
+        cancelled = true;
+      };
     }
 
-    let cancelled = false;
-    // Reset state at the start of fetching - this is intentional
-    setContent(null); // eslint-disable-line react-hooks/set-state-in-effect
-    setIsLoading(true);
-    setError(null);
+    const cachedContent = getCachedBlob(walrusId);
+    const shouldRefresh = Boolean(cachedContent);
 
-    getFile(walrusId)
+    // Queue initial state updates asynchronously
+    queueMicrotask(() => {
+      if (!cancelled) {
+        setContent(cachedContent);
+        setIsLoading(!cachedContent);
+        setError(null);
+      }
+    });
+
+    getFile(walrusId, { refresh: shouldRefresh })
       .then((data) => {
         if (!cancelled) {
           setContent(data);

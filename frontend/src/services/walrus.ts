@@ -12,6 +12,75 @@ import walrusWasmUrl from "@mysten/walrus-wasm/web/walrus_wasm_bg.wasm?url";
 let walrusClient: WalrusClient | null = null;
 const contentCache = new Map<string, Uint8Array>();
 const pendingRequests = new Map<string, Promise<Uint8Array>>();
+const SESSION_STORAGE_PREFIX = "press3:walrus:";
+
+function getSessionStorage(): Storage | null {
+  if (typeof window === "undefined" || !("sessionStorage" in window)) {
+    return null;
+  }
+  return window.sessionStorage;
+}
+
+function toStorageKey(blobId: string) {
+  return `${SESSION_STORAGE_PREFIX}${blobId}`;
+}
+
+function encodeContent(content: Uint8Array) {
+  let binary = "";
+  content.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary);
+}
+
+function decodeContent(payload: string) {
+  const binary = atob(payload);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+function readFromSession(blobId: string): Uint8Array | null {
+  const storage = getSessionStorage();
+  if (!storage) {
+    return null;
+  }
+
+  try {
+    const cachedValue = storage.getItem(toStorageKey(blobId));
+    if (!cachedValue) {
+      return null;
+    }
+    const decoded = decodeContent(cachedValue);
+    contentCache.set(blobId, decoded);
+    return decoded;
+  } catch {
+    storage.removeItem(toStorageKey(blobId));
+    return null;
+  }
+}
+
+function writeToSession(blobId: string, content: Uint8Array) {
+  const storage = getSessionStorage();
+  if (!storage) {
+    return;
+  }
+  try {
+    storage.setItem(toStorageKey(blobId), encodeContent(content));
+  } catch {
+    // Ignore storage quota errors and keep the in-memory cache only.
+  }
+}
+
+export function getCachedBlob(blobId: string): Uint8Array | null {
+  const cached = contentCache.get(blobId);
+  if (cached) {
+    return cached;
+  }
+  return readFromSession(blobId);
+}
 
 export function getWalrusClient() {
   if (!walrusClient) {
@@ -35,11 +104,20 @@ async function fetchFromWalrus(blobId: string): Promise<Uint8Array> {
   return files[0].bytes();
 }
 
-export async function getFile(blobId: string): Promise<Uint8Array> {
-  // Return from cache if exists
-  const cached = contentCache.get(blobId);
-  if (cached !== undefined) {
-    return cached;
+interface GetFileOptions {
+  refresh?: boolean;
+}
+
+export async function getFile(
+  blobId: string,
+  options: GetFileOptions = {},
+): Promise<Uint8Array> {
+  // Return from cache if exists and refresh was not requested
+  if (!options.refresh) {
+    const cached = getCachedBlob(blobId);
+    if (cached) {
+      return cached;
+    }
   }
 
   // Join existing request if in-flight
@@ -49,13 +127,16 @@ export async function getFile(blobId: string): Promise<Uint8Array> {
   }
 
   // Make new request
-  const promise = fetchFromWalrus(blobId);
+  const promise = (async () => {
+    const content = await fetchFromWalrus(blobId);
+    contentCache.set(blobId, content);
+    writeToSession(blobId, content);
+    return content;
+  })();
   pendingRequests.set(blobId, promise);
 
   try {
-    const content = await promise;
-    contentCache.set(blobId, content);
-    return content;
+    return await promise;
   } finally {
     pendingRequests.delete(blobId);
   }
