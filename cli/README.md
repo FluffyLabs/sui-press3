@@ -52,14 +52,21 @@ bun run press3 promote --path /docs/intro.md --remove 0xaddr3
 bun run press3 promote --path /docs/intro.md --add 0xnew --remove 0xold
 ```
 
+### Monitoring & Maintenance
+
+```bash
+# Check storage epoch health of all blobs
+bun run press3 health
+bun run press3 health --press3-id 0x...              # Use specific Press3 object ID
+bun run press3 health --expiring-threshold 5         # Set expiration warning threshold (default: 2)
+bun run press3 health --renew                        # Renew expiring blobs (not yet implemented)
+```
+
 ### Future Commands (Not Yet Implemented)
 
 ```bash
 # Domain management
 bun run press3 assign-domain --domain docs.press3.sui --target walrus://blob/site
-
-# Blob management
-bun run press3 renew --batch-size 50 --dry-run
 
 # Search indexing
 bun run press3 index --output dist/search-index.json
@@ -107,6 +114,19 @@ Downloads a blob from Walrus by blob ID. If `--output` is specified, saves to a 
 - `--blob-id <id>` - Blob ID to retrieve (required)
 - `--output <path>` - Path to save the retrieved blob (optional)
 
+### health
+Queries all blobs from a Press3 contract and checks their storage epoch health. Reports which blobs are healthy, expiring soon, or expired.
+
+**Options:**
+- `--press3-id <id>` - Press3 contract object ID (optional, reads from PRESS3_OBJECT_ID env var or press3.config.yml)
+- `--expiring-threshold <number>` - Number of epochs to consider as "expiring" (default: 2)
+- `--renew` - Renew expiring blobs (not yet implemented, placeholder for future functionality)
+
+**Limitations:**
+- Only reports storage information for blobs with on-chain Blob objects on SUI
+- Blobs uploaded without on-chain registration (e.g., via site-builder) will show as "unknown" status
+- These blobs may still be accessible but their expiration status cannot be determined
+
 ## Configuration
 
 The CLI can be configured using environment variables. Create a `.env` file in the project root:
@@ -121,8 +141,9 @@ WALRUS_NETWORK=testnet
 
 - **WALRUS_PUBLISH_SECRET** - Your Sui private key for publishing to Walrus and SUI (required for SDK mode, which is the default)
   - Supports multiple formats: `suiprivkey1...`, `ed25519:...`, `0x...` (hex), or base64
-- **WALRUS_EPOCHS** - Number of epochs to store blobs (default: 1, must be a positive integer)
+- **WALRUS_EPOCHS** - Number of epochs to store blobs (default: 4, must be a positive integer)
 - **WALRUS_NETWORK** - Target network for both Walrus and SUI operations (default: `testnet`, options: `testnet`, `mainnet`)
+- **PRESS3_OBJECT_ID** - Press3 contract object ID (optional, used by health command if not provided via flag or config file)
 
 ## Development
 
