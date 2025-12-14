@@ -14,17 +14,38 @@ When working with this codebase using Claude Code (the CLI tool):
 **Adding a new CLI command:**
 1. Create `src/cmd-<name>.ts` with a thin handler function
 2. Add utility functions to appropriate modules (`sui.ts`, `walrus.ts`, etc.)
-3. Register command in `src/run.ts` (add to Command type, parseArgs, switch statement, and HELP_TEXT)
+3. Register command in `src/run.ts`:
+   - Add to `Command` type
+   - Add to `parseArgs` whitelist array
+   - Add case to switch statement
+   - Add to HELP_TEXT with description and options
 4. Update `README.md` with command documentation
-5. Run quality checks: `bun run typecheck && bun run lint`
+5. Run quality checks: `bun run typecheck && bun run lint` (if available)
 6. Test with `--dry-run` if applicable
+
+**Example implemented commands:**
+- `init` - Complete initialization workflow
+- `contract` - Build and publish Move contract
+- `update` - Update existing page or register new one
+- `promote` - Manage editors for pages
+- `batch-publish-update` - Batch upload and update pages
 
 **Refactoring:**
 1. Identify common patterns and duplicate code
-2. Extract to utility modules with clear, focused functions
+2. Extract to utility modules with clear, focused functions:
+   - `sui.ts` - SUI blockchain operations
+   - `walrus.ts` - Walrus storage operations
+   - `config.ts` - Configuration management
+   - `utils.ts` - General utilities
 3. Update all call sites to use the new utilities
 4. Verify with quality checks and functional tests
 5. Update CLAUDE.md if introducing new patterns
+
+**Recent Refactorings:**
+- Extracted SUI client creation to `sui.ts`
+- Centralized contract publishing logic in `sui.ts`
+- Added `buildPromoteTransaction` helper for editor management
+- Created reusable transaction builders
 
 ## Bun Usage
 
@@ -136,9 +157,30 @@ For more information, read the Bun API docs in `node_modules/bun-types/docs/**.m
 
 ## Code Organization
 
-### Command Handlers
+### Current Structure
 
-Command handlers (`cmd-*.ts`) should be thin and delegate to utility modules:
+**Command Handlers** (`cmd-*.ts`):
+- `cmd-init.ts` - Complete initialization workflow
+- `cmd-contract.ts` - Contract building and publishing
+- `cmd-deploy.ts` - Frontend deployment to Walrus
+- `cmd-publish.ts` - Single file upload to Walrus
+- `cmd-retrieve.ts` - Download blob from Walrus
+- `cmd-update.ts` - Update/register pages
+- `cmd-promote.ts` - Manage page editors
+- `cmd-batch-publish-update.ts` - Batch directory upload and update
+
+**Utility Modules**:
+- `sui.ts` - SUI client, contract publishing, transaction building
+- `walrus.ts` - Walrus file operations and keypair management
+- `config.ts` - Configuration and environment variables
+- `types.ts` - Shared type definitions
+- `utils.ts` - General-purpose helpers
+- `logger.ts` - Logging utilities
+- `run.ts` - CLI argument parsing and command routing
+
+### Best Practices
+
+Command handlers should be thin and delegate to utility modules:
 
 ```ts
 // GOOD: Thin handler that delegates to utilities
