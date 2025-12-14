@@ -1,6 +1,7 @@
 import { handleBatchPublishUpdate } from './cmd-batch-publish-update';
 import { handleContract } from './cmd-contract';
 import { handleDeploy } from './cmd-deploy';
+import { handleHealth } from './cmd-health';
 import { handleInit } from './cmd-init';
 import { handlePromote } from './cmd-promote';
 import { handlePublish } from './cmd-publish';
@@ -15,7 +16,7 @@ type Command =
   | 'batch-publish-update'
   | 'contract'
   | 'assign-domain'
-  | 'renew'
+  | 'health'
   | 'index'
   | 'init'
   | 'update'
@@ -45,7 +46,7 @@ Additional helpers:
   publish               Upload a single file to Walrus and get the blob ID
   retrieve              Download a blob from Walrus by blob ID
   assign-domain         Attach a DNS/NS record to a Walrus site
-  renew                 Proactively renew Walrus blobs for a deployment
+  health                Check storage epoch health of all blobs in a Press3 contract
   index                 Build the off-chain search index and publish it
 
 Global options:
@@ -81,6 +82,10 @@ Promote options:
   --path             Page path to manage editors for (required)
   --add              Comma-separated list of Sui addresses to add as editors
   --remove           Comma-separated list of Sui addresses to remove from editors
+
+Health options:
+  --renew            Renew expiring blobs (not yet implemented)
+  --expiring-threshold   Number of epochs to consider as "expiring" (default: 2)
 `;
 
 function parseArgs(argv: string[]): ParsedArgs {
@@ -112,7 +117,7 @@ function parseArgs(argv: string[]): ParsedArgs {
       'contract',
       'batch-publish-update',
       'assign-domain',
-      'renew',
+      'health',
       'index',
       'init',
       'update',
@@ -145,8 +150,8 @@ export async function run() {
     case 'assign-domain':
       await handleAssignDomain(flags);
       break;
-    case 'renew':
-      await handleRenew(flags);
+    case 'health':
+      await handleHealth(flags);
       break;
     case 'index':
       await handleIndex(flags);
@@ -170,12 +175,6 @@ async function handleAssignDomain(flags: Record<string, string | boolean>) {
   const domain = (flags.domain as string) ?? 'example.press3.sui';
   logStep('Assign domain', `${domain} -> ${target}`);
   // TODO: integrate with Walrus NS helpers
-}
-
-async function handleRenew(flags: Record<string, string | boolean>) {
-  const batchSize = Number(flags['batch-size'] ?? 25);
-  logStep('Auto-renew', `Scanning registry in batches of ${batchSize}`);
-  // TODO: fetch registry, renew expiring blobs, batch txns
 }
 
 async function handleIndex(flags: Record<string, string | boolean>) {
