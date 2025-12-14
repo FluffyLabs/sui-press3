@@ -8,7 +8,11 @@ Press3 is a decentralized CMS built on Sui with Walrus storage. The project cont
 
 See `AGENTS.md` for the full project context and requirements shared across AI agents.
 
-## [Documentation](./docs/sidenav.md)
+## Documentation
+
+- [View on Github](./docs/sidenav.md)
+- [View as Press3](https://press3.fluffylabs.dev) - fully decentralized, domain is pointing to Walrus Testnet Portal.
+- Check out [The admin panel](https://press3.fluffylabs.dev/admin) as well.
 
 ## Features
 
