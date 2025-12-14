@@ -3,7 +3,7 @@ import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
 } from "@mysten/dapp-kit";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePermissions } from "../../hooks/usePermissions";
@@ -210,9 +210,20 @@ export function PageEditor() {
       />
 
       <div className="mb-5">
-        <label htmlFor="path" className="block mb-2 font-medium">
-          Page Path
-        </label>
+        <div className="flex justify-between items-center mb-2">
+          <label htmlFor="path" className="font-medium">
+            Page Path
+          </label>
+          <a
+            href={page.path}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-sm text-blue-500 hover:text-blue-600 no-underline"
+          >
+            <ExternalLink size={14} />
+            Preview Page
+          </a>
+        </div>
         <Input
           id="path"
           value={path}
