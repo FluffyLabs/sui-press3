@@ -1,3 +1,4 @@
+import { handleBatchPublishUpdate } from './cmd-batch-publish-update';
 import { handleContract } from './cmd-contract';
 import { handleDeploy } from './cmd-deploy';
 import { handleInit } from './cmd-init';
@@ -10,6 +11,7 @@ type Command =
   | 'deploy'
   | 'publish'
   | 'retrieve'
+  | 'batch-publish-update'
   | 'contract'
   | 'assign-domain'
   | 'renew'
@@ -30,15 +32,17 @@ Usage:
   press3 <command> [options]
 
 Commands:
-  deploy         Upload a Walrus site bundle and update the Move contract
-  publish        Upload a single file to Walrus and get the blob ID
-  retrieve       Download a blob from Walrus by blob ID
-  contract       Build and publish the Move contract to SUI
-  init           Build and publish Press3 contract, upload frontend to walrus and initialize home page
-  update         Update an existing page or register new one with a new Walrus blob ID
-  assign-domain  Attach a DNS/NS record to a Walrus site
-  renew          Proactively renew Walrus blobs for a deployment
-  index          Build the off-chain search index and publish it
+  deploy                Upload a Walrus site bundle and update the Move contract
+  publish               Upload a single file to Walrus and get the blob ID
+  retrieve              Download a blob from Walrus by blob ID
+  contract              Build and publish the Move contract to SUI
+  init                  Build and publish Press3 contract, upload frontend to walrus and initialize home page
+  update                Update an existing page or register new one with a new Walrus blob ID
+  promote               Add or remove editors for a specific page
+  batch-publish-update  Upload all files from a directory to Walrus and update/register pages in one transaction
+  assign-domain         Attach a DNS/NS record to a Walrus site
+  renew                 Proactively renew Walrus blobs for a deployment
+  index                 Build the off-chain search index and publish it
 
 Global options:
   --dry-run          Print actions without executing transactions
@@ -60,6 +64,9 @@ Init options:
   --home             Walrus Blob ID to set as homepage (required)
   --demo             Setup initial homepage, index.html and article.md (ignores flag --home)
   --output           Path to save the configuration file (default: press3.init.log)
+
+Batch Publish Update options:
+  --dir              Directory path to traverse and upload files from (required)
 
 Update options:
   --path             Page path to update (required)
@@ -93,6 +100,7 @@ function parseArgs(argv: string[]): ParsedArgs {
       'publish',
       'retrieve',
       'contract',
+      'batch-publish-update',
       'assign-domain',
       'renew',
       'index',
@@ -119,6 +127,9 @@ export async function run() {
       break;
     case 'contract':
       await handleContract(flags);
+      break;
+    case 'batch-publish-update':
+      await handleBatchPublishUpdate(flags);
       break;
     case 'assign-domain':
       await handleAssignDomain(flags);
