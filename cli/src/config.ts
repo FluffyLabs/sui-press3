@@ -31,7 +31,7 @@ function getWalrusEpochs(): number {
     }
     return parsed;
   }
-  return 1;
+  return 4;
 }
 
 export const DEFAULT_CONFIG = {
