@@ -19,7 +19,7 @@ console.log("Default contract", {
   objectId: DEFAULT_OBJECT_ID,
 });
 
-console.log("New contract", {
+console.log("Wiki contract", {
   packageId:
     "0x7be9e3f9be03af1835fdbbe05812d32755393b175362f62b25bfafdc01f3e9d0",
   objectId:
@@ -33,8 +33,8 @@ console.log("Using contract", {
 
 console.log(
   "Local storage configuration entries",
-  "press3_package_id",
-  "press3_object_id",
+  "localStorage.setItem('press3_package_id', '0x7be9e3f9be03af1835fdbbe05812d32755393b175362f62b25bfafdc01f3e9d0')",
+  "localStorage.setItem('press3_object_id', '0xec6ed6f322d9c94e60efdd832ecd769d2baefaf8e68f146b7231dec177a21350')",
 );
 
 function getPackageId(): string {
