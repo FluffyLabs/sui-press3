@@ -10,9 +10,9 @@ export const JsonRenderer = ({ content }: Props) => {
       const parsed = JSON.parse(content);
       return JSON.stringify(parsed, null, 2);
     } catch {
-      return "Invalid JSON";
+      return null;
     }
   }, [content]);
 
-  return <>{formattedContent && <pre>{formattedContent}</pre>}</>;
+  return <pre>{formattedContent === null ? content : formattedContent}</pre>;
 };

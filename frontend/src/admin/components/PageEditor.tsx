@@ -58,8 +58,9 @@ export function PageEditor() {
           // Fetch content from Walrus
           try {
             const walrusContent = await getFile(fetchedPage.walrusId);
-            setContent(walrusContent || "");
-            setOriginalContent(walrusContent || "");
+            const textContent = new TextDecoder().decode(walrusContent);
+            setContent(textContent || "");
+            setOriginalContent(textContent || "");
           } catch (error) {
             console.error("Failed to fetch content from Walrus:", error);
             setContent("");
