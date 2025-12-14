@@ -1,6 +1,7 @@
 import { handleContract } from './cmd-contract';
 import { handleDeploy } from './cmd-deploy';
 import { handleInit } from './cmd-init';
+import { handlePromote } from './cmd-promote';
 import { handlePublish } from './cmd-publish';
 import { handleRetrieve } from './cmd-retrieve';
 import { handleUpdate } from './cmd-update';
@@ -16,6 +17,7 @@ type Command =
   | 'index'
   | 'init'
   | 'update'
+  | 'promote'
   | 'help';
 
 type ParsedArgs = {
@@ -36,6 +38,7 @@ Commands:
   contract       Build and publish the Move contract to SUI
   init           Build and publish Press3 contract, upload frontend to walrus and initialize home page
   update         Update an existing page or register new one with a new Walrus blob ID
+  promote        Add or remove editors for a specific page
   assign-domain  Attach a DNS/NS record to a Walrus site
   renew          Proactively renew Walrus blobs for a deployment
   index          Build the off-chain search index and publish it
@@ -64,6 +67,11 @@ Init options:
 Update options:
   --path             Page path to update (required)
   --blob-id          New Walrus blob ID (required)
+
+Promote options:
+  --path             Page path to manage editors for (required)
+  --add              Comma-separated list of Sui addresses to add as editors
+  --remove           Comma-separated list of Sui addresses to remove from editors
 `;
 
 function parseArgs(argv: string[]): ParsedArgs {
@@ -98,6 +106,7 @@ function parseArgs(argv: string[]): ParsedArgs {
       'index',
       'init',
       'update',
+      'promote',
     ].includes(command)
       ? (command as Command)
       : 'help',
@@ -134,6 +143,9 @@ export async function run() {
       break;
     case 'update':
       await handleUpdate(flags);
+      break;
+    case 'promote':
+      await handlePromote(flags);
       break;
     default:
       console.log(HELP_TEXT.trim());
