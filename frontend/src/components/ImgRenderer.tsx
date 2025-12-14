@@ -48,7 +48,9 @@ function detectMimeType(name: string | undefined, bytes: Uint8Array): string {
 export const ImgRenderer = ({ content, name }: Props) => {
   const { objectUrl, alt } = useMemo(() => {
     const mimeType = detectMimeType(name, content);
-    const blob = new Blob([content], { type: mimeType });
+    const view = new Uint8Array(content.byteLength);
+    view.set(content);
+    const blob = new Blob([view.buffer], { type: mimeType });
     const url = URL.createObjectURL(blob);
     return {
       objectUrl: url,
@@ -66,9 +68,5 @@ export const ImgRenderer = ({ content, name }: Props) => {
     return null;
   }
 
-  return (
-    <>
-      <img src={objectUrl} alt={alt} />
-    </>
-  );
+  return <img src={objectUrl} alt={alt} />;
 };
