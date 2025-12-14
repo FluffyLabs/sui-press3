@@ -57,7 +57,6 @@ bun run press3 promote --path /docs/intro.md --add 0xnew --remove 0xold
 ```bash
 # Check storage epoch health of all blobs
 bun run press3 health
-bun run press3 health --press3-id 0x...              # Use specific Press3 object ID
 bun run press3 health --expiring-threshold 5         # Set expiration warning threshold (default: 2)
 bun run press3 health --renew                        # Renew expiring blobs (not yet implemented)
 ```
@@ -115,10 +114,9 @@ Downloads a blob from Walrus by blob ID. If `--output` is specified, saves to a 
 - `--output <path>` - Path to save the retrieved blob (optional)
 
 ### health
-Queries all blobs from a Press3 contract and checks their storage epoch health. Reports which blobs are healthy, expiring soon, or expired.
+Queries all blobs from a Press3 contract and checks their storage epoch health. Reports which blobs are healthy, expiring soon, or expired. Requires `press3.config.yml` (created by `init` command).
 
 **Options:**
-- `--press3-id <id>` - Press3 contract object ID (optional, reads from PRESS3_OBJECT_ID env var or press3.config.yml)
 - `--expiring-threshold <number>` - Number of epochs to consider as "expiring" (default: 2)
 - `--renew` - Renew expiring blobs (not yet implemented, placeholder for future functionality)
 
@@ -143,7 +141,6 @@ WALRUS_NETWORK=testnet
   - Supports multiple formats: `suiprivkey1...`, `ed25519:...`, `0x...` (hex), or base64
 - **WALRUS_EPOCHS** - Number of epochs to store blobs (default: 4, must be a positive integer)
 - **WALRUS_NETWORK** - Target network for both Walrus and SUI operations (default: `testnet`, options: `testnet`, `mainnet`)
-- **PRESS3_OBJECT_ID** - Press3 contract object ID (optional, used by health command if not provided via flag or config file)
 
 ## Development
 

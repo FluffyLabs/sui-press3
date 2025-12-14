@@ -1,6 +1,7 @@
 import { DEFAULT_CONFIG, PRESS3_CONF_NAME, type Press3Config } from './config';
 import { logStep } from './logger';
 import { createSuiClient, getPages } from './sui';
+import { ensurePathExists } from './utils';
 import { createWalrusClient } from './walrus';
 
 /**
@@ -25,41 +26,15 @@ interface BlobHealth {
   status: 'healthy' | 'expiring' | 'expired' | 'unknown';
 }
 
-async function getPress3ObjectId(
-  flagValue: string | boolean | undefined
-): Promise<string> {
-  // 1. Try from --press3-id flag
-  if (typeof flagValue === 'string' && flagValue) {
-    return flagValue;
-  }
-
-  // 2. Try from PRESS3_OBJECT_ID env var
-  const envValue = process.env.PRESS3_OBJECT_ID;
-  if (envValue) {
-    return envValue;
-  }
-
-  // 3. Try from press3.config.yml
-  try {
-    const configFile = Bun.file(PRESS3_CONF_NAME);
-    if (await configFile.exists()) {
-      const config = Bun.YAML.parse(await configFile.text()) as Press3Config;
-      if (config.press3_object_id) {
-        return config.press3_object_id;
-      }
-    }
-  } catch {
-    // Config file doesn't exist or is invalid, continue
-  }
-
-  throw new Error(
-    'Missing Press3 object ID. Provide via --press3-id flag, PRESS3_OBJECT_ID env var, or press3.config.yml file'
-  );
-}
-
 export async function handleHealth(flags: Record<string, string | boolean>) {
   const config = DEFAULT_CONFIG;
-  const press3ObjectId = await getPress3ObjectId(flags['press3-id']);
+
+  // Load Press3 object ID from config file (matches pattern in update, promote, batch-publish-update)
+  await ensurePathExists(PRESS3_CONF_NAME, 'Press3 config file');
+  const { press3_object_id: press3ObjectId } = Bun.YAML.parse(
+    await Bun.file(PRESS3_CONF_NAME).text()
+  ) as Press3Config;
+
   const shouldRenew = flags.renew === true;
   const expiringThreshold = Number(flags['expiring-threshold'] ?? 2);
 

@@ -84,7 +84,6 @@ Promote options:
   --remove           Comma-separated list of Sui addresses to remove from editors
 
 Health options:
-  --press3-id        Press3 contract object ID (or use PRESS3_OBJECT_ID env var)
   --renew            Renew expiring blobs (not yet implemented)
   --expiring-threshold   Number of epochs to consider as "expiring" (default: 2)
 `;
