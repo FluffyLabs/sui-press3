@@ -24,7 +24,7 @@ export function WikiLayout({ layout }: Props) {
             <ContentRenderer path={layout.sidenav} />
           </nav>
         )}
-        <main className="wiki-content">
+        <main className="wiki-content max-w-[1280px] mx-auto p-8">
           <ContentRenderer path={contentPath} />
         </main>
       </div>
