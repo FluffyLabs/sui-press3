@@ -10,7 +10,7 @@ export interface WikiLayout {
   header?: string;
   content: string;
   footer?: string;
-  sidenav: string;
+  sidenav?: string;
 }
 
 export type PageLayout = CmsLayout | WikiLayout;
