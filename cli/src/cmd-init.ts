@@ -99,7 +99,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
       packageId,
       press3ObjectId,
       pagePath: '/',
-      walrusId: 'Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU',
+      walrusId: '08JJSUbexGFWTBt1XLgxFmM9vhWiOIFMDms9EdRe3pc',
     });
 
     logStep(
@@ -115,7 +115,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
       packageId,
       press3ObjectId,
       pagePath: '/index.html',
-      walrusId: 'Jr8pOhbySA3GEUQqSzcmxZEoOGgqY6gn-Kmo6-pkNvU',
+      walrusId: 'hhMqCcybe-KFgwLsx34skqh55clwNk8mVxIhZfsPXJc',
     });
 
     logStep(
@@ -131,7 +131,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
       packageId,
       press3ObjectId,
       pagePath: '/article.md',
-      walrusId: '1uJVmO-79L9ZefNxKYJz8239OGFdNFgk9oXQZV5OBkg',
+      walrusId: 'TnIUDp2AJjp-PjbKMsl-bMF-EcZdqPe33YVO8JufWv4',
     });
 
     logStep(
