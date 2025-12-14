@@ -26,47 +26,134 @@ The following requirements capture the initial hackathon scope and should remain
 - **Forum / Discussion**: threads with comments, author edits, moderator removals, hierarchical ownership.
 
 ### Components Overview
-- **Smart Contract**: tracks `page -> walrus blob id`, access rights, edit queues, page configuration.
-- **Content Display Frontend**: resolves page events, fetches Walrus blobs, renders HTML/Markdown, handles menus, sidebars, search metadata, dynamic asset resolution, quilt paths, and search integration.
-- **Backoffice Frontend**: full-featured editor with rich text/media uploads, permission-aware save button, Walrus upload, and contract updates; supports page creation, access management (users/groups), and moderator hierarchies.
-- **Search Indexer**: scans Walrus blobs, builds compressed search index, redeploys to Walrus.
-- **Deployment Tooling**: deploy CMS instances, manage namespace routing, auto-renew content.
 
-## Smart Contract MVP Tasks
-- Init contract with admin role, emit initial `/index.html` page event and `/ -> /index.html` redirect.
-- Register new top-level routes (`/<name>`) restricted to admin; emit events.
-- Allow admin to grant/revoke top-level access to users/groups; nested permissions allow `/abc/<xyz>` registration if `/abc` rights exist.
-- Editing: authorized users update Walrus content references per page or quilt file path.
-- Manage edit queues (optional) and ensure permissions are transferable by wallet ownership.
-- Research multisig-style group permissions.
-- Support Walrus quilt references (specific file pointers), cheaper deployments.
-- Ensure ownership is transferable and censorship-resistant.
+### Smart Contract (`contract/sources/contract.move`)
+**Status**: Core functionality implemented ✅
+- Tracks `page -> walrus blob id` mapping in Press3 shared object
+- Access rights (admins and per-page editors)
+- Events for initialization, registration, and updates
+- **TODO**: Edit queues, nested permissions, page funding
+
+### Content Display Frontend (`frontend/src/`)
+**Status**: Fully functional public renderer ✅
+- Resolves pages from contract, fetches Walrus blobs
+- Renders HTML, Markdown, JSON, Images, Raw content
+- Layout system (CMS, Wiki)
+- Menu and sidebar support
+- **TODO**: Dynamic asset resolution, quilt paths, search integration
+
+### Backoffice Frontend (`frontend/src/admin/`)
+**Status**: Core features implemented ✅
+- Page creation and editing interfaces
+- Wallet integration and permission checks
+- Multi-step Walrus upload workflows
+- Pages table and metadata display
+- **TODO**: Rich text editor, media uploads, user/group management UI
+
+### CLI Tooling (`cli/src/`)
+**Status**: Core commands working ✅
+- Contract deployment (SDK and CLI modes)
+- Frontend deployment to Walrus
+- Page management (create, update, promote)
+- Batch operations for directories
+- **TODO**: Domain assignment, auto-renewal, search indexing
+
+### Search Indexer
+**Status**: Not yet implemented 🚧
+- **TODO**: Scan Walrus blobs, build compressed index, deploy to Walrus
+
+## Smart Contract Status
+
+### ✅ Implemented
+- ✅ Init contract with admin role and shared Press3 object
+- ✅ Register new pages (restricted to admin)
+- ✅ Update page Walrus blob IDs (admin and editors can update)
+- ✅ Set/manage editors per page (admin only)
+- ✅ Set/manage admin list (admin only)
+- ✅ Events emitted for initialization, page registration, and updates
+- ✅ Permission checks (admin vs editor access)
+
+### 🚧 TODO
+- Edit queues for proposed changes workflow
+- Nested permissions (parent page editors can manage subpages)
+- Multisig-style group permissions
+- Walrus quilt references for multi-file content
+- On-chain redirect rules (e.g., `/ -> /index.html`)
+- Page funding and sponsored transactions
 
 ## Frontend (Public Renderer)
-- Connect to contract, display page events, fetch Walrus content, render `/` default.
-- Render HTML when URL ends `.html`, Markdown when `.md`.
-- Menu JSON from `/menu`, sidebar JSON from `/sidebar` (define structures).
-- Resolve smart-contract-provided asset URLs (`/style.css`, `/logo.png`, etc.) dynamically.
-- Integrate Quilt file lookups and search metadata/indexes stored on Walrus.
+
+### ✅ Implemented
+- ✅ Connect to contract and fetch page data from Press3 shared object
+- ✅ Fetch Walrus content for each page
+- ✅ Render content based on type: HTML, Markdown, JSON, Images, Raw
+- ✅ Layout system with CMS and Wiki templates
+- ✅ Menu and sidebar support (when configured in layout)
+- ✅ Dynamic routing (catch-all `/*` route renders pages from contract)
+- ✅ 404 handling for missing pages
+- ✅ Multi-stage loading indicators
+
+### 🚧 TODO
+- Resolve smart-contract-provided asset URLs dynamically
+- Walrus Quilt file lookups for multi-file content
+- Search metadata/indexes integration
+- Client-side caching strategy
 
 ## Frontend (Backoffice)
-- Edit mode with rich editor; show Save only if user has rights.
-- Saving uploads to Walrus, then submits contract txn referencing new blob.
-- Allow editing any registered resource (HTML, metadata JSON, redirects).
-- Enable new page creation (Walrus deploy + contract registration).
-- Provide admin panel for assigning users/groups to pages; moderators of `/x` manage `/x/*`.
+
+### ✅ Implemented
+- ✅ Admin panel with pages table displaying all pages from contract
+- ✅ Page creation interface with multi-step workflow (Register → Certify → Update)
+- ✅ Page editor with content textarea
+- ✅ Wallet integration for authentication
+- ✅ Permission checks (show/hide features based on admin/editor status)
+- ✅ Multi-step save workflow with progress modal
+- ✅ Upload to Walrus → Submit contract transaction workflow
+- ✅ Error handling with user-friendly messages
+- ✅ View page metadata (path, Walrus ID, editors)
+
+### 🚧 TODO
+- Rich text editor (WYSIWYG) for content creation
+- Media upload interface
+- Admin panel for assigning users/groups to pages
+- Edit any resource type (metadata JSON, redirects, etc.)
+- Nested page moderator management (`/x` editors manage `/x/*`)
 
 ## CLI & Indexing Tools
-- Bun CLI helpers to:
-  - Deploy new frontends to Walrus.
-  - Assign domain/NS records for Walrus sites.
-  - Auto-renew content: scan pages, batch renew transactions.
-- Indexing utility to:
-  - Crawl all pages, build compact index, deploy to Walrus.
-  - Research smart compression schemes.
 
-## Additional Notes
-- Pages/Subpages are SUI objects (NFT-like) owning subpages and pointing to Walrus blobs.
-- Global registry shared object: map of page IDs for discovery and search.
-- Content formats: Markdown/HTML, with diffs for history.
-- Goal: build repo, smart contracts, frontend, Walrus integration, and win the hackathon.
+### ✅ Implemented
+- ✅ **init**: Complete initialization (build contract, deploy frontend, register homepage)
+- ✅ **contract**: Build and publish Move contract to SUI (SDK and CLI modes)
+- ✅ **deploy**: Deploy frontend to Walrus
+- ✅ **publish**: Upload single file to Walrus
+- ✅ **retrieve**: Download blob from Walrus
+- ✅ **update**: Update existing page or register new one with Walrus blob ID
+- ✅ **promote**: Add/remove editors to/from pages
+- ✅ **batch-publish-update**: Upload directory and update/register all pages in one transaction
+
+### 🚧 TODO
+- **assign-domain**: Assign domain/NS records for Walrus sites
+- **renew**: Auto-renew content (scan pages, batch renew transactions)
+- **index**: Indexing utility to crawl pages, build compact index, deploy to Walrus
+
+## Implementation Details
+
+### Current Architecture
+- **Pages**: Stored as `PageRecord` structs in a vector within Press3 shared object
+- **Access Control**: Admins (global) and Editors (per-page)
+- **Content Storage**: Walrus blob IDs referenced from contract
+- **Frontend**: React SPA with public renderer and admin panel
+- **CLI**: Bun-based tooling for deployment and management
+
+### Data Flow
+1. **Page Creation**: Admin creates page → Upload to Walrus → Register in contract
+2. **Page Update**: Admin/Editor edits → Upload new version to Walrus → Update contract reference
+3. **Public View**: User requests page → Fetch from contract → Retrieve from Walrus → Render
+4. **Editor Management**: Admin promotes/demotes editors → Contract updates editors list
+
+### Key Design Decisions
+- Pages stored in vector (not as separate objects) for simpler querying
+- Editors list per page (not group-based yet)
+- Multi-step Walrus upload (register + certify) with progress tracking
+- Layout configuration via special pages (e.g., `/_layout.json`)
+- Content type detection by file extension and MIME type

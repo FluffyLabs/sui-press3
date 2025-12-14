@@ -6,13 +6,14 @@ The Press3 frontend is a Vite + React application that serves as both the **publ
 
 ## Architecture
 
-The frontend consists of three main routes:
+The frontend is a full-featured CMS with public rendering and admin capabilities.
 
 ### Routes
 
-- **`/`** - Empty home page (placeholder for future public renderer)
+- **`/*`** - Public renderer (catch-all route for rendering pages from contract)
 - **`/dev`** - Development sandbox showing Walrus integration and page rendering prototypes
-- **`/admin`** - Admin panel for managing pages (fully implemented)
+- **`/admin`** - Admin panel for managing pages
+  - `/admin/create` - Page creation interface
   - `/admin/edit/:pageId` - Page editor interface
 
 ### Directory Structure
@@ -20,27 +21,51 @@ The frontend consists of three main routes:
 ```
 frontend/
 ├── src/
-│   ├── admin/                    # Isolated admin panel (uses @fluffylabs/shared-ui)
-│   │   ├── Admin.tsx            # Main admin dashboard with pages table
-│   │   ├── components/          # Admin-specific components
-│   │   │   ├── PageEditor.tsx   # Page editing interface
-│   │   │   └── PagesTable.tsx   # Table displaying all pages
-│   │   ├── services/            # Admin data services
-│   │   │   └── pages.ts         # Mock SUI contract data (to be replaced)
-│   │   └── types/               # Admin type definitions
-│   │       └── page.ts          # Page data structure matching SUI contract
-│   ├── components/              # Shared components
-│   │   ├── HtmlRenderer.tsx     # HTML content renderer
-│   │   ├── JsonRenderer.tsx     # JSON content renderer
-│   │   ├── MarkdownRenderer.tsx # Markdown content renderer
-│   │   └── Menu.tsx            # Navigation menu component
+│   ├── admin/                       # Isolated admin panel (uses @fluffylabs/shared-ui)
+│   │   ├── Admin.tsx               # Main admin dashboard with pages table
+│   │   ├── components/             # Admin-specific components
+│   │   │   ├── AdminLayout.tsx     # Admin panel layout wrapper
+│   │   │   ├── PageCreate.tsx      # Page creation interface
+│   │   │   ├── PageEditor.tsx      # Page editing interface
+│   │   │   ├── PagesTable.tsx      # Table displaying all pages
+│   │   │   ├── SaveProgressModal.tsx # Multi-step save progress modal
+│   │   │   └── WalletConnectButton.tsx # Wallet connection button
+│   │   ├── services/               # Admin data services
+│   │   │   ├── create.ts           # Page creation workflow
+│   │   │   └── save.ts             # Page save/update workflow
+│   │   └── types/                  # Admin type definitions
+│   │       └── page.ts             # Page data structure matching SUI contract
+│   ├── components/                 # Shared components
+│   │   ├── CmsLayout.tsx           # CMS layout template
+│   │   ├── ContentRenderer.tsx     # Dynamic content renderer (routing by type)
+│   │   ├── HtmlRenderer.tsx        # HTML content renderer
+│   │   ├── ImgRenderer.tsx         # Image content renderer
+│   │   ├── JsonRenderer.tsx        # JSON content renderer
+│   │   ├── LayoutPage.tsx          # Layout page wrapper
+│   │   ├── MarkdownRenderer.tsx    # Markdown content renderer
+│   │   ├── Menu.tsx                # Navigation menu component
+│   │   ├── MultiStageLoader.tsx    # Loading indicator with stages
+│   │   ├── NotFoundPage.tsx        # 404 page component
+│   │   ├── RawRenderer.tsx         # Raw text content renderer
+│   │   ├── Sidebar.tsx             # Sidebar navigation component
+│   │   └── WikiLayout.tsx          # Wiki layout template
+│   ├── hooks/
+│   │   └── useWalrusContent.ts     # Hook for fetching Walrus content
+│   ├── providers/                  # Context providers
+│   │   ├── LayoutProvider.tsx      # Layout and page data provider
+│   │   ├── Press3Provider.tsx      # Press3 contract data provider
+│   │   └── WalletProvider.tsx      # Sui wallet provider
 │   ├── services/
-│   │   └── walrus.ts           # Walrus storage integration
-│   ├── App.tsx                 # Main routing configuration
-│   ├── Dev.tsx                 # Development sandbox component
-│   └── Home.tsx                # Home page component
-├── public/                     # Static assets
-└── package.json               # Dependencies and scripts
+│   │   ├── contract.ts             # SUI contract transaction builders
+│   │   ├── enrichedPages.ts        # Page data enrichment
+│   │   ├── press3.ts               # Press3 contract queries
+│   │   └── walrus.ts               # Walrus storage integration
+│   ├── App.tsx                     # Main routing configuration
+│   ├── Dev.tsx                     # Development sandbox component
+│   ├── Page.tsx                    # Public page renderer
+│   └── main.tsx                    # Application entry point
+├── public/                         # Static assets
+└── package.json                    # Dependencies and scripts
 ```
 
 ## Data Model
@@ -89,10 +114,11 @@ The app will be available at `http://localhost:5173` (or the next available port
 
 ### Available Routes
 
-- `http://localhost:5173/` - Home page (empty)
-- `http://localhost:5173/dev` - Development sandbox with mock data
+- `http://localhost:5173/` - Public renderer (renders pages from contract)
+- `http://localhost:5173/dev` - Development sandbox for testing
 - `http://localhost:5173/admin` - Admin panel with pages table
-- `http://localhost:5173/admin/edit/1` - Edit page with ID "1"
+- `http://localhost:5173/admin/create` - Create new page
+- `http://localhost:5173/admin/edit/:pageId` - Edit existing page
 
 ### Build
 
@@ -119,32 +145,50 @@ npm run qa-fix
 The admin panel provides a complete interface for managing pages:
 
 **Pages Table**:
-- Displays all pages from the SUI contract
-- Columns: Page Path, Registered Block, Updated Block, Editors, Previous Blob
+- Displays all pages from the SUI contract (live data!)
+- Columns: Page Path, Walrus ID, Editors
 - Click any page path to edit
-- Shows statistics: total pages and total editors
+- Create new page button
+
+**Page Creation** (`/admin/create`):
+- Create new pages with custom path and content
+- Upload content to Walrus
+- Register page in smart contract
+- Multi-step progress indicator (Register → Certify → Update → Success)
+- Error handling with helpful messages
 
 **Page Editor** (`/admin/edit/:pageId`):
-- Edit page path and content
-- View all editors (SUI addresses)
-- See metadata: registration block, update block, previous blob ID
-- Save changes (currently mocked, will connect to SUI contract)
+- Edit existing page content
+- Upload new version to Walrus
+- Update contract with new Walrus blob ID
+- View page metadata and editors
+- Multi-step save progress modal
 - Visual indicators for modified pages
+
+**Wallet Integration**:
+- Connect with Sui wallet
+- Sign transactions for page updates
+- Admin/editor permission checks
 
 **UI Components**:
 - Uses [@fluffylabs/shared-ui](https://github.com/FluffyLabs/shared-ui) component library
-- Includes Header, Button, Input, Textarea, Alert, Badge components
+- Includes Header, Button, Input, Textarea, Alert, Badge, Modal components
 - Consistent design system with Tailwind CSS
-- Dark mode support (via shared-ui)
 
-### Dev Sandbox (`/dev`)
+### Public Renderer (`/`)
 
-The development sandbox demonstrates:
-- Walrus content fetching
-- HTML, Markdown, and JSON rendering
-- Menu navigation component
-- Page event simulation
-- Smart contract asset bindings
+The public renderer displays pages from the contract:
+- Fetches page data from SUI smart contract
+- Retrieves content from Walrus storage
+- Supports multiple layout types (CMS, Wiki)
+- Dynamic content rendering based on file extension
+- Menu and sidebar support (when configured)
+- 404 handling for missing pages
+
+**Layout Types**:
+- **CMS Layout**: Traditional CMS with menu and main content area
+- **Wiki Layout**: Wiki-style layout with sidebar navigation
+- **Raw**: Direct HTML rendering without layout wrapper
 
 ### Content Renderers
 
@@ -153,51 +197,67 @@ The frontend includes specialized renderers for different content types:
 - **HtmlRenderer**: Renders HTML content with `dangerouslySetInnerHTML`
 - **MarkdownRenderer**: Uses `react-markdown` for Markdown rendering
 - **JsonRenderer**: Pretty-prints JSON with syntax highlighting
+- **ImgRenderer**: Displays images with loading states and fallbacks
+- **RawRenderer**: Renders raw text content
+
+Content type is automatically determined by file extension or MIME type.
 
 ## Integration Points
 
-### SUI Smart Contract (To Be Implemented)
+### SUI Smart Contract Integration ✅
 
-The frontend currently uses mock data in `src/admin/services/pages.ts`. This needs to be replaced with:
+The frontend is **fully integrated** with the SUI smart contract:
 
-1. **Connect to SUI RPC**: Use `@mysten/sui` to connect to the network
-2. **Fetch Page Events**: Subscribe to or query page registration/update events
-3. **Read PageRecords**: Query the contract for page data
-4. **Write Updates**: Submit transactions to update pages
-5. **Handle Permissions**: Check editor permissions before showing edit UI
+**Implemented Features**:
+1. **Connect to SUI RPC**: Using `@mysten/sui` SDK (`src/services/press3.ts`)
+2. **Fetch Page Data**: Queries the Press3 shared object for all pages
+3. **Read PageRecords**: Retrieves path, walrus_id, and editors for each page
+4. **Write Updates**: Submits transactions to update pages (`src/services/contract.ts`)
+5. **Handle Permissions**: Checks admin/editor permissions via wallet connection
+6. **Create Pages**: Registers new pages with Walrus content (`src/admin/services/create.ts`)
+7. **Multi-step Workflows**: Handles Walrus registration, certification, and contract updates
 
-Example integration points:
-```typescript
-// TODO: Replace mock with actual SUI queries
-export async function fetchPages(): Promise<Page[]> {
-  // Query contract for all pages
-  // Parse PageRecord objects
-  // Return formatted data
-}
+**Key Files**:
+- `src/services/press3.ts` - Contract queries and data fetching
+- `src/services/contract.ts` - Transaction builders for updates and registration
+- `src/providers/Press3Provider.tsx` - React context for contract data
+- `src/admin/services/create.ts` - Page creation workflow
+- `src/admin/services/save.ts` - Page update workflow
 
-export async function updatePage(id: string, updates: Partial<Page>): Promise<Page> {
-  // Upload content to Walrus
-  // Submit transaction to update PageRecord
-  // Return updated page
-}
-```
+### Walrus Storage Integration ✅
 
-### Walrus Storage
-
-Current Walrus integration in `src/services/walrus.ts`:
+**Fully implemented** Walrus integration in `src/services/walrus.ts`:
 
 ```typescript
 import { Walrus } from "@mysten/walrus";
 
+// Upload content to Walrus (with multi-step workflow)
+export async function uploadContent(
+  content: string,
+  path: string,
+  owner: string,
+  epochs: number,
+  signAndExecute: (tx: Transaction) => Promise<{ digest: string }>,
+  onCertifying: () => void
+): Promise<{ blobId: string; registerDigest: string; certifyDigest: string }>;
+
 // Fetch file from Walrus
-export async function getFile(blobId: string): Promise<string>
+export async function getFile(blobId: string): Promise<Uint8Array>;
+
+// Check blob existence
+export async function checkBlobExists(blobId: string): Promise<boolean>;
 ```
 
-**Next Steps**:
-1. Upload content to Walrus when saving pages
-2. Fetch and cache Walrus content efficiently
-3. Handle Walrus quilt paths for multi-file blobs
-4. Implement asset resolution (CSS, images) from contract-provided URLs
+**Features**:
+- ✅ Upload content with configurable epoch storage duration
+- ✅ Multi-step workflow (register, certify)
+- ✅ Download and cache content
+- ✅ Blob existence checking
+- ✅ Error handling and user-friendly messages
+
+**Future Enhancements**:
+- Walrus quilt paths for multi-file blobs
+- Asset resolution (CSS, images) from contract-provided URLs
 
 ## Dependencies
 
@@ -222,45 +282,44 @@ export async function getFile(blobId: string): Promise<string>
 
 ## Environment Setup
 
-The frontend doesn't currently use environment variables, but you may need to add:
+The frontend supports the following environment variables:
 
 ```bash
 # .env.local
-VITE_SUI_NETWORK=testnet
-VITE_SUI_PACKAGE_ID=0x...
-VITE_WALRUS_AGGREGATOR=https://...
-VITE_WALRUS_PUBLISHER=https://...
+VITE_PRESS3_PACKAGE_ID=0x...     # Press3 contract package ID (optional, uses localStorage or hardcoded default)
+VITE_PRESS3_OBJECT_ID=0x...      # Press3 shared object ID (optional, uses localStorage or hardcoded default)
 ```
+
+**Note**: Package ID and Object ID are primarily configured via localStorage after running `bun run press3 init` from the CLI, which saves the configuration. The environment variables serve as fallbacks.
 
 ## Next Steps
 
 ### Immediate TODOs
 
-1. **Replace Mock Data**:
-   - Connect to actual SUI smart contract
-   - Fetch real page events and data
-   - Implement transaction submission
+1. **zkLogin Integration**:
+   - Implement zkLogin for gasless editor authentication
+   - Handle sponsored transactions for editors
+   - Reduce friction for content contributors
 
-2. **Walrus Integration**:
-   - Upload editor content to Walrus
-   - Fetch content for rendering
-   - Handle quilt paths and asset resolution
+2. **Rich Text Editor**:
+   - Replace textarea with WYSIWYG editor
+   - Support media uploads
+   - Markdown editing mode
 
-3. **Public Renderer** (`/`):
-   - Implement page routing based on contract data
-   - Render HTML/Markdown content from Walrus
-   - Add menu/sidebar navigation
-   - Support asset injection (CSS, images)
-
-4. **Authentication**:
-   - Integrate zkLogin for editor authentication
-   - Show/hide edit UI based on permissions
-   - Handle sponsored transactions
-
-5. **Edit Queue**:
+3. **Edit Queue**:
    - Implement proposed changes workflow
-   - Show pending edits
+   - Show pending edits for review
    - Approval/rejection interface
+
+4. **Asset Management**:
+   - Handle Walrus quilt paths for multi-file content
+   - Implement asset resolution (CSS, images, fonts)
+   - Support referencing assets from contract metadata
+
+5. **Search**:
+   - Integrate with Walrus-hosted search index
+   - Implement search UI
+   - Support full-text search across pages
 
 ### Future Enhancements
 

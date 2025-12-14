@@ -14,20 +14,27 @@ Press3 is a decentralized CMS built on SUI with Walrus storage. The frontend ser
 
 ### ✅ Implemented
 - React + Vite + TypeScript setup
-- React Router with three main routes (`/`, `/dev`, `/admin`)
-- Admin panel with pages table and editor interface
+- React Router with public renderer and admin routes
+- **Full SUI smart contract integration** via `@mysten/sui` SDK
+- **Sui wallet integration** for authentication and transactions
+- Admin panel with pages table, page creation, and page editor
+- **Public renderer** with multi-layout support (CMS, Wiki)
 - Integration with @fluffylabs/shared-ui component library
-- Content renderers for HTML, Markdown, and JSON
-- Mock data matching SUI contract schema
-- Walrus integration stub (`src/services/walrus.ts`)
+- **Content renderers** for HTML, Markdown, JSON, Images, and Raw content
+- **Full Walrus storage integration** (upload and download)
+- **Multi-step workflows** for page creation and updates with progress indicators
+- Layout system with customizable templates (CMS, Wiki)
+- Context providers for Press3 contract data, wallet, and layout management
+- Error handling with user-friendly messages
 
 ### 🚧 In Progress / TODO
-- Connect to actual SUI smart contract (replace mock data)
-- Implement Walrus content upload/download
-- Add zkLogin authentication
-- Build public renderer on `/` route
-- Implement edit queue workflow
-- Add permission checks
+- zkLogin for gasless editor authentication
+- Edit queue workflow for proposed changes
+- Rich text editor for content creation
+- Version history viewer (displaying previous Walrus blobs)
+- Search integration with Walrus-hosted index
+- Comment system
+- Walrus quilt paths for multi-file content
 
 ## Architecture Guidelines
 
@@ -36,21 +43,45 @@ Press3 is a decentralized CMS built on SUI with Walrus storage. The frontend ser
 **IMPORTANT**: The admin panel is **isolated** in `src/admin/`:
 ```
 src/
-├── admin/              # ⚠️ Admin panel - isolated module
-│   ├── Admin.tsx
-│   ├── components/
-│   ├── services/
-│   └── types/
-├── components/         # Shared components (renderers, menu)
-├── services/          # Shared services (walrus)
-└── *.tsx              # Route components (App, Home, Dev)
+├── admin/                        # ⚠️ Admin panel - isolated module
+│   ├── Admin.tsx                # Main admin dashboard
+│   ├── components/              # Admin UI components
+│   │   ├── AdminLayout.tsx      # Admin layout wrapper
+│   │   ├── PageCreate.tsx       # Page creation interface
+│   │   ├── PageEditor.tsx       # Page editing interface
+│   │   ├── PagesTable.tsx       # Pages table component
+│   │   ├── SaveProgressModal.tsx # Multi-step save progress
+│   │   └── WalletConnectButton.tsx # Wallet connection
+│   ├── services/                # Admin business logic
+│   │   ├── create.ts            # Page creation workflow
+│   │   └── save.ts              # Page update workflow
+│   └── types/                   # Admin type definitions
+│       └── page.ts              # Page data structure
+├── components/                  # Shared components (renderers, layouts)
+│   ├── *Renderer.tsx            # Content type renderers
+│   ├── *Layout.tsx              # Layout templates
+│   └── ...
+├── hooks/                       # React hooks
+│   └── useWalrusContent.ts
+├── providers/                   # React context providers
+│   ├── LayoutProvider.tsx       # Layout and page data
+│   ├── Press3Provider.tsx       # Contract data
+│   └── WalletProvider.tsx       # Wallet connection
+├── services/                    # Shared services
+│   ├── contract.ts              # Transaction builders
+│   ├── press3.ts                # Contract queries
+│   ├── walrus.ts                # Walrus integration
+│   └── enrichedPages.ts         # Data enrichment
+└── *.tsx                        # Route components (App, Page, Dev)
 ```
 
 **Rules**:
 1. Admin-specific code MUST stay in `src/admin/`
 2. Admin panel imports from `@fluffylabs/shared-ui` only (no other UI libraries)
 3. Shared components go in `src/components/`
-4. Don't mix admin and public renderer code
+4. Contract integration goes in `src/services/`
+5. Don't mix admin and public renderer code
+6. Use context providers for cross-cutting concerns
 
 ### Data Model
 
@@ -81,56 +112,68 @@ public struct PageRecord has store {
 
 ### Integration Points
 
-#### SUI Contract Integration
-Location: `src/admin/services/pages.ts`
+#### SUI Contract Integration ✅
+Location: `src/services/press3.ts` and `src/services/contract.ts`
 
-Currently contains mock data. When implementing:
-1. Use `@mysten/sui` package (already installed)
-2. Connect to testnet/mainnet RPC
-3. Query for PageRecord objects
-4. Subscribe to page creation/update events
-5. Submit transactions for page updates
+**Fully implemented**:
+1. ✅ Uses `@mysten/sui` package
+2. ✅ Connects to testnet/mainnet RPC via `SuiClient`
+3. ✅ Queries Press3 shared object for all PageRecord objects
+4. ✅ Parses and transforms PageRecord data to frontend types
+5. ✅ Submits transactions for page updates and registration
+6. ✅ Transaction builders in `src/services/contract.ts`
 
-Example:
+**Key Functions**:
 ```typescript
-import { SuiClient } from '@mysten/sui';
+// src/services/press3.ts
+export async function fetchPress3Pages(
+  client: SuiClient,
+  packageId: string,
+  objectId: string
+): Promise<Page[]>
 
-const client = new SuiClient({
-  url: import.meta.env.VITE_SUI_NETWORK
-});
-
-export async function fetchPages(): Promise<Page[]> {
-  // Query contract for all PageRecord objects
-  // Transform to frontend Page type
-  // Return data
-}
+// src/services/contract.ts
+export function buildUpdatePageTransaction(...)
+export function buildRegisterPageTransaction(...)
 ```
 
-#### Walrus Storage Integration
+**Context Provider**:
+- `src/providers/Press3Provider.tsx` - Provides contract data to entire app
+- Automatically refreshes on wallet connection
+
+#### Walrus Storage Integration ✅
 Location: `src/services/walrus.ts`
 
-Currently has basic `getFile` function. When implementing:
-1. Use `@mysten/walrus` package (already installed)
-2. Implement upload for content saves
-3. Handle quilt paths for multi-file content
-4. Cache fetched content
-5. Resolve asset URLs from contract
+**Fully implemented**:
+1. ✅ Uses `@mysten/walrus` package
+2. ✅ Implements multi-step upload workflow (register + certify)
+3. ✅ Downloads and caches content
+4. ✅ Blob existence checking
+5. ✅ Error handling with user-friendly messages
 
-Example:
+**Key Functions**:
 ```typescript
-import { Walrus } from '@mysten/walrus';
+// Upload with multi-step workflow
+export async function uploadContent(
+  content: string,
+  path: string,
+  owner: string,
+  epochs: number,
+  signAndExecute: (tx: Transaction) => Promise<{ digest: string }>,
+  onCertifying: () => void
+): Promise<{ blobId: string; registerDigest: string; certifyDigest: string }>
 
-export async function uploadContent(content: string): Promise<string> {
-  // Upload to Walrus
-  // Return blob ID
-}
+// Download content
+export async function getFile(blobId: string): Promise<Uint8Array>
 
-export async function getFile(blobId: string): Promise<string> {
-  // Fetch from Walrus
-  // Cache if appropriate
-  // Return content
-}
+// Check blob existence
+export async function checkBlobExists(blobId: string): Promise<boolean>
 ```
+
+**Usage**:
+- Used in `src/admin/services/create.ts` for page creation
+- Used in `src/admin/services/save.ts` for page updates
+- Integrated with multi-step progress modals
 
 ## Development Workflow
 
@@ -172,12 +215,18 @@ export async function getFile(blobId: string): Promise<string> {
 4. Export component
 5. Import in `Admin.tsx` or `PageEditor.tsx`
 
-#### Task: Integrate SUI Contract
-1. Read contract code in `../contract/sources/press3.move`
-2. Understand data structures and functions
-3. Update `src/admin/services/pages.ts`:
-   - Replace `fetchPages()` with SUI query
-   - Replace `updatePage()` with transaction submission
+#### Task: Add New Feature
+1. **Frontend feature**: Create component in appropriate location
+   - Admin features → `src/admin/components/`
+   - Public features → `src/components/`
+   - Shared services → `src/services/`
+2. **Contract integration**: Use existing services
+   - Query data via `src/services/press3.ts`
+   - Build transactions via `src/services/contract.ts`
+   - Access data via `Press3Provider` context
+3. **Walrus integration**: Use existing walrus service
+   - Upload via `uploadContent()` in `src/services/walrus.ts`
+   - Download via `getFile()` or `useWalrusContent()` hook
 4. Handle errors and loading states
 5. Test with testnet contract
 
