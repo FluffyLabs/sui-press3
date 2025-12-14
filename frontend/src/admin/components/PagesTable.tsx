@@ -3,6 +3,7 @@ import { Check, History, Pencil } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Tooltip } from "react-tooltip";
+import { formatFullTimestamp, formatTimestamp } from "../../utils/time";
 import type { Page } from "../types/page";
 import { EditorsDialog } from "./EditorsDialog";
 
@@ -96,7 +97,7 @@ export function PagesTable({
           <tr className="border-b-2 border-gray-200 text-left">
             <th className="px-4 py-3 font-semibold">Actions</th>
             <th className="px-4 py-3 font-semibold">Page Path</th>
-            <th className="px-4 py-3 font-semibold">Block</th>
+            <th className="px-4 py-3 font-semibold">Last change</th>
             <th className="px-4 py-3 font-semibold">Walrus Quilt ID</th>
             <th className="px-4 py-3 font-semibold">Editors</th>
           </tr>
@@ -131,17 +132,20 @@ export function PagesTable({
                 data-tooltip-id="block-tooltip"
                 data-tooltip-content={
                   page.registeredAtBlock && page.updatedAtBlock
-                    ? `Registered: #${page.registeredAtBlock.toLocaleString()}\nLast Updated: #${page.updatedAtBlock.toLocaleString()}`
-                    : undefined
+                    ? `Registered: ${formatFullTimestamp(page.registeredAtBlock)}\nLast Updated: ${formatFullTimestamp(page.updatedAtBlock)}`
+                    : page.registeredAtBlock
+                      ? `Registered: ${formatFullTimestamp(page.registeredAtBlock)}`
+                      : page.updatedAtBlock
+                        ? `Last Updated: ${formatFullTimestamp(page.updatedAtBlock)}`
+                        : undefined
                 }
               >
                 {page.updatedAtBlock || page.registeredAtBlock ? (
                   <>
                     <div>
-                      #
-                      {(
-                        page.updatedAtBlock || page.registeredAtBlock
-                      )?.toLocaleString()}
+                      {formatTimestamp(
+                        page.updatedAtBlock || page.registeredAtBlock || 0,
+                      )}
                     </div>
                     {page.updatedAtBlock &&
                       page.registeredAtBlock &&
