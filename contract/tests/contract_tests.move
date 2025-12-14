@@ -220,7 +220,7 @@ module contract::press3_test {
     }
 
     #[test]
-    fun test_set_admin() {
+    fun test_set_admins() {
         let mut scenario = test_scenario::begin(ADMIN);
 
         // Initialize the Press3 object
@@ -236,7 +236,7 @@ module contract::press3_test {
             let another_admin = ANOTHER_ADMIN;
             let mut state = test_scenario::take_shared<Press3>(&scenario);
             let new_admins = vector[admin, new_admin, another_admin];
-            press3::set_admin(&mut state, new_admins, test_scenario::ctx(&mut scenario));
+            press3::set_admins(&mut state, new_admins, test_scenario::ctx(&mut scenario));
 
             // Verify the admins were set
             let admins = press3::admins(&state);
@@ -253,7 +253,7 @@ module contract::press3_test {
 
     #[test]
     #[expected_failure(abort_code = E_NOT_ADMIN)]
-    fun test_non_admin_cannot_set_admin() {
+    fun test_non_admin_cannot_set_admins() {
         let mut scenario = test_scenario::begin(ADMIN);
 
         // Initialize
@@ -266,7 +266,7 @@ module contract::press3_test {
         {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
             let new_admins = vector[NON_ADMIN];
-            press3::set_admin(&mut state, new_admins, test_scenario::ctx(&mut scenario));
+            press3::set_admins(&mut state, new_admins, test_scenario::ctx(&mut scenario));
             test_scenario::return_shared(state);
         };
 
@@ -274,7 +274,7 @@ module contract::press3_test {
     }
 
     #[test]
-    fun test_set_editor() {
+    fun test_set_editors() {
         let mut scenario = test_scenario::begin(ADMIN);
 
         // Initialize
@@ -302,7 +302,7 @@ module contract::press3_test {
             let new_editor = NEW_EDITOR;
             let mut state = test_scenario::take_shared<Press3>(&scenario);
             let new_editors = vector[editor, new_editor];
-            press3::set_editor(
+            press3::set_editors(
                 &mut state,
                 0,
                 string::utf8(b"/test"),
@@ -324,7 +324,7 @@ module contract::press3_test {
 
     #[test]
     #[expected_failure(abort_code = E_NOT_ADMIN)]
-    fun test_non_admin_cannot_set_editor() {
+    fun test_non_admin_cannot_set_editors() {
         let mut scenario = test_scenario::begin(ADMIN);
 
         // Initialize
@@ -350,7 +350,7 @@ module contract::press3_test {
         {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
             let new_editors = vector[NON_ADMIN];
-            press3::set_editor(
+            press3::set_editors(
                 &mut state,
                 0,
                 string::utf8(b"/test"),
@@ -391,7 +391,7 @@ module contract::press3_test {
         {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
             let new_editors = vector[EDITOR];
-            press3::set_editor(
+            press3::set_editors(
                 &mut state,
                 0,
                 string::utf8(b"/wrong"),
@@ -470,7 +470,7 @@ module contract::press3_test {
         {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
             let new_editors = vector[ADMIN, EDITOR];
-            press3::set_editor(
+            press3::set_editors(
                 &mut state,
                 0,
                 string::utf8(b"/test"),

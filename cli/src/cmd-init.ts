@@ -1,6 +1,4 @@
 import { promises as fs } from 'node:fs';
-import { join } from 'node:path';
-
 import { DEFAULT_CONFIG, PRESS3_CONF_NAME, type Press3Config } from './config';
 import { logStep } from './logger';
 import {
@@ -14,12 +12,8 @@ import {
   readPackageDependencies,
   registerPage,
 } from './sui';
-import { ensurePathExists, fileExists } from './utils';
-import {
-  createWalrusClient,
-  loadPublisherKeypair,
-  prepareWalrusFiles,
-} from './walrus';
+import { fileExists } from './utils';
+import { loadPublisherKeypair } from './walrus';
 
 export async function handleInit(flags: Record<string, string | boolean>) {
   if (await fileExists(PRESS3_CONF_NAME)) {
@@ -39,49 +33,9 @@ export async function handleInit(flags: Record<string, string | boolean>) {
     process.exit(1);
   }
 
-  // Step 1: Build and deploy frontend to Walrus
-  logStep('Init', 'Building frontend...');
-  const quiltEntryPoint = join(config.frontendDir, config.quiltEntry);
-  const quiltAssetsDir = join(config.frontendDir, config.quiltAssetsDir);
-
-  await buildFrontend(config.frontendDir);
-  await ensurePathExists(quiltEntryPoint, 'quilt entry point');
-
-  const files = await prepareWalrusFiles({
-    assetsDir: quiltAssetsDir,
-    entryPath: quiltEntryPoint,
-  });
-  logStep('Init', `Bundled ${files.length} files from ${quiltAssetsDir}`);
-
-  // Deploy to Walrus
-  logStep('Init', 'Deploying frontend to Walrus...');
   const signer = await loadPublisherKeypair(config.walrus.secret);
-  logStep('Init', `Using signer: ${signer.toSuiAddress()}`);
 
-  const walrusClient = createWalrusClient(config.walrus.network);
-
-  const patches = await walrusClient.walrus.writeFiles({
-    files,
-    epochs: config.walrus.epochs,
-    deletable: config.walrus.deletable,
-    signer,
-  });
-
-  if (!patches.length) {
-    throw new Error('Walrus writeFiles returned zero patches.');
-  }
-
-  const walrusId = patches[0]?.blobId;
-  if (!walrusId) {
-    throw new Error('Failed to get blob ID from Walrus');
-  }
-
-  logStep(
-    'Init',
-    `Frontend deployed to Walrus: ${walrusId} (${patches.length} files)`
-  );
-
-  // Step 2: Build and publish smart contract
+  // Step 1: Build and publish smart contract
   logStep('Init', 'Building smart contract...');
   await buildMoveContract(config.contractDir);
 
@@ -113,7 +67,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
   );
 
   if (isDemo) {
-    // Step 3: Register demo pages with Walrus blob
+    // Step 2: Register demo pages with Walrus blob
     logStep('Init', 'Registering homepage...');
     const registerHomeResult = await registerPage({
       client: suiClient,
@@ -167,7 +121,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
       process.exit(1);
     }
 
-    // Step 3: Register homepage with Walrus blob
+    // Step 2: Register homepage with Walrus blob
     logStep('Init', 'Registering homepage...');
     const registerResult = await registerPage({
       client: suiClient,
@@ -185,7 +139,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
     );
   }
 
-  // Step 4: Write config file
+  // Step 3: Write config file
   const initConfig: Press3Config = {
     package_id: packageId,
     press3_object_id: press3ObjectId,
@@ -200,14 +154,8 @@ export async function handleInit(flags: Record<string, string | boolean>) {
   console.log(`Network: ${config.walrus.network}`);
   console.log(`Package ID: ${packageId}`);
   console.log(`Press3 Object: ${press3ObjectId}`);
-  console.log(`Walrus Blob: ${walrusId}`);
   console.log(`Config File: ${outputPath}`);
   console.log('=====================================\n');
-}
-
-async function buildFrontend(frontendDir: string) {
-  await Bun.$`npm ci`.cwd(frontendDir);
-  await Bun.$`npm run build`.cwd(frontendDir);
 }
 
 async function writeLogFile(path: string, config: Press3Config) {
