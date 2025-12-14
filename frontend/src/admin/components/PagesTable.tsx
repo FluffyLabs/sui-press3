@@ -46,7 +46,7 @@ export function PagesTable({ pages, admins }: Props) {
           <tr className="border-b-2 border-gray-200 text-left">
             <th className="px-4 py-3 font-semibold">Page Path</th>
             <th className="px-4 py-3 font-semibold">Block</th>
-            <th className="px-4 py-3 font-semibold">Walrus Blob ID</th>
+            <th className="px-4 py-3 font-semibold">Walrus Quilt ID</th>
             <th className="px-4 py-3 font-semibold">Editors</th>
           </tr>
         </thead>
@@ -113,6 +113,8 @@ export function PagesTable({ pages, admins }: Props) {
                           `${page.id}-prev`,
                         )
                       }
+                      data-tooltip-id="walrus-tooltip"
+                      data-tooltip-content={copiedId === `${page.id}-prev` ? 'Copied!' : 'Copy walrus quilt id of previous content'}
                       className="bg-transparent border border-gray-300 rounded px-2 py-1 cursor-pointer text-gray-500 hover:bg-gray-50"
                     >
                       {copiedId === `${page.id}-prev` ? (

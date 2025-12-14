@@ -5,11 +5,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import {
-  findPress3Object,
-  getPress3State,
-  subscribeToPress3Events,
-} from "../services/press3";
+import { getPress3State, subscribeToPress3Events } from "../services/press3";
 import { getFile } from "../services/walrus";
 
 interface Press3ContextValue {
@@ -18,7 +14,7 @@ interface Press3ContextValue {
   error: Error | null;
   packageId: string;
   admins: string[];
-  press3ObjectId: string | null;
+  press3ObjectId: string;
   getPageWithIndex: (
     path: string,
   ) => { walrusId: string; index: number; editors: string[] } | null;
@@ -28,15 +24,15 @@ const Press3Context = createContext<Press3ContextValue | null>(null);
 
 interface Press3ProviderProps {
   packageId: string;
+  objectId: string;
   children: ReactNode;
 }
 
-export function Press3Provider({ packageId, children }: Press3ProviderProps) {
+export function Press3Provider({ packageId, objectId, children }: Press3ProviderProps) {
   const [pages, setPages] = useState<Map<string, string>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [admins, setAdmins] = useState<string[]>([]);
-  const [press3ObjectId, setPress3ObjectId] = useState<string | null>(null);
   const [pageRecords, setPageRecords] = useState<
     Array<{ path: string; walrusId: string; editors: string[] }>
   >([]);
@@ -47,8 +43,7 @@ export function Press3Provider({ packageId, children }: Press3ProviderProps) {
 
     async function fetchState() {
       try {
-        const objectId = await findPress3Object(packageId);
-        if (!objectId || cancelled) return;
+        if (cancelled) return;
 
         const state = await getPress3State(objectId);
         if (!state || cancelled) return;
@@ -59,7 +54,6 @@ export function Press3Provider({ packageId, children }: Press3ProviderProps) {
         }
         setPages(pagesMap);
         setAdmins(state.admins);
-        setPress3ObjectId(objectId);
         setPageRecords(state.pages);
         setIsLoading(false);
       } catch (err) {
@@ -74,7 +68,7 @@ export function Press3Provider({ packageId, children }: Press3ProviderProps) {
     return () => {
       cancelled = true;
     };
-  }, [packageId]);
+  }, [objectId]);
 
   // Subscribe to events
   useEffect(() => {
@@ -129,7 +123,7 @@ export function Press3Provider({ packageId, children }: Press3ProviderProps) {
         error,
         packageId,
         admins,
-        press3ObjectId,
+        press3ObjectId: objectId,
         getPageWithIndex,
       }}
     >

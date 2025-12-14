@@ -13,6 +13,7 @@ import { fetchPageById } from "../services/pages";
 import { SaveStep, savePageContent } from "../services/save";
 import type { Page } from "../types/page";
 import { AdminLayout } from "./AdminLayout";
+import { SaveProgressModal } from "./SaveProgressModal";
 
 export function PageEditor() {
   const { pageId } = useParams<{ pageId: string }>();
@@ -28,11 +29,16 @@ export function PageEditor() {
   const [originalContent, setOriginalContent] = useState("");
   const [path, setPath] = useState("");
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveStep, setSaveStep] = useState<SaveStep | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [transactionDigests, setTransactionDigests] = useState<{
+    register?: string;
+    certify?: string;
+    update?: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!pageId) return;
@@ -40,7 +46,7 @@ export function PageEditor() {
     const loadPage = async () => {
       setLoading(true);
       try {
-        const fetchedPage = await fetchPageById(packageId, pageId);
+        const fetchedPage = await fetchPageById(packageId, press3ObjectId, pageId);
         if (fetchedPage) {
           setPage(fetchedPage);
           setPath(fetchedPage.path);
@@ -64,7 +70,7 @@ export function PageEditor() {
     };
 
     loadPage();
-  }, [pageId, packageId]);
+  }, [pageId, packageId, press3ObjectId]);
 
   // Track content changes
   useEffect(() => {
@@ -101,10 +107,11 @@ export function PageEditor() {
       return;
     }
 
-    setSaving(true);
+    setSaveModalOpen(true);
     setSaveSuccess(false);
     setSaveError(null);
     setSaveStep(null);
+    setTransactionDigests(null);
 
     try {
       const result = await savePageContent({
@@ -113,6 +120,8 @@ export function PageEditor() {
         pageIndex: pageData.index,
         pagePath: page.path,
         content,
+        owner: currentAccount.address,
+        epochs: 5, // Store for 5 epochs (~30 days) to reduce storage costs
         signAndExecute: async (tx) => {
           const result = await signAndExecuteTransaction({ transaction: tx });
           return { digest: result.digest };
@@ -125,18 +134,28 @@ export function PageEditor() {
       if (result.success) {
         setSaveSuccess(true);
         setOriginalContent(content); // Update original to match new saved content
-        setTimeout(() => {
-          setSaveSuccess(false);
-          setSaveStep(null);
-        }, 3000);
+        setTransactionDigests({
+          register: result.walrusRegisterDigest,
+          certify: result.walrusCertifyDigest,
+          update: result.transactionDigest,
+        });
       } else {
         setSaveError(result.error?.message || "Failed to save page");
       }
     } catch (error) {
       console.error("Failed to save page:", error);
       setSaveError(error instanceof Error ? error.message : "Unknown error");
-    } finally {
-      setSaving(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSaveModalOpen(false);
+    // Reset state when modal closes
+    if (saveSuccess) {
+      setSaveSuccess(false);
+      setSaveStep(null);
+      setSaveError(null);
+      setTransactionDigests(null);
     }
   };
 
@@ -175,16 +194,14 @@ export function PageEditor() {
         <span>Back</span>
       </button>
 
-      {saveSuccess && <Alert className="mb-5">Page saved successfully!</Alert>}
-      {saveError && <Alert className="mb-5">Error: {saveError}</Alert>}
-      {saveStep && !saveSuccess && (
-        <Alert className="mb-5">
-          {saveStep === SaveStep.UPLOADING_WALRUS && "Uploading to Walrus..."}
-          {saveStep === SaveStep.WAITING_WALLET &&
-            "Waiting for wallet approval..."}
-          {saveStep === SaveStep.SUBMITTING_TX && "Submitting transaction..."}
-        </Alert>
-      )}
+      <SaveProgressModal
+        open={saveModalOpen}
+        currentStep={saveStep}
+        isSuccess={saveSuccess}
+        error={saveError}
+        transactionDigests={transactionDigests}
+        onClose={handleCloseModal}
+      />
 
       <div className="mb-5">
         <label htmlFor="path" className="block mb-2 font-medium">
@@ -233,9 +250,9 @@ export function PageEditor() {
       <div className="flex gap-3">
         <Button
           onClick={handleSave}
-          disabled={saving || !hasChanges || !currentAccount}
+          disabled={saveModalOpen || !hasChanges || !currentAccount}
         >
-          {saving ? "Saving..." : "Save Changes"}
+          Save Changes
         </Button>
         <Button variant="secondary" onClick={() => navigate("/admin")}>
           Cancel

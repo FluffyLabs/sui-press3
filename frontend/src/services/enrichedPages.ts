@@ -1,18 +1,13 @@
 import type { EnrichedPage } from "../types/press3";
-import { findPress3Object, getPress3State, queryPageEvents } from "./press3";
+import { getPress3State, queryPageEvents } from "./press3";
 
 /**
  * Fetches pages from the contract and enriches them with event history data
  */
 export async function fetchEnrichedPages(
   packageId: string,
+  objectId: string,
 ): Promise<{ pages: EnrichedPage[]; admins: string[] }> {
-  // Find the Press3 object
-  const objectId = await findPress3Object(packageId);
-  if (!objectId) {
-    throw new Error("Press3 object not found");
-  }
-
   // Get current state
   const state = await getPress3State(objectId);
   if (!state) {
