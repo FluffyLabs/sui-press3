@@ -266,6 +266,69 @@ export async function registerPage(options: {
 }
 
 /**
+ * Batch update or register multiple pages in a single transaction
+ */
+export async function batchUpdateOrRegisterPages(options: {
+  client: SuiClient;
+  signer: Ed25519Keypair;
+  packageId: string;
+  press3ObjectId: string;
+  pages: Array<{ path: string; walrusId: string }>;
+  existingPages: PageRecord[];
+}): Promise<SuiPublishResult> {
+  const { client, signer, packageId, press3ObjectId, pages, existingPages } =
+    options;
+
+  // Wait for the package to be indexed before calling Move functions
+  await waitForPackage(client, packageId);
+
+  const tx = new Transaction();
+
+  for (const page of pages) {
+    const existingIndex = existingPages.findIndex((p) => p.path === page.path);
+
+    if (existingIndex !== -1) {
+      // Page exists, update it
+      tx.moveCall({
+        target: `${packageId}::press3::update_page_walrus_id`,
+        arguments: [
+          tx.object(press3ObjectId),
+          tx.pure.u64(existingIndex),
+          tx.pure.string(page.path),
+          tx.pure.string(page.walrusId),
+        ],
+      });
+    } else {
+      // Page doesn't exist, register it
+      tx.moveCall({
+        target: `${packageId}::press3::register_page`,
+        arguments: [
+          tx.object(press3ObjectId),
+          tx.pure.string(page.path),
+          tx.pure.string(page.walrusId),
+        ],
+      });
+    }
+  }
+
+  // Set gas budget based on number of operations
+  // Base cost + additional cost per page
+  const gasBudget = Math.max(10_000_000, pages.length * 5_000_000);
+  tx.setGasBudget(gasBudget);
+
+  const result = await client.signAndExecuteTransaction({
+    transaction: tx,
+    signer,
+    options: {
+      showEffects: true,
+      showObjectChanges: true,
+    },
+  });
+
+  return result;
+}
+
+/**
  * Fetch all pages from a Press3 object
  */
 export async function getPages(options: {
