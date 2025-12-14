@@ -20,7 +20,6 @@ export function isPageLayout(value: unknown): value is PageLayout {
   const obj = value as Record<string, unknown>;
   if (obj.mode !== "cms" && obj.mode !== "wiki") return false;
   if (typeof obj.content !== "string") return false;
-  if (obj.mode === "wiki" && typeof obj.sidenav !== "string") return false;
   return true;
 }
 
