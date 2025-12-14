@@ -5,6 +5,7 @@ module contract::press3 {
     const E_NOT_ADMIN: u64 = 0;
     const E_NOT_EDITOR: u64 = 1;
     const E_INVALID_PAGE_PATH: u64 = 2;
+    const E_EMPTY_ADMINS: u64 = 3;
 
     public struct Press3 has key {
         id: sui::object::UID,
@@ -105,12 +106,14 @@ module contract::press3 {
     }
 
     /// Sets admins. Only existing admins can set admins.
+    /// At least one admin must remain to prevent lock-out.
     entry fun set_admins(
         state: &mut Press3,
         new_admins: vector<address>,
         ctx: &sui::tx_context::TxContext,
     ) {
         assert_admin(state, ctx);
+        assert!(new_admins.length() > 0, E_EMPTY_ADMINS);
         state.admins = new_admins;
     }
 

@@ -1,6 +1,6 @@
 #[test_only]
 module contract::press3_test {
-    use contract::press3::{Self, Press3, E_NOT_ADMIN, E_NOT_EDITOR, E_INVALID_PAGE_PATH};
+    use contract::press3::{Self, Press3, E_NOT_ADMIN, E_NOT_EDITOR, E_INVALID_PAGE_PATH, E_EMPTY_ADMINS};
     use std::string;
     use sui::test_scenario;
 
@@ -267,6 +267,28 @@ module contract::press3_test {
             let mut state = test_scenario::take_shared<Press3>(&scenario);
             let new_admins = vector[NON_ADMIN];
             press3::set_admins(&mut state, new_admins, test_scenario::ctx(&mut scenario));
+            test_scenario::return_shared(state);
+        };
+
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = E_EMPTY_ADMINS)]
+    fun test_cannot_set_empty_admins() {
+        let mut scenario = test_scenario::begin(ADMIN);
+
+        // Initialize
+        {
+            press3::init_for_testing(test_scenario::ctx(&mut scenario));
+        };
+
+        // Admin tries to set empty admins list (should fail to prevent lock-out)
+        test_scenario::next_tx(&mut scenario, ADMIN);
+        {
+            let mut state = test_scenario::take_shared<Press3>(&scenario);
+            let empty_admins = vector::empty<address>();
+            press3::set_admins(&mut state, empty_admins, test_scenario::ctx(&mut scenario));
             test_scenario::return_shared(state);
         };
 
