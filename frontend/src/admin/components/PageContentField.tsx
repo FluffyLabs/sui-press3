@@ -32,8 +32,8 @@ export function PageContentField({
         format={
           path.endsWith(".md")
             ? "markdown"
-            : path.endsWith(".html")
-              ? "html"
+            : path.endsWith("html")
+              ? "raw"
               : "raw"
         }
       />
