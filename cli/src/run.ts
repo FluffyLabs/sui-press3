@@ -2,6 +2,7 @@ import { handleBatchPublishUpdate } from './cmd-batch-publish-update';
 import { handleContract } from './cmd-contract';
 import { handleDeploy } from './cmd-deploy';
 import { handleInit } from './cmd-init';
+import { handlePromote } from './cmd-promote';
 import { handlePublish } from './cmd-publish';
 import { handleRetrieve } from './cmd-retrieve';
 import { handleUpdate } from './cmd-update';
@@ -18,6 +19,7 @@ type Command =
   | 'index'
   | 'init'
   | 'update'
+  | 'promote'
   | 'help';
 
 type ParsedArgs = {
@@ -71,6 +73,11 @@ Batch Publish Update options:
 Update options:
   --path             Page path to update (required)
   --blob-id          New Walrus blob ID (required)
+
+Promote options:
+  --path             Page path to manage editors for (required)
+  --add              Comma-separated list of Sui addresses to add as editors
+  --remove           Comma-separated list of Sui addresses to remove from editors
 `;
 
 function parseArgs(argv: string[]): ParsedArgs {
@@ -106,6 +113,7 @@ function parseArgs(argv: string[]): ParsedArgs {
       'index',
       'init',
       'update',
+      'promote',
     ].includes(command)
       ? (command as Command)
       : 'help',
@@ -145,6 +153,9 @@ export async function run() {
       break;
     case 'update':
       await handleUpdate(flags);
+      break;
+    case 'promote':
+      await handlePromote(flags);
       break;
     default:
       console.log(HELP_TEXT.trim());

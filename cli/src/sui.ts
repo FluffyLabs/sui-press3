@@ -408,3 +408,54 @@ export async function updatePage(options: {
 
   return result;
 }
+
+/**
+ * Set editors for a specific page
+ */
+export async function setEditors(options: {
+  client: SuiClient;
+  signer: Ed25519Keypair;
+  packageId: string;
+  press3ObjectId: string;
+  pageIndex: number;
+  pagePath: string;
+  editors: string[];
+}): Promise<SuiPublishResult> {
+  const {
+    client,
+    signer,
+    packageId,
+    press3ObjectId,
+    pageIndex,
+    pagePath,
+    editors,
+  } = options;
+
+  // Wait for the package to be indexed before calling Move functions
+  await waitForPackage(client, packageId);
+
+  const tx = new Transaction();
+
+  tx.moveCall({
+    target: `${packageId}::press3::set_editors`,
+    arguments: [
+      tx.object(press3ObjectId),
+      tx.pure.u64(pageIndex),
+      tx.pure.string(pagePath),
+      tx.pure.vector('address', editors),
+    ],
+  });
+
+  tx.setGasBudget(10_000_000); // 0.01 SUI
+
+  const result = await client.signAndExecuteTransaction({
+    transaction: tx,
+    signer,
+    options: {
+      showEffects: true,
+      showObjectChanges: true,
+    },
+  });
+
+  return result;
+}

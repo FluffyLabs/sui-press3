@@ -105,7 +105,7 @@ module contract::press3 {
     }
 
     /// Sets admins. Only existing admins can set admins.
-    entry fun set_admin(
+    entry fun set_admins(
         state: &mut Press3,
         new_admins: vector<address>,
         ctx: &sui::tx_context::TxContext,
@@ -115,7 +115,7 @@ module contract::press3 {
     }
 
     /// Set editors to a specific page. Only admins can set editors.
-    entry fun set_editor(
+    entry fun set_editors(
         state: &mut Press3,
         page_index: u64,
         page_path: String,
