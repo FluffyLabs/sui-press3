@@ -8,10 +8,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { usePermissions } from "../../hooks/usePermissions";
 import { usePress3 } from "../../providers/Press3Provider";
 import { getFile } from "../../services/walrus";
+import { setPageEditors } from "../services/editors";
 import { fetchPageById } from "../services/pages";
 import { type SaveStep, savePageContent } from "../services/save";
 import type { Page } from "../types/page";
 import { AdminLayout } from "./AdminLayout";
+import { EditorsDialog } from "./EditorsDialog";
 import { PageContentField } from "./PageContentField";
 import { PageEditorHeader } from "./PageEditorHeader";
 import { PageEditorsSection } from "./PageEditorsSection";
@@ -43,6 +45,9 @@ export function PageEditor() {
     certify?: string;
     update?: string;
   } | null>(null);
+  const [editorsDialogOpen, setEditorsDialogOpen] = useState(false);
+  const [isSavingEditors, setIsSavingEditors] = useState(false);
+  const [editorsDialogError, setEditorsDialogError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!pageId) return;
@@ -172,6 +177,55 @@ export function PageEditor() {
     navigate("/admin");
   };
 
+  const handleOpenEditorsDialog = () => {
+    setEditorsDialogOpen(true);
+    setEditorsDialogError(null);
+  };
+
+  const handleEditorsDialogClose = (open: boolean) => {
+    setEditorsDialogOpen(open);
+    if (!open) {
+      setEditorsDialogError(null);
+      setIsSavingEditors(false);
+    }
+  };
+
+  const handleSaveEditors = async (editors: string[]) => {
+    if (!page || !currentAccount) return;
+
+    const pageData = getPageWithIndex(page.path);
+    if (!pageData) {
+      setEditorsDialogError("Page not found in contract state");
+      return;
+    }
+
+    setIsSavingEditors(true);
+    setEditorsDialogError(null);
+
+    try {
+      await setPageEditors({
+        packageId,
+        press3ObjectId,
+        pageIndex: pageData.index,
+        pagePath: page.path,
+        editors,
+        signAndExecute: async (tx) => {
+          const result = await signAndExecuteTransaction({ transaction: tx });
+          return { digest: result.digest };
+        },
+      });
+
+      // Update local page state
+      setPage({ ...page, editors });
+      setEditorsDialogOpen(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to update editors";
+      setEditorsDialogError(message);
+    } finally {
+      setIsSavingEditors(false);
+    }
+  };
+
   if (loading) {
     return (
       <AdminLayout>
@@ -212,6 +266,8 @@ export function PageEditor() {
 
       <PageEditorsSection
         editors={page.editors}
+        onEditClick={handleOpenEditorsDialog}
+        canEdit={currentAccount ? canEditPage(page.path) : false}
       />
 
       <PageSaveActions
@@ -223,6 +279,15 @@ export function PageEditor() {
         showSavingState={saveModalOpen}
       />
 
+      <EditorsDialog
+        open={editorsDialogOpen}
+        pagePath={page.path}
+        editors={page.editors}
+        onOpenChange={handleEditorsDialogClose}
+        onSave={handleSaveEditors}
+        isSaving={isSavingEditors}
+        errorMessage={editorsDialogError}
+      />
     </AdminLayout>
   );
 }
