@@ -105,9 +105,9 @@ export function RichEditor({
     },
   });
 
-  // Sync content from parent
+  // Sync content from parent (skip in raw mode - we don't want TipTap processing)
   useEffect(() => {
-    if (!editor) return;
+    if (!editor || rawMode) return;
     const storage = editor.storage as unknown as {
       markdown: { getMarkdown: () => string };
     };
@@ -116,7 +116,7 @@ export function RichEditor({
     if (content !== currentContent) {
       editor.commands.setContent(content);
     }
-  }, [content, editor, format]);
+  }, [content, editor, format, rawMode]);
 
   const closeSlashMenu = useCallback(() => {
     setSlashMenuOpen(false);
