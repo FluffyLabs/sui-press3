@@ -6,7 +6,7 @@ Press3 is a decentralized CMS built on Sui with Walrus storage. The project cont
 - `frontend/` – Vite + React application serving as both public content renderer and admin backoffice editor.
 - `cli/` – Bun-based tooling for contract deployment, Walrus publishing, page management, and batch operations.
 
-See `AGENTS.md` for the full project context and requirements shared across AI agents.
+### See [demo @ youtube](https://www.youtube.com/watch?v=0QO_3YYDiRo).
 
 ## Documentation
 
