@@ -12,6 +12,7 @@ import { common, createLowlight } from "lowlight";
 import {
   Bold,
   Code,
+  Code2,
   Heading1,
   Heading2,
   Heading3,
@@ -54,6 +55,7 @@ export function RichEditor({
   const [slashMenuOpen, setSlashMenuOpen] = useState(false);
   const [slashMenuFilter, setSlashMenuFilter] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [rawMode, setRawMode] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -365,86 +367,120 @@ export function RichEditor({
     return null;
   }
 
+  const toggleRawMode = () => {
+    if (rawMode) {
+      // Switching from raw to rich - sync content to editor
+      editor.commands.setContent(content);
+    }
+    setRawMode(!rawMode);
+  };
+
   return (
     <div className="rich-editor">
-      {/* Bubble Menu - appears on text selection */}
-      <BubbleMenu editor={editor} className="bubble-menu">
+      {/* Mode Toggle */}
+      <div className="editor-toolbar">
         <button
           type="button"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={editor.isActive("bold") ? "active" : ""}
+          onClick={toggleRawMode}
+          className={`toolbar-button ${rawMode ? "active" : ""}`}
+          title={rawMode ? "Switch to Rich Editor" : "Switch to Raw Mode"}
         >
-          <Bold size={16} />
+          <Code2 size={16} />
+          <span>{rawMode ? "Rich" : "Raw"}</span>
         </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={editor.isActive("italic") ? "active" : ""}
-        >
-          <Italic size={16} />
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          className={editor.isActive("strike") ? "active" : ""}
-        >
-          <Strikethrough size={16} />
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleCode().run()}
-          className={editor.isActive("code") ? "active" : ""}
-        >
-          <Code size={16} />
-        </button>
-        <div className="bubble-divider" />
-        <button
-          type="button"
-          onClick={setLink}
-          className={editor.isActive("link") ? "active" : ""}
-        >
-          <LinkIcon size={16} />
-        </button>
-      </BubbleMenu>
+      </div>
 
-      {/* Floating Menu - appears on empty lines */}
-      <FloatingMenu editor={editor} className="floating-menu">
-        <span className="floating-hint">Type '/' for commands</span>
-      </FloatingMenu>
-
-      {/* Slash Command Menu */}
-      {slashMenuOpen && filteredItems.length > 0 && (
-        <div className="slash-menu">
-          {filteredItems.map((item, index) => (
+      {rawMode ? (
+        <textarea
+          className="raw-editor"
+          value={content}
+          onChange={(e) => onChange(e.target.value)}
+          spellCheck={false}
+        />
+      ) : (
+        <>
+          {/* Bubble Menu - appears on text selection */}
+          <BubbleMenu editor={editor} className="bubble-menu">
             <button
-              key={item.title}
               type="button"
-              className={`slash-menu-item ${index === selectedIndex ? "selected" : ""}`}
-              onClick={() => {
-                item.command();
-                closeSlashMenu();
-              }}
-              onMouseEnter={() => setSelectedIndex(index)}
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              className={editor.isActive("bold") ? "active" : ""}
             >
-              <div className="slash-menu-icon">{item.icon}</div>
-              <div className="slash-menu-content">
-                <div className="slash-menu-title">{item.title}</div>
-                <div className="slash-menu-description">{item.description}</div>
-              </div>
+              <Bold size={16} />
             </button>
-          ))}
-        </div>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              className={editor.isActive("italic") ? "active" : ""}
+            >
+              <Italic size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().toggleStrike().run()}
+              className={editor.isActive("strike") ? "active" : ""}
+            >
+              <Strikethrough size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().toggleCode().run()}
+              className={editor.isActive("code") ? "active" : ""}
+            >
+              <Code size={16} />
+            </button>
+            <div className="bubble-divider" />
+            <button
+              type="button"
+              onClick={setLink}
+              className={editor.isActive("link") ? "active" : ""}
+            >
+              <LinkIcon size={16} />
+            </button>
+          </BubbleMenu>
+
+          {/* Floating Menu - appears on empty lines */}
+          <FloatingMenu editor={editor} className="floating-menu">
+            <span className="floating-hint">Type '/' for commands</span>
+          </FloatingMenu>
+
+          {/* Slash Command Menu */}
+          {slashMenuOpen && filteredItems.length > 0 && (
+            <div className="slash-menu">
+              {filteredItems.map((item, index) => (
+                <button
+                  key={item.title}
+                  type="button"
+                  className={`slash-menu-item ${index === selectedIndex ? "selected" : ""}`}
+                  onClick={() => {
+                    item.command();
+                    closeSlashMenu();
+                  }}
+                  onMouseEnter={() => setSelectedIndex(index)}
+                >
+                  <div className="slash-menu-icon">{item.icon}</div>
+                  <div className="slash-menu-content">
+                    <div className="slash-menu-title">{item.title}</div>
+                    <div className="slash-menu-description">
+                      {item.description}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          <EditorContent editor={editor} className="editor-content" />
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+          />
+        </>
       )}
-
-      <EditorContent editor={editor} className="editor-content" />
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        style={{ display: "none" }}
-      />
     </div>
   );
 }

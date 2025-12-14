@@ -11,6 +11,61 @@
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
 }
 
+/* Editor Toolbar */
+.editor-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 8px 8px 0 0;
+}
+
+.toolbar-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #374151;
+  transition: all 0.15s;
+}
+
+.toolbar-button:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.toolbar-button.active {
+  background: #1f2937;
+  border-color: #1f2937;
+  color: white;
+}
+
+/* Raw Editor (Textarea) */
+.raw-editor {
+  width: 100%;
+  min-height: 480px;
+  padding: 24px 48px;
+  border: none;
+  outline: none;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #374151;
+  background: white;
+  border-radius: 0 0 8px 8px;
+}
+
+.raw-editor:focus {
+  outline: none;
+}
+
 /* Editor Content Area */
 .editor-content .ProseMirror {
   min-height: 480px;
