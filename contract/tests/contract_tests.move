@@ -1,6 +1,6 @@
 #[test_only]
 module contract::press3_test {
-    use contract::press3::{Self, Press3, E_NOT_ADMIN, E_NOT_EDITOR, E_INVALID_PAGE_PATH, E_EMPTY_ADMINS};
+    use contract::press3::{Self, Press3, E_NOT_ADMIN, E_NOT_EDITOR, E_INVALID_PAGE_PATH, E_EMPTY_ADMINS, E_PATH_ALREADY_EXISTS};
     use std::string;
     use sui::test_scenario;
 
@@ -57,6 +57,45 @@ module contract::press3_test {
                 &mut state,
                 string::utf8(b"/test"),
                 string::utf8(b"blob123"),
+                test_scenario::ctx(&mut scenario)
+            );
+            test_scenario::return_shared(state);
+        };
+
+        test_scenario::end(scenario);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = E_PATH_ALREADY_EXISTS)]
+    fun test_cannot_register_duplicate_path() {
+        let mut scenario = test_scenario::begin(ADMIN);
+
+        // Initialize
+        {
+            press3::init_for_testing(test_scenario::ctx(&mut scenario));
+        };
+
+        // Register a page
+        test_scenario::next_tx(&mut scenario, ADMIN);
+        {
+            let mut state = test_scenario::take_shared<Press3>(&scenario);
+            press3::register_page(
+                &mut state,
+                string::utf8(b"/about"),
+                string::utf8(b"walrus_blob_123"),
+                test_scenario::ctx(&mut scenario)
+            );
+            test_scenario::return_shared(state);
+        };
+
+        // Try to register the same path again (should fail)
+        test_scenario::next_tx(&mut scenario, ADMIN);
+        {
+            let mut state = test_scenario::take_shared<Press3>(&scenario);
+            press3::register_page(
+                &mut state,
+                string::utf8(b"/about"),
+                string::utf8(b"different_blob"),
                 test_scenario::ctx(&mut scenario)
             );
             test_scenario::return_shared(state);

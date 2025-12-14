@@ -6,6 +6,7 @@ module contract::press3 {
     const E_NOT_EDITOR: u64 = 1;
     const E_INVALID_PAGE_PATH: u64 = 2;
     const E_EMPTY_ADMINS: u64 = 3;
+    const E_PATH_ALREADY_EXISTS: u64 = 4;
 
     public struct Press3 has key {
         id: sui::object::UID,
@@ -61,6 +62,7 @@ module contract::press3 {
         ctx: &sui::tx_context::TxContext,
     ) {
         assert_admin(state, ctx);
+        assert!(!path_exists(state, &path), E_PATH_ALREADY_EXISTS);
 
         let editors = vector::empty<address>();
         vector::push_back(
@@ -103,6 +105,18 @@ module contract::press3 {
 
     fun assert_admin(state: &Press3, ctx: &sui::tx_context::TxContext) {
         assert!(state.admins.contains(&sui::tx_context::sender(ctx)), E_NOT_ADMIN);
+    }
+
+    fun path_exists(state: &Press3, path: &String): bool {
+        let mut i = 0;
+        let len = state.pages.length();
+        while (i < len) {
+            if (&vector::borrow(&state.pages, i).path == path) {
+                return true
+            };
+            i = i + 1;
+        };
+        false
     }
 
     /// Sets admins. Only existing admins can set admins.
