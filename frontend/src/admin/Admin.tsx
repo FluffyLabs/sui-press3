@@ -1,5 +1,7 @@
 import { Alert, Badge, Button } from "@fluffylabs/shared-ui";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { usePermissions } from "../hooks/usePermissions";
 import { usePress3 } from "../providers/Press3Provider";
 import { fetchEnrichedPages } from "../services/enrichedPages";
 import { AdminLayout } from "./components/AdminLayout";
@@ -7,6 +9,8 @@ import { PagesTable } from "./components/PagesTable";
 import type { Page } from "./types/page";
 
 function Admin() {
+  const navigate = useNavigate();
+  const { isAdmin } = usePermissions();
   const { packageId, press3ObjectId } = usePress3();
   const [pages, setPages] = useState<Page[]>([]);
   const [admins, setAdmins] = useState<string[]>([]);
@@ -32,7 +36,13 @@ function Admin() {
 
   return (
     <AdminLayout
-      headerEndSlot={<Button className="mr-4">Create New Page</Button>}
+      headerEndSlot={
+        isAdmin ? (
+          <Button className="mr-4" onClick={() => navigate("/admin/create")}>
+            Create New Page
+          </Button>
+        ) : undefined
+      }
     >
       <Alert className="my-4">
         <p>
