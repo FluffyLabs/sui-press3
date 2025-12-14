@@ -1,30 +1,60 @@
 # Press3 CLI (Bun)
 
-Utility entry point for automating deployments, renewals, and indexing for the Press3 CMS.
+Command-line tool for managing Press3 CMS deployments, pages, and Walrus storage.
 
 ## Commands
 
+### Initialization & Deployment
+
 ```bash
 # Initialize Press3 (build contract, deploy frontend, register homepage)
-bun run press3 init
-bun run press3 init --output custom-config.log  # Save config to custom location
+bun run press3 init --home <blob-id>           # Set specific homepage
+bun run press3 init --demo                     # Setup with demo content
+bun run press3 init --output custom-config.log # Save config to custom location
 
 # Deploy frontend to Walrus
 bun run press3 deploy
 bun run press3 deploy --use-cli  # Deploy using site-builder instead of SDK
 
-# Publish a single file to Walrus
-bun run press3 publish --file path/to/file.txt
-
-# Retrieve a blob from Walrus
-bun run press3 retrieve --blob-id <blob-id>
-bun run press3 retrieve --blob-id <blob-id> --output path/to/save.txt
-
 # Build and publish the Move contract to SUI
 bun run press3 contract                  # Uses SDK with WALRUS_PUBLISH_SECRET (default)
 bun run press3 contract --use-cli        # Uses sui CLI (requires active sui client config)
 bun run press3 contract --dry-run        # Build only, skip publishing
+```
 
+### Content Management
+
+```bash
+# Publish a single file to Walrus
+bun run press3 publish --file path/to/file.txt
+
+# Update an existing page or register a new one
+bun run press3 update --path /about.html --blob-id <new-blob-id>
+
+# Batch upload directory and update/register pages
+bun run press3 batch-publish-update --dir ./content
+
+# Retrieve a blob from Walrus
+bun run press3 retrieve --blob-id <blob-id>
+bun run press3 retrieve --blob-id <blob-id> --output path/to/save.txt
+```
+
+### Editor Management
+
+```bash
+# Add editors to a page
+bun run press3 promote --path /docs/intro.md --add 0xaddr1,0xaddr2
+
+# Remove editors from a page
+bun run press3 promote --path /docs/intro.md --remove 0xaddr3
+
+# Add and remove editors in one command
+bun run press3 promote --path /docs/intro.md --add 0xnew --remove 0xold
+```
+
+### Future Commands (Not Yet Implemented)
+
+```bash
 # Domain management
 bun run press3 assign-domain --domain docs.press3.sui --target walrus://blob/site
 
@@ -35,17 +65,47 @@ bun run press3 renew --batch-size 50 --dry-run
 bun run press3 index --output dist/search-index.json
 ```
 
-### Command Details
+## Command Details
 
-**init** - Complete initialization workflow that:
-- Builds and deploys the frontend to Walrus
+### init
+Complete initialization workflow that:
 - Builds and publishes the Move smart contract to SUI
-- Registers the homepage with the Walrus blob
+- Builds and deploys the frontend to Walrus
+- Registers the homepage with the specified Walrus blob
 - Saves configuration (package ID, Press3 object ID, Walrus blob ID) to a log file
 
-**retrieve** - Downloads a blob from Walrus by blob ID. If `--output` is specified, saves to a file; otherwise prints to stdout.
+**Options:**
+- `--home <blob-id>` - Walrus blob ID to set as homepage (required unless using --demo)
+- `--demo` - Setup with initial demo content (homepage, index.html, article.md)
+- `--output <path>` - Path to save configuration file (default: press3.init.log)
 
-Each command logs its actions. The `contract` and `init` commands are fully implemented and can publish Move packages to SUI networks.
+### update
+Updates an existing page's Walrus blob ID or registers a new page if it doesn't exist.
+
+**Options:**
+- `--path <path>` - Page path (e.g., /about.html) (required)
+- `--blob-id <id>` - New Walrus blob ID (required)
+
+### promote
+Manages editor permissions for a specific page. Only admins can promote/demote editors.
+
+**Options:**
+- `--path <path>` - Page path to manage editors for (required)
+- `--add <addresses>` - Comma-separated list of Sui addresses to add as editors
+- `--remove <addresses>` - Comma-separated list of Sui addresses to remove
+
+### batch-publish-update
+Traverses a directory, uploads all files to Walrus, and updates/registers pages in a single transaction.
+
+**Options:**
+- `--dir <path>` - Directory path to traverse and upload files from (required)
+
+### retrieve
+Downloads a blob from Walrus by blob ID. If `--output` is specified, saves to a file; otherwise prints to stdout.
+
+**Options:**
+- `--blob-id <id>` - Blob ID to retrieve (required)
+- `--output <path>` - Path to save the retrieved blob (optional)
 
 ## Configuration
 
