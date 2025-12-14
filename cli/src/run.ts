@@ -72,7 +72,8 @@ Batch Publish Update options:
 
 Update options:
   --path             Page path to update (required)
-  --blob-id          New Walrus blob ID (required)
+  --blob-id          New Walrus blob ID (either --blob-id or --file required)
+  --file             Path to file to upload to Walrus (either --blob-id or --file required)
 
 Promote options:
   --path             Page path to manage editors for (required)
