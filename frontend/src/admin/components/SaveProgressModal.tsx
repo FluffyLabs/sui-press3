@@ -16,9 +16,9 @@ interface SaveProgressModalProps {
 }
 
 const STEPS = [
-  { id: "registering" as SaveStep, label: "Preparing Walrus Content" },
-  { id: "certifying" as SaveStep, label: "Certifying in Walrus Contract" },
-  { id: "updating" as SaveStep, label: "Updating CMS contract" },
+  { id: "registering" as SaveStep, label: "Acquiring Storage Space" },
+  { id: "certifying" as SaveStep, label: "Certifying Blob Receipts" },
+  { id: "updating" as SaveStep, label: "Updating CMS Contract" },
 ];
 
 export function SaveProgressModal({
