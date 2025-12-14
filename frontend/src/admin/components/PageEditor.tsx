@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Input, Textarea } from "@fluffylabs/shared-ui";
+import { Alert, Badge, Button, Input } from "@fluffylabs/shared-ui";
 import {
   useCurrentAccount,
   useSignAndExecuteTransaction,
@@ -13,6 +13,7 @@ import { fetchPageById } from "../services/pages";
 import { type SaveStep, savePageContent } from "../services/save";
 import type { Page } from "../types/page";
 import { AdminLayout } from "./AdminLayout";
+import { RichEditor } from "./RichEditor";
 import { SaveProgressModal } from "./SaveProgressModal";
 
 export function PageEditor() {
@@ -232,13 +233,10 @@ export function PageEditor() {
             </code>
           </div>
         </div>
-        <Textarea
-          id="content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          rows={20}
-          placeholder="Enter page content..."
-          className="font-mono text-[13px]"
+        <RichEditor
+          content={content}
+          onChange={setContent}
+          format={page.path.endsWith(".md") ? "markdown" : "html"}
         />
       </div>
 
