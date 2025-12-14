@@ -8,6 +8,8 @@ Press3 is a decentralized CMS built on Sui with Walrus storage. The project cont
 
 See `AGENTS.md` for the full project context and requirements shared across AI agents.
 
+## [Documentation](./docs/sidenav.md)
+
 ## Features
 
 ### ✅ Implemented
