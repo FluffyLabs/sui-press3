@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getFile } from "../services/walrus";
 
 interface UseWalrusContentResult {
-  content: string | null;
+  content: Uint8Array | null;
   isLoading: boolean;
   error: Error | null;
 }
@@ -10,7 +10,7 @@ interface UseWalrusContentResult {
 export function useWalrusContent(
   walrusId: string | null,
 ): UseWalrusContentResult {
-  const [content, setContent] = useState<string | null>(null);
+  const [content, setContent] = useState<Uint8Array | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
