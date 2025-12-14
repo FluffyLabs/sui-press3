@@ -36,7 +36,7 @@ const lowlight = createLowlight(common);
 interface RichEditorProps {
   content: string;
   onChange: (content: string) => void;
-  format?: "html" | "markdown";
+  format?: "html" | "markdown" | "raw";
 }
 
 interface SlashMenuItem {
@@ -55,7 +55,9 @@ export function RichEditor({
   const [slashMenuOpen, setSlashMenuOpen] = useState(false);
   const [slashMenuFilter, setSlashMenuFilter] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [rawMode, setRawMode] = useState(false);
+  const isRawOnly = format === "raw";
+  const [rawMode, setRawMode] = useState(isRawOnly);
+  const [rawContent, setRawContent] = useState(content);
 
   const editor = useEditor({
     extensions: [
@@ -375,32 +377,48 @@ export function RichEditor({
 
   const toggleRawMode = () => {
     if (rawMode) {
-      // Switching from raw to rich - sync content to editor
-      editor.commands.setContent(content);
+      // Switching from raw to rich - sync rawContent to editor and parent
+      editor.commands.setContent(rawContent);
+      onChange(rawContent);
+    } else {
+      // Switching from rich to raw - capture current content
+      if (format === "markdown") {
+        const storage = editor.storage as unknown as {
+          markdown: { getMarkdown: () => string };
+        };
+        setRawContent(storage.markdown.getMarkdown());
+      } else {
+        setRawContent(editor.getHTML());
+      }
     }
     setRawMode(!rawMode);
   };
 
   return (
     <div className="rich-editor">
-      {/* Mode Toggle */}
-      <div className="editor-toolbar">
-        <button
-          type="button"
-          onClick={toggleRawMode}
-          className={`toolbar-button ${rawMode ? "active" : ""}`}
-          title={rawMode ? "Switch to Rich Editor" : "Switch to Raw Mode"}
-        >
-          <Code2 size={16} />
-          <span>{rawMode ? "Rich" : "Raw"}</span>
-        </button>
-      </div>
+      {/* Mode Toggle - hidden for raw-only formats */}
+      {!isRawOnly && (
+        <div className="editor-toolbar">
+          <button
+            type="button"
+            onClick={toggleRawMode}
+            className={`toolbar-button ${rawMode ? "active" : ""}`}
+            title={rawMode ? "Switch to Rich Editor" : "Switch to Raw Mode"}
+          >
+            <Code2 size={16} />
+            <span>{rawMode ? "Rich" : "Raw"}</span>
+          </button>
+        </div>
+      )}
 
       {rawMode ? (
         <textarea
           className="raw-editor"
-          value={content}
-          onChange={(e) => onChange(e.target.value)}
+          value={rawContent}
+          onChange={(e) => {
+            setRawContent(e.target.value);
+            onChange(e.target.value);
+          }}
           spellCheck={false}
         />
       ) : (

@@ -29,7 +29,13 @@ export function PageContentField({
       <RichEditor
         content={content}
         onChange={onChange}
-        format={path.endsWith(".md") ? "markdown" : "html"}
+        format={
+          path.endsWith(".md")
+            ? "markdown"
+            : path.endsWith(".html")
+              ? "html"
+              : "raw"
+        }
       />
     </div>
   );
