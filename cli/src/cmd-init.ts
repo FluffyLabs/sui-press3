@@ -13,7 +13,7 @@ import {
   readPackageDependencies,
   registerPage,
 } from './sui';
-import { fileExists } from './utils';
+import { fileExists, promptConfirmation } from './utils';
 import { loadPublisherKeypair } from './walrus';
 
 export async function handleInit(flags: Record<string, string | boolean>) {
@@ -66,6 +66,29 @@ export async function handleInit(flags: Record<string, string | boolean>) {
       `  Press3 Object: ${press3ObjectId}\n` +
       `  Transaction: ${getSuiscanUrl(config.walrus.network, publishResult.digest)}`
   );
+
+  // Pause and wait for user confirmation before proceeding
+  const shouldProceed = await promptConfirmation(
+    'Contract published successfully. Do you want to proceed with registering pages?'
+  );
+
+  if (!shouldProceed) {
+    logStep(
+      'Init',
+      'Initialization cancelled by user. You can register pages later using the update command.'
+    );
+
+    // Still write config file so the user has the package ID and Press3 object ID
+    const initConfig: Press3Config = {
+      package_id: packageId,
+      press3_object_id: press3ObjectId,
+      network: config.walrus.network,
+    };
+    await writeLogFile(outputPath, initConfig);
+    logStep('Init', `Configuration saved to ${outputPath}`);
+
+    process.exit(0);
+  }
 
   if (isDemo) {
     // Step 2: Register demo pages with Walrus blob

@@ -20,3 +20,8 @@ export function hexToBytes(value: string) {
   }
   return bytes;
 }
+
+export async function promptConfirmation(message: string): Promise<boolean> {
+  const response = prompt(`${message} (y/n): `);
+  return response?.toLowerCase() === 'y' || response?.toLowerCase() === 'yes';
+}
