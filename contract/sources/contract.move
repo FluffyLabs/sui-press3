@@ -8,6 +8,10 @@ module contract::press3 {
     const E_EMPTY_ADMINS: u64 = 3;
     const E_PATH_ALREADY_EXISTS: u64 = 4;
     const E_INVALID_PATH_FORMAT: u64 = 5;
+    const E_MAX_PAGES_REACHED: u64 = 6;
+
+    // Limit pages to prevent excessive gas costs and slow off-chain indexing.
+    const MAX_PAGES: u64 = 1000;
 
     // TODO: Page deletion not yet implemented. Pages cannot be removed once registered.
     public struct Press3 has key {
@@ -64,6 +68,7 @@ module contract::press3 {
         ctx: &sui::tx_context::TxContext,
     ) {
         assert_admin(state, ctx);
+        assert!(state.pages.length() < MAX_PAGES, E_MAX_PAGES_REACHED);
         assert!(is_valid_path(&path), E_INVALID_PATH_FORMAT);
         assert!(!path_exists(state, &path), E_PATH_ALREADY_EXISTS);
 
