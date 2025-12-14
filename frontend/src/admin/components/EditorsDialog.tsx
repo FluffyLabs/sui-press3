@@ -12,6 +12,11 @@ interface EditorsDialogProps {
   errorMessage?: string | null;
 }
 
+interface EditorSlot {
+  id: string;
+  value: string;
+}
+
 function isValidAddress(address: string): boolean {
   if (!address) return false;
   if (!address.startsWith("0x")) return false;
@@ -30,19 +35,26 @@ export function EditorsDialog({
   isSaving = false,
   errorMessage,
 }: EditorsDialogProps) {
-  const [slots, setSlots] = useState<string[]>([]);
+  const [slots, setSlots] = useState<EditorSlot[]>([]);
 
   // Reset dialog state when opening/closing - intentional setState in effect
   useEffect(() => {
     if (open) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSlots(editors.length ? editors : [""]);
+      setSlots(
+        editors.length
+          ? editors.map((value, idx) => ({ id: `${value}-${idx}`, value }))
+          : [{ id: crypto.randomUUID(), value: "" }],
+      );
     } else {
       setSlots([]);
     }
   }, [open, editors]);
 
-  const trimmedSlots = useMemo(() => slots.map((slot) => slot.trim()), [slots]);
+  const trimmedSlots = useMemo(
+    () => slots.map((slot) => slot.value.trim()),
+    [slots],
+  );
   const validationErrors = useMemo(() => {
     return trimmedSlots.map((slot) => {
       if (slot === "") return "Address is required";
@@ -58,18 +70,18 @@ export function EditorsDialog({
     return trimmedSlots.some((slot, index) => slot !== editors[index]);
   }, [trimmedSlots, editors]);
 
-  const handleSlotChange = (index: number, value: string) => {
+  const handleSlotChange = (id: string, value: string) => {
     setSlots((prev) =>
-      prev.map((slot, slotIndex) => (slotIndex === index ? value : slot)),
+      prev.map((slot) => (slot.id === id ? { ...slot, value } : slot)),
     );
   };
 
-  const handleSlotRemove = (index: number) => {
-    setSlots((prev) => prev.filter((_, slotIndex) => slotIndex !== index));
+  const handleSlotRemove = (id: string) => {
+    setSlots((prev) => prev.filter((slot) => slot.id !== id));
   };
 
   const handleAddSlot = () => {
-    setSlots((prev) => [...prev, ""]);
+    setSlots((prev) => [...prev, { id: crypto.randomUUID(), value: "" }]);
   };
 
   const handleSave = () => {
@@ -92,9 +104,9 @@ export function EditorsDialog({
           )}
           <div className="space-y-3">
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-gray-700">
+              <div className="text-sm font-medium text-gray-700">
                 Editor Addresses
-              </label>
+              </div>
               <Button
                 type="button"
                 variant="secondary"
@@ -117,21 +129,21 @@ export function EditorsDialog({
             )}
 
             {slots.map((slot, index) => (
-              <div key={`editor-slot-${index}`} className="space-y-1">
+              <div key={slot.id} className="space-y-1">
                 <div className="flex items-start gap-2">
                   <div className="flex-1">
                     <Input
-                      value={slot}
+                      value={slot.value}
                       onChange={(event) =>
-                        handleSlotChange(index, event.target.value)
+                        handleSlotChange(slot.id, event.target.value)
                       }
                       placeholder="0x1234567890abcdef..."
-                      className={`font-mono text-sm ${validationErrors[index] && slot ? "border-red-300 focus:border-red-500 focus:ring-red-500" : ""}`}
+                      className={`font-mono text-sm ${validationErrors[index] && slot.value ? "border-red-300 focus:border-red-500 focus:ring-red-500" : ""}`}
                     />
                   </div>
                   <button
                     type="button"
-                    onClick={() => handleSlotRemove(index)}
+                    onClick={() => handleSlotRemove(slot.id)}
                     disabled={isSaving}
                     className="inline-flex items-center justify-center w-9 h-9 rounded border border-gray-300 text-gray-500 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                     title="Remove editor"
@@ -139,7 +151,7 @@ export function EditorsDialog({
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
-                {validationErrors[index] && slot && (
+                {validationErrors[index] && slot.value && (
                   <div className="flex items-center gap-1.5 text-xs text-red-600 mt-1 ml-1">
                     <AlertCircle className="w-3 h-3" />
                     <span>{validationErrors[index]}</span>
