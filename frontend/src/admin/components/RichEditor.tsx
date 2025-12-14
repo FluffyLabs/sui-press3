@@ -93,7 +93,9 @@ export function RichEditor({
     content,
     onUpdate: ({ editor }) => {
       if (format === "markdown") {
-        const storage = editor.storage as unknown as { markdown: { getMarkdown: () => string } };
+        const storage = editor.storage as unknown as {
+          markdown: { getMarkdown: () => string };
+        };
         onChange(storage.markdown.getMarkdown());
       } else {
         onChange(editor.getHTML());
@@ -104,11 +106,11 @@ export function RichEditor({
   // Sync content from parent
   useEffect(() => {
     if (!editor) return;
-    const storage = editor.storage as unknown as { markdown: { getMarkdown: () => string } };
+    const storage = editor.storage as unknown as {
+      markdown: { getMarkdown: () => string };
+    };
     const currentContent =
-      format === "markdown"
-        ? storage.markdown.getMarkdown()
-        : editor.getHTML();
+      format === "markdown" ? storage.markdown.getMarkdown() : editor.getHTML();
     if (content !== currentContent) {
       editor.commands.setContent(content);
     }
