@@ -19,9 +19,11 @@ export function WikiLayout({ layout }: Props) {
         </header>
       )}
       <div className="wiki-body">
-        <nav className="wiki-sidenav">
-          <ContentRenderer path={layout.sidenav} />
-        </nav>
+        {layout.sidenav && (
+          <nav className="wiki-sidenav">
+            <ContentRenderer path={layout.sidenav} />
+          </nav>
+        )}
         <main className="wiki-content">
           <ContentRenderer path={contentPath} />
         </main>
