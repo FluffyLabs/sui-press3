@@ -30,7 +30,7 @@ export interface SavePageContentOptions {
   owner: string;
   onProgress: (step: SaveStep) => void;
   signAndExecute: (tx: Transaction) => Promise<{ digest: string }>;
-  epochs?: number;
+  epochs: number;
 }
 
 /**
@@ -53,7 +53,7 @@ export async function savePageContent(
     owner,
     onProgress,
     signAndExecute,
-    epochs = 5, // Default to 5 epochs (~30 days) for reasonable storage costs
+    epochs,
   } = options;
 
   try {

@@ -125,7 +125,7 @@ export function PageEditor() {
         pagePath: page.path,
         content,
         owner: currentAccount.address,
-        epochs: 5, // Store for 5 epochs (~30 days) to reduce storage costs
+        epochs: 5,
         signAndExecute: async (tx) => {
           const result = await signAndExecuteTransaction({ transaction: tx });
           return { digest: result.digest };
