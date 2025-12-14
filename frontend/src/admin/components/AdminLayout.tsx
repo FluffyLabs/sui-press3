@@ -15,8 +15,8 @@ export function AdminLayout({ children, headerEndSlot }: AdminLayoutProps) {
         ghRepoName="FluffyLabs/sui-press3"
         endSlot={
           <div className="flex items-center gap-3 mr-3">
-            <WalletConnectButton />
             {headerEndSlot}
+            <WalletConnectButton />
           </div>
         }
       />

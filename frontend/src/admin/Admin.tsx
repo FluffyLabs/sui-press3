@@ -7,7 +7,7 @@ import { PagesTable } from "./components/PagesTable";
 import type { Page } from "./types/page";
 
 function Admin() {
-  const { packageId } = usePress3();
+  const { packageId, press3ObjectId } = usePress3();
   const [pages, setPages] = useState<Page[]>([]);
   const [admins, setAdmins] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +17,7 @@ function Admin() {
       setLoading(true);
       try {
         const { pages: fetchedPages, admins: fetchedAdmins } =
-          await fetchEnrichedPages(packageId);
+          await fetchEnrichedPages(packageId, press3ObjectId);
         setPages(fetchedPages);
         setAdmins(fetchedAdmins);
       } catch (error) {
@@ -28,7 +28,7 @@ function Admin() {
     };
 
     loadPages();
-  }, [packageId]);
+  }, [packageId, press3ObjectId]);
 
   return (
     <AdminLayout

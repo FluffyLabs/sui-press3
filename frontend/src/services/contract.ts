@@ -19,6 +19,9 @@ export function buildUpdatePageTransaction(
 ): Transaction {
   const tx = new Transaction();
 
+  // Set gas budget (0.1 SUI = 100_000_000 MIST)
+  tx.setGasBudget(100_000_000);
+
   tx.moveCall({
     target: `${packageId}::press3::update_page_walrus_id`,
     arguments: [

@@ -34,7 +34,8 @@ export function LayoutProvider({ children }: Props) {
 
     const rootWalrusId = pages.get("/");
     if (!rootWalrusId) {
-      setIsLoading(false);
+      // Use queueMicrotask to avoid synchronous setState in effect
+      queueMicrotask(() => setIsLoading(false));
       return;
     }
 
@@ -69,6 +70,7 @@ export function LayoutProvider({ children }: Props) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useLayout() {
   const context = useContext(LayoutContext);
   if (!context) {
