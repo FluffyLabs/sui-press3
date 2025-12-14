@@ -198,7 +198,7 @@ function Dev() {
             {tocItems.length > 0 && (
               <button
                 type="button"
-                className="hamburger"
+                className="hamburger cursor-pointer"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 aria-label="Toggle sidebar"
                 aria-expanded={isSidebarOpen}

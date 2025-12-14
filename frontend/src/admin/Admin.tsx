@@ -1,4 +1,5 @@
 import { Alert, Badge, Button } from "@fluffylabs/shared-ui";
+import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePermissions } from "../hooks/usePermissions";
@@ -6,12 +7,16 @@ import { usePress3 } from "../providers/Press3Provider";
 import { fetchEnrichedPages } from "../services/enrichedPages";
 import { AdminLayout } from "./components/AdminLayout";
 import { PagesTable } from "./components/PagesTable";
+import { setPageEditors } from "./services/editors";
 import type { Page } from "./types/page";
 
 function Admin() {
   const navigate = useNavigate();
   const { isAdmin } = usePermissions();
-  const { packageId, press3ObjectId } = usePress3();
+  const currentAccount = useCurrentAccount();
+  const { mutateAsync: signAndExecuteTransaction } =
+    useSignAndExecuteTransaction();
+  const { packageId, press3ObjectId, getPageWithIndex } = usePress3();
   const [pages, setPages] = useState<Page[]>([]);
   const [admins, setAdmins] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +38,38 @@ function Admin() {
 
     loadPages();
   }, [packageId, press3ObjectId]);
+
+  const handleUpdateEditors = async (page: Page, updatedEditors: string[]) => {
+    if (!currentAccount) {
+      throw new Error("Connect your wallet to update editors.");
+    }
+    if (!isAdmin) {
+      throw new Error("Only admins can update editors.");
+    }
+
+    const pageData = getPageWithIndex(page.path);
+    if (!pageData) {
+      throw new Error("Page not found in contract state.");
+    }
+
+    await setPageEditors({
+      packageId,
+      press3ObjectId,
+      pageIndex: pageData.index,
+      pagePath: page.path,
+      editors: updatedEditors,
+      signAndExecute: async (tx) => {
+        const result = await signAndExecuteTransaction({ transaction: tx });
+        return { digest: result.digest };
+      },
+    });
+
+    setPages((prev) =>
+      prev.map((candidate) =>
+        candidate.id === page.id ? { ...candidate, editors: updatedEditors } : candidate,
+      ),
+    );
+  };
 
   return (
     <AdminLayout
@@ -75,7 +112,12 @@ function Admin() {
           No pages found. Create your first page to get started.
         </div>
       ) : (
-        <PagesTable pages={pages} admins={admins} />
+        <PagesTable
+          pages={pages}
+          admins={admins}
+          onUpdateEditors={handleUpdateEditors}
+          canEditEditors={isAdmin}
+        />
       )}
     </AdminLayout>
   );

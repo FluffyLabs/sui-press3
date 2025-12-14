@@ -1,4 +1,5 @@
 import { Transaction } from "@mysten/sui/transactions";
+import {getSetEditors} from "../App";
 
 /**
  * Builds a transaction to update a page's Walrus ID in the smart contract.
@@ -29,6 +30,33 @@ export function buildUpdatePageTransaction(
       tx.pure.u64(pageIndex), // Page index in vector
       tx.pure.string(pagePath), // Page path for validation
       tx.pure.string(newWalrusId), // New Walrus blob ID
+    ],
+  });
+
+  return tx;
+}
+
+/**
+ * Builds a transaction to update editors for a page. Only admins can call this.
+ */
+export function buildSetEditorsTransaction(
+  packageId: string,
+  press3ObjectId: string,
+  pageIndex: number,
+  pagePath: string,
+  editors: string[],
+): Transaction {
+  const tx = new Transaction();
+
+  tx.setGasBudget(100_000_000);
+
+  tx.moveCall({
+    target: `${packageId}::press3::${getSetEditors()}`,
+    arguments: [
+      tx.object(press3ObjectId),
+      tx.pure.u64(pageIndex),
+      tx.pure.string(pagePath),
+      tx.pure.vector("address", editors),
     ],
   });
 

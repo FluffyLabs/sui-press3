@@ -1,17 +1,29 @@
 import { Badge } from "@fluffylabs/shared-ui";
-import { Check, History } from "lucide-react";
-import { useState } from "react";
+import { Check, History, Pencil } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Tooltip } from "react-tooltip";
 import type { Page } from "../types/page";
+import { EditorsDialog } from "./EditorsDialog";
 
 interface Props {
   pages: Page[];
   admins: string[];
+  onUpdateEditors: (page: Page, editors: string[]) => Promise<void>;
+  canEditEditors: boolean;
 }
 
-export function PagesTable({ pages, admins }: Props) {
+export function PagesTable({
+  pages,
+  admins,
+  onUpdateEditors,
+  canEditEditors,
+}: Props) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
+  const [isSavingEditors, setIsSavingEditors] = useState(false);
+  const [dialogError, setDialogError] = useState<string | null>(null);
 
   const formatAddress = (address: string) => {
     // Show first 6 and last 4 characters
@@ -37,6 +49,42 @@ export function PagesTable({ pages, admins }: Props) {
 
   const isAdmin = (editor: string) => {
     return admins.includes(editor);
+  };
+
+  const selectedPage = useMemo(
+    () => pages.find((page) => page.id === selectedPageId) || null,
+    [pages, selectedPageId],
+  );
+
+  const handleOpenEditors = (pageId: string) => {
+    if (!canEditEditors) return;
+    setSelectedPageId(pageId);
+    setDialogOpen(true);
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setDialogOpen(open);
+    if (!open) {
+      setSelectedPageId(null);
+      setDialogError(null);
+      setIsSavingEditors(false);
+    }
+  };
+
+  const handleSaveEditors = async (editors: string[]) => {
+    if (!selectedPage || isSavingEditors) return;
+    setDialogError(null);
+    setIsSavingEditors(true);
+    try {
+      await onUpdateEditors(selectedPage, editors);
+      handleDialogOpenChange(false);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : String(error ?? "Unknown error");
+      setDialogError(message);
+    } finally {
+      setIsSavingEditors(false);
+    }
   };
 
   return (
@@ -131,7 +179,7 @@ export function PagesTable({ pages, admins }: Props) {
                 </div>
               </td>
               <td className="px-4 py-3">
-                <div className="flex gap-1.5 flex-wrap">
+                <div className="flex gap-1.5 flex-wrap items-center">
                   {getAllEditors(page.editors).map((editor) => (
                     <Badge
                       key={editor}
@@ -148,6 +196,18 @@ export function PagesTable({ pages, admins }: Props) {
                       {formatAddress(editor)}
                     </Badge>
                   ))}
+                  {canEditEditors && (
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEditors(page.id)}
+                      className="inline-flex items-center justify-center w-8 h-8 border border-gray-300 rounded text-gray-500 hover:text-gray-900 hover:border-gray-400 cursor-pointer"
+                      data-tooltip-id="editor-tooltip"
+                      data-tooltip-content="Edit editors"
+                    >
+                      <Pencil className="w-4 h-4" />
+                      <span className="sr-only">Edit editors for {page.path}</span>
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>
@@ -157,6 +217,18 @@ export function PagesTable({ pages, admins }: Props) {
       <Tooltip id="block-tooltip" style={{ whiteSpace: "pre-line" }} />
       <Tooltip id="walrus-tooltip" />
       <Tooltip id="editor-tooltip" />
+
+      {selectedPage && (
+        <EditorsDialog
+          open={dialogOpen}
+          pagePath={selectedPage.path}
+          editors={selectedPage.editors}
+          onOpenChange={handleDialogOpenChange}
+          onSave={handleSaveEditors}
+          isSaving={isSavingEditors}
+          errorMessage={dialogError}
+        />
+      )}
     </div>
   );
 }
