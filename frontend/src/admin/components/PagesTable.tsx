@@ -1,4 +1,4 @@
-import { Badge } from "@fluffylabs/shared-ui";
+import { Badge, Button } from "@fluffylabs/shared-ui";
 import { Check, History, Pencil } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -92,6 +92,7 @@ export function PagesTable({
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-b-2 border-gray-200 text-left">
+            <th className="px-4 py-3 font-semibold">Actions</th>
             <th className="px-4 py-3 font-semibold">Page Path</th>
             <th className="px-4 py-3 font-semibold">Block</th>
             <th className="px-4 py-3 font-semibold">Walrus Quilt ID</th>
@@ -102,12 +103,26 @@ export function PagesTable({
           {pages.map((page) => (
             <tr key={page.id} className="border-b border-gray-200">
               <td className="px-4 py-3">
-                <Link
-                  to={`/admin/edit/${page.id}`}
+                <Link to={`/admin/edit/${page.id}`}>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="flex items-center gap-1.5"
+                  >
+                    <Pencil size={14} />
+                    Edit
+                  </Button>
+                </Link>
+              </td>
+              <td className="px-4 py-3">
+                <a
+                  href={page.path}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-blue-500 no-underline font-medium hover:text-blue-600"
                 >
                   {page.path}
-                </Link>
+                </a>
               </td>
               <td
                 className="px-4 py-3 text-gray-500"

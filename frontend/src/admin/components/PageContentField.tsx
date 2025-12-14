@@ -1,13 +1,15 @@
-import { Textarea } from "@fluffylabs/shared-ui";
+import { RichEditor } from "./RichEditor";
 
 interface PageContentFieldProps {
   walrusId: string;
+  path: string;
   content: string;
   onChange: (value: string) => void;
 }
 
 export function PageContentField({
   walrusId,
+  path,
   content,
   onChange,
 }: PageContentFieldProps) {
@@ -24,13 +26,10 @@ export function PageContentField({
           </code>
         </div>
       </div>
-      <Textarea
-        id="content"
-        value={content}
-        onChange={(event) => onChange(event.target.value)}
-        rows={20}
-        placeholder="Enter page content..."
-        className="font-mono text-[13px]"
+      <RichEditor
+        content={content}
+        onChange={onChange}
+        format={path.endsWith(".md") ? "markdown" : "html"}
       />
     </div>
   );

@@ -260,6 +260,7 @@ export function PageEditor() {
 
       <PageContentField
         walrusId={page.walrusId}
+        path={page.path}
         content={content}
         onChange={setContent}
       />

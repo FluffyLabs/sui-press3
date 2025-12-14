@@ -23,6 +23,29 @@ export function getSetEditors(): string {
   return 'set_editors';
 }
 
+console.log("Default contract", {
+  packageId: DEFAULT_PACKAGE_ID,
+  objectId: DEFAULT_OBJECT_ID,
+});
+
+console.log("New contract", {
+  packageId:
+    "0x5f37e5cad06ac00de37cd4f01f8b67ff640395011dfd0c6ed332e8483e02e431",
+  objectId:
+    "0x88cd3a01c76c723f01fcc85131f7826614eaf554711383b1a720eb6f259b8103",
+});
+
+console.log("Using contract", {
+  packageId: getPackageId(),
+  objectId: getObjectId(),
+});
+
+console.log(
+  "Local storage configuration entries",
+  "press3_package_id",
+  "press3_object_id",
+);
+
 function getPackageId(): string {
   // Priority: localStorage > env variable > hardcoded default
   return (
