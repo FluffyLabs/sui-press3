@@ -1,0 +1,6 @@
+{
+  "mode": "wiki",
+  "_header": "/header.html",
+  "_footer": "/footer.md",
+  "sidenav": "/sidenav.md"
+}

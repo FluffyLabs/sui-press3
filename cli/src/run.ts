@@ -34,14 +34,16 @@ Usage:
   press3 <command> [options]
 
 Commands:
-  deploy                Upload a Walrus site bundle and update the Move contract
-  publish               Upload a single file to Walrus and get the blob ID
-  retrieve              Download a blob from Walrus by blob ID
-  contract              Build and publish the Move contract to SUI
-  init                  Build and publish Press3 contract, upload frontend to walrus and initialize home page
+  init                  Build and publish Press3 contract and initialize home page
+  deploy                Build and deploy Press3 frontend (note you should init first)
   update                Update an existing page or register new one with a new Walrus blob ID
   promote               Add or remove editors for a specific page
   batch-publish-update  Upload all files from a directory to Walrus and update/register pages in one transaction
+
+Additional helpers:
+  contract              Build and publish the Move contract to SUI
+  publish               Upload a single file to Walrus and get the blob ID
+  retrieve              Download a blob from Walrus by blob ID
   assign-domain         Attach a DNS/NS record to a Walrus site
   renew                 Proactively renew Walrus blobs for a deployment
   index                 Build the off-chain search index and publish it
