@@ -11,7 +11,7 @@ import { usePress3 } from "./Press3Provider";
 
 interface LayoutContextValue {
   layout: PageLayout | null;
-  rawContent: string | null;
+  rawContent: Uint8Array | null;
   isLoading: boolean;
   error: Error | null;
 }
@@ -25,7 +25,7 @@ interface Props {
 export function LayoutProvider({ children }: Props) {
   const { pages, isLoading: isLoadingPages } = usePress3();
   const [layout, setLayout] = useState<PageLayout | null>(null);
-  const [rawContent, setRawContent] = useState<string | null>(null);
+  const [rawContent, setRawContent] = useState<Uint8Array | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -44,7 +44,7 @@ export function LayoutProvider({ children }: Props) {
     getFile(rootWalrusId)
       .then((content) => {
         if (cancelled) return;
-        const parsed = tryParsePageLayout(content);
+        const parsed = tryParsePageLayout(new TextDecoder().decode(content));
         if (parsed) {
           setLayout(parsed);
         } else {

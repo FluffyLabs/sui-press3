@@ -10,8 +10,8 @@ import {
 import walrusWasmUrl from "@mysten/walrus-wasm/web/walrus_wasm_bg.wasm?url";
 
 let walrusClient: WalrusClient | null = null;
-const contentCache = new Map<string, string>();
-const pendingRequests = new Map<string, Promise<string>>();
+const contentCache = new Map<string, Uint8Array>();
+const pendingRequests = new Map<string, Promise<Uint8Array>>();
 
 export function getWalrusClient() {
   if (!walrusClient) {
@@ -28,14 +28,14 @@ export function getWalrusClient() {
   return walrusClient;
 }
 
-async function fetchFromWalrus(blobId: string): Promise<string> {
+async function fetchFromWalrus(blobId: string): Promise<Uint8Array> {
   const client = getWalrusClient();
   const blob = await client.getBlob({ blobId });
   const files = await blob.files();
-  return files[0].text();
+  return files[0].bytes();
 }
 
-export async function getFile(blobId: string): Promise<string> {
+export async function getFile(blobId: string): Promise<Uint8Array> {
   // Return from cache if exists
   const cached = contentCache.get(blobId);
   if (cached !== undefined) {
