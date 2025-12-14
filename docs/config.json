@@ -2,5 +2,6 @@
   "mode": "wiki",
   "_header": "/header.html",
   "_footer": "/footer.md",
+  "content": "/0-about.md",
   "sidenav": "/sidenav.md"
 }
