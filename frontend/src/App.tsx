@@ -10,9 +10,9 @@ import { WalletProvider } from "./providers/WalletProvider";
 import "@fluffylabs/shared-ui/style.css";
 
 const DEFAULT_PACKAGE_ID =
-  "0xb23a6a6687bd1af39d5a2ac6739a7d36e331d6b0b39446101a59748c65ba58a8";
+  "0xb6764961f9579c04229c5e5d18e6d82bc667c75c9a659f3c5c3d0748f731078c";
 const DEFAULT_OBJECT_ID =
-  "0x10c798b604846b4eace4f2966c1a93f07d49dce129dad99052fffc165fff36d3";
+  "0x19187b8f76b6e3261cb9072535014f431964cf3aa6fe58c42bf8f7969a15e659";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function getSetEditors(): string {
