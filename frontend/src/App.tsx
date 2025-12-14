@@ -21,9 +21,9 @@ console.log("Default contract", {
 
 console.log("New contract", {
   packageId:
-    "0x5f37e5cad06ac00de37cd4f01f8b67ff640395011dfd0c6ed332e8483e02e431",
+    "0x7be9e3f9be03af1835fdbbe05812d32755393b175362f62b25bfafdc01f3e9d0",
   objectId:
-    "0x88cd3a01c76c723f01fcc85131f7826614eaf554711383b1a720eb6f259b8103",
+    "0xec6ed6f322d9c94e60efdd832ecd769d2baefaf8e68f146b7231dec177a21350",
 });
 
 console.log("Using contract", {
