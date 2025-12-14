@@ -28,7 +28,11 @@ interface Press3ProviderProps {
   children: ReactNode;
 }
 
-export function Press3Provider({ packageId, objectId, children }: Press3ProviderProps) {
+export function Press3Provider({
+  packageId,
+  objectId,
+  children,
+}: Press3ProviderProps) {
   const [pages, setPages] = useState<Map<string, string>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);

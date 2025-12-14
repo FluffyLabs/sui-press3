@@ -1,13 +1,13 @@
 import { getFullnodeUrl } from "@mysten/sui/client";
 import { SuiJsonRpcClient } from "@mysten/sui/jsonRpc";
+import type { Transaction } from "@mysten/sui/transactions";
 import {
   type WalrusClient,
-  walrus,
   WalrusFile,
   type WriteFilesFlow,
+  walrus,
 } from "@mysten/walrus";
-import type { Transaction } from "@mysten/sui/transactions";
-import walrusWasmUrl from '@mysten/walrus-wasm/web/walrus_wasm_bg.wasm?url';
+import walrusWasmUrl from "@mysten/walrus-wasm/web/walrus_wasm_bg.wasm?url";
 
 let walrusClient: WalrusClient | null = null;
 const contentCache = new Map<string, string>();
@@ -19,9 +19,11 @@ export function getWalrusClient() {
       url: getFullnodeUrl("testnet"),
       // Setting network on your client is required for walrus to work correctly
       network: "testnet",
-    }).$extend(walrus({
-      wasmUrl: walrusWasmUrl
-    })).walrus;
+    }).$extend(
+      walrus({
+        wasmUrl: walrusWasmUrl,
+      }),
+    ).walrus;
   }
   return walrusClient;
 }

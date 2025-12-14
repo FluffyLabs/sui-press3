@@ -114,7 +114,11 @@ export function PagesTable({ pages, admins }: Props) {
                         )
                       }
                       data-tooltip-id="walrus-tooltip"
-                      data-tooltip-content={copiedId === `${page.id}-prev` ? 'Copied!' : 'Copy walrus quilt id of previous content'}
+                      data-tooltip-content={
+                        copiedId === `${page.id}-prev`
+                          ? "Copied!"
+                          : "Copy walrus quilt id of previous content"
+                      }
                       className="bg-transparent border border-gray-300 rounded px-2 py-1 cursor-pointer text-gray-500 hover:bg-gray-50"
                     >
                       {copiedId === `${page.id}-prev` ? (

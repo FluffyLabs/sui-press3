@@ -10,7 +10,7 @@ import { usePermissions } from "../../hooks/usePermissions";
 import { usePress3 } from "../../providers/Press3Provider";
 import { getFile } from "../../services/walrus";
 import { fetchPageById } from "../services/pages";
-import { SaveStep, savePageContent } from "../services/save";
+import { type SaveStep, savePageContent } from "../services/save";
 import type { Page } from "../types/page";
 import { AdminLayout } from "./AdminLayout";
 import { SaveProgressModal } from "./SaveProgressModal";
@@ -46,7 +46,11 @@ export function PageEditor() {
     const loadPage = async () => {
       setLoading(true);
       try {
-        const fetchedPage = await fetchPageById(packageId, press3ObjectId, pageId);
+        const fetchedPage = await fetchPageById(
+          packageId,
+          press3ObjectId,
+          pageId,
+        );
         if (fetchedPage) {
           setPage(fetchedPage);
           setPath(fetchedPage.path);
