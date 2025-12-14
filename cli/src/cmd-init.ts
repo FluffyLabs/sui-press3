@@ -13,9 +13,7 @@ import {
   registerPage,
 } from './sui';
 import { fileExists } from './utils';
-import {
-  loadPublisherKeypair,
-} from './walrus';
+import { loadPublisherKeypair } from './walrus';
 
 export async function handleInit(flags: Record<string, string | boolean>) {
   if (await fileExists(PRESS3_CONF_NAME)) {
@@ -37,7 +35,7 @@ export async function handleInit(flags: Record<string, string | boolean>) {
 
   const signer = await loadPublisherKeypair(config.walrus.secret);
 
-  // Step : Build and publish smart contract
+  // Step 1: Build and publish smart contract
   logStep('Init', 'Building smart contract...');
   await buildMoveContract(config.contractDir);
 
@@ -158,11 +156,6 @@ export async function handleInit(flags: Record<string, string | boolean>) {
   console.log(`Press3 Object: ${press3ObjectId}`);
   console.log(`Config File: ${outputPath}`);
   console.log('=====================================\n');
-}
-
-async function buildFrontend(frontendDir: string) {
-  await Bun.$`npm ci`.cwd(frontendDir);
-  await Bun.$`npm run build`.cwd(frontendDir);
 }
 
 async function writeLogFile(path: string, config: Press3Config) {
